@@ -1,0 +1,37 @@
+# Tatemis3D — Ficha: Ottorock (Luchador de Mineral)
+
+> **TL;DR:** Luchador de **dos estados (Libre ↔ Sujeción)**: arranca un trozo del terreno y pelea con él (y detrás de él). Dictada por Arzpal (2026-07-17). **Es la criatura del gate (T1.4): empezar por su modo Libre** (melee puro, sin reacciones); Sujeción llega post-gate como stress-test de stances. Plantilla de los 18 campos → [CREATURES.md](CREATURES.md) §2.
+
+| # | Campo | Valor |
+|---|---|---|
+| 1 | Nombre + concepto | **Ottorock** — *agarrar el terreno para aprovechar su elemento*: arranca un trozo del suelo y pelea con él (y detrás de él). |
+| 2 | Elemento | **Mineral** (roca/piedra/cristal, NO metal — GDD §7.1) |
+| 3 | Arquetipo | **Luchador** |
+| 4 | Silueta y tamaño | ✅ **Animal: nutria** *(confirmado 2026-07-18 — el nombre ya lo decía: otter + rock).* **Cuadrúpedo en Libre, bípedo en Sujeción** (sostiene la roca con las garras delanteras, exactamente como una nutria marina flotando). ⚠️ Escala vs Tamer/maniquí sin dictar. |
+| 5 | Vida / Daño / Velocidad | **30 / 35 / 35** (proporciones relativas) → equilibrado: vida media-alta, daño medio, velocidad media (cf. Pyrecko 15/55/30). |
+| 6 | Peso percibido | Mediano. |
+| 7 | Locomoción | Medianamente ágil en modo **Libre**; **pesado** en modo **Sujeción**. |
+| 8 | **Movilidad** (2 variantes) | Energía 2/10 · CD 4/10 (comunes a ambas). **Embestida Rocosa** *(Sujeción)*: embiste hacia donde mira, distancia **media-larga**; al chocar con enemigo u objeto: daño 3/10 + **stun breve** (6/10) + **reproduce la reacción sellada** del trozo (campo 14). / **Embestida Garra** *(Libre)*: embiste a distancia **media-corta**; al chocar: daño 5/10 + **slow breve** (2/10). |
+| 9 | **Flex** (ataque, 2 variantes) | Energía 5/10 · CD 6/10 (comunes a ambas). **Impacto a distancia** *(Sujeción)*: **lanza el trozo de terreno** que sujeta; al impactar contra enemigo u objeto: daño 5/10 + **stun breve** (2/10) + **reproduce la reacción sellada** (el impacto la aplica; después pierde el trozo y vuelve a Libre). / **Mordisco Ferroso** *(Libre)*: mordida fuerte hacia donde mira; daño alto (7/10). |
+| 10 | **Signature** | **Cambio de estado** — alterna **Libre ↔ Sujeción**. Libre→Sujeción: **agarra el terreno a sus pies** → se resuelve **una sola vez** `Mineral + elemento del terreno` y el resultado queda **sellado en el trozo** (si salió dominancia o anulación, se consume ahí y el trozo queda **puro**); el trozo queda delante, sujeto con ambas garras como **escudo**; se suma como **barra de vida adicional**; velocidad de movimiento y de ataque **reducidas**. Vuelve a Libre si el daño **rompe la roca** (agota la barra extra), si la **lanza** (Impacto a distancia) o si **él mismo la rompe** con las garras; en Libre recupera velocidad y pierde la vida extra. · Energía 3/10 · CD 3/10. |
+| 11 | Ataque básico | **Sujeción:** cadena de **3**, alcance **medio**, ritmo **muy lento**, y **cada golpe reproduce la combinación sellada** del trozo, en cualquier superficie **incluida la neutra**. **Libre:** cadena de **5**, alcance **corto**, ritmo **medio**. |
+| 12 | Bloqueo / forma elemental | Regular, duración **media-larga**. En **Sujeción** solo se interrumpe **rompiendo la roca**; en **Libre**, al golpearlo. (En forma pura su debilidad —Aire— pasa a 2x.) |
+| 13 | Plan de juego | Alternar modos según la situación: **Libre** = velocidad, desplazamientos, golpes continuos y ataques fuertes; **Sujeción** = reacciones elementales + stuns, usando la ventana de stun para meter básicos. Es el generalista del cambio constante: brilla contra enemigos tipo Pyrecko (defensivo a distancia, ofensivo al llegar al melee) y, bien jugado, gana a luchadores en Sujeción y a tanques en Libre. **Debilidad táctica:** los especialistas — un tatemis mejor que él en un solo rubro (tanque extremo o luchador extremo) le gana su propia partida. |
+| 14 | Sinergia ambiental | ✅ **Cerrado (2026-07-18).** Su mecánica insignia es la **combinación sellada portátil** ([ELEMENTAL-REACTIONS](ELEMENTAL-REACTIONS.md) §5): al agarrar se resuelve **una vez** `Mineral + elemento del terreno` y el resultado queda **sellado en el trozo**; cada impacto reproduce esa reacción **en cualquier superficie, incluida la neutra**. Elige su combinación eligiendo **dónde agarra**: río → **barro** portátil (ralentiza, casa con su kit de stun) · lava → **roca al rojo** · matorral → **púas** · zona de Rayo → la **descarga a tierra** se consume al agarrar y el trozo queda **puro**. Terreno neutro → **roca pura** (reacciona como Mineral allá donde impacte). Al volver a Libre pierde la combinación. |
+| 15 | Como salvaje (IA) | Con **vida alta**: empieza y se mantiene casi todo el rato en **Sujeción**. Con **vida baja**: predomina **Libre**, buscando atacar y noquear antes de que lo noqueen. ⚠️ Telegraph legible por definir. |
+| 16 | Orden rápida (aliado) 🔮 | Según modo: **Sujeción** → ponerse delante a **defender** · **Libre** → **perseguir** a un enemigo lejano. |
+| 17 | Formas evolutivas 🔮 | Base + **1 evolución** (tardía). Mini-misión: **sellar todas las combinaciones posibles** (barro, roca al rojo, púas) + cambiar de modo **100 veces**. |
+| 18 | Rareza 🔮 | **Intermedia**: fuerte al inicio y evolución tardía para quedar a la par de los starters ("el típico pokémon volador del inicio del juego"). |
+
+**Resuelto:**
+- *(2026-07-18)* **Animal: nutria.** No es solo estético: las **nutrias marinas usan piedras como herramienta** para romper conchas, y **guardan su piedra favorita** en un pliegue de piel bajo el brazo, llevándola consigo entre inmersiones. Su mecánica insignia —agarrar un trozo de terreno, pelear con él y perderlo— **es literalmente el comportamiento del animal**, incluida la idea de "mi roca", que es la combinación sellada.
+- *(2026-07-17)* Suelo sin elemento → agarra **Mineral puro**: sin reacción al agarrar, y el trozo reacciona como Mineral contra la superficie donde impacte (embestidas/lanzamiento/básicos).
+- *(2026-07-18)* **Roca sellada, no elemento portado:** la mezcla se decide **al agarrar** y vale para todos sus impactos, en vez de que el trozo transporte el elemento y reaccione contra cada destino. Es lo que le permite "atacar libremente con la combinación que elija" — su razón de ser en Sujeción. ⚠️ *Reconciliar [ABILITY-EXTRACTION](ABILITY-EXTRACTION.md) §4.9/H9, que asumía elemento portado.*
+- *(2026-07-18)* **Mineral + Aire:** cerrado por la regla direccional ya ratificada — agarrar sobre terreno de Aire da roca pura, sin reacción en su contra.
+- *(2026-07-18)* **El combustible de Pyrecko no viaja con el trozo:** arrancar terreno marcado se lleva el terreno, no la marca.
+- *(2026-07-18)* **No se electrocuta a sí mismo:** el estallido de una reacción no golpea a quien la provoca (regla R6).
+
+**Abiertas:**
+1. **Escala** vs Tamer/maniquí (campo 4) sin dictar.
+2. **Telegraph** de la IA salvaje.
+3. **Balance:** Mantagale (Aire › Mineral) le countea dentro del propio equipo — revisar en playtest ([CREATURES](CREATURES.md) §3).

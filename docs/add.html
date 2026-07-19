@@ -1,0 +1,229 @@
+<title>Tatemis3D — ADD · Arquitectura</title>
+<style>
+  :root{
+    --ground:#13131b; --ground-2:#191a24; --ground-3:#22232f;
+    --ink:#ECE6D8; --ink-2:#B4AD9C; --ink-3:#7d7869;
+    --line:rgba(236,230,216,.10); --line-2:rgba(236,230,216,.16);
+    --gold:#D9A441; --gold-lt:#EBC069;
+    --fuego:#DA6A3E; --mineral:#A98FC4; --aire:#9FC7D6; --ok:#7FB574; --warn:#EAC94B; --no:#7f8196;
+    --serif:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+    --sans:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+    --mono:"Consolas","SF Mono","JetBrains Mono",Menlo,monospace;
+    --maxw:900px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:1.0625rem;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 1.5rem}
+  header{padding:4.5rem 0 2.5rem;border-bottom:1px solid var(--line)}
+  h1{font-family:var(--serif);font-size:clamp(2.2rem,5vw,3.4rem);font-weight:600;margin:0 0 .6rem;line-height:1.05}
+  .sub{color:var(--ink-2);max-width:62ch;margin:.4rem 0}
+  .tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);border:1px solid var(--line-2);border-radius:100px;padding:.3rem .75rem;display:inline-block;margin:.25rem .3rem .25rem 0}
+  section{padding:3rem 0;border-bottom:1px solid var(--line)}
+  .ch-head{display:flex;align-items:baseline;gap:1rem;margin-bottom:.6rem}
+  .ch-num{font-family:var(--mono);font-size:.75rem;letter-spacing:.16em;color:var(--gold)}
+  h2{font-family:var(--serif);font-size:clamp(1.5rem,3.2vw,2.1rem);font-weight:600;margin:0}
+  h3{font-family:var(--serif);font-size:1.18rem;font-weight:600;margin:2rem 0 .5rem;color:var(--ink)}
+  p{max-width:68ch}
+  .fig{background:var(--ground-2);border:1px solid var(--line);border-radius:12px;padding:1.4rem;margin:1.5rem 0;overflow-x:auto}
+  .fig figcaption{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:1rem}
+  table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.93rem}
+  th{text-align:left;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line-2);padding:.5rem .6rem}
+  td{padding:.5rem .6rem;border-bottom:1px solid var(--line);color:var(--ink-2);vertical-align:top}
+  td strong{color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--ground-3);padding:.12em .4em;border-radius:4px;color:var(--gold-lt)}
+  .note{border-left:2px solid var(--gold);padding:.2rem 0 .2rem 1rem;margin:1.4rem 0;color:var(--ink-2)}
+  .note strong{color:var(--ink)}
+  footer{padding:3rem 0 5rem;color:var(--ink-3);font-size:.9rem}
+  a{color:var(--gold-lt)}
+  svg{display:block;max-width:100%;height:auto;margin:0 auto}
+  .st{font-family:var(--sans);font-size:12px;fill:var(--ink)}
+  .ss{font-family:var(--sans);font-size:10.5px;fill:var(--ink-2)}
+  .sm{font-family:var(--mono);font-size:9.5px;fill:var(--ink-3);letter-spacing:.1em}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Architecture Design Document</h1>
+  <p class="sub">El mapa mental del código de Tatemis3D: cómo encajan las piezas y <strong>por qué</strong> están separadas así. Cada decisión de aquí la obliga un kit real de las tres criaturas.</p>
+  <div>
+    <span class="tag">Unity · URP</span>
+    <span class="tag">Data-driven</span>
+    <span class="tag">Bespoke primero</span>
+    <span class="tag">2026-07-18</span>
+  </div>
+  <p class="sub" style="margin-top:1.4rem;font-size:.95rem">Especificación en código → <code>ARCHITECTURE.md</code> · Texto completo de este doc → <code>add.md</code></p>
+</header>
+
+<section>
+  <div class="ch-head"><span class="ch-num">01</span><h2>Las 5 capas del controlador</h2></div>
+  <p>El input no habla con el mundo directamente: atraviesa cinco capas, y en cada una se puede sustituir una pieza sin tocar las demás.</p>
+
+  <figure class="fig">
+    <figcaption>Flujo de entrada a mundo · morado = datos intercambiables</figcaption>
+    <svg viewBox="0 0 760 520" role="img" aria-label="Cinco capas: entrada, decisión, criatura, efectos y mundo.">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+
+      <text class="sm" x="8" y="16">1 · ENTRADA</text>
+      <rect x="8" y="24" width="744" height="48" rx="7" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="26" y="45" font-weight="600">InputReader</text>
+      <text class="ss" x="26" y="62">teclado · gamepad · rebinding en runtime — un solo mapeo para las 3 especies</text>
+      <line x1="380" y1="74" x2="380" y2="92" stroke="#7d7869" stroke-width="1.5" marker-end="url(#ar)"/>
+
+      <text class="sm" x="8" y="108">2 · DECISIÓN</text>
+      <rect x="8" y="116" width="744" height="48" rx="7" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="26" y="137" font-weight="600">IBrain</text>
+      <text class="ss" x="26" y="154">PlayerBrain (hoy) · AIBrain (salvajes y aliados) · órdenes — la misma interfaz</text>
+      <line x1="380" y1="166" x2="380" y2="184" stroke="#7d7869" stroke-width="1.5" marker-end="url(#ar)"/>
+
+      <text class="sm" x="8" y="200">3 · LA CRIATURA</text>
+      <rect x="8" y="208" width="744" height="136" rx="7" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="26" y="230" font-weight="600">CreatureController</text>
+      <text class="ss" x="182" y="230">máquina de estados: Locomotion · Ability · Hitstun · Block · KO</text>
+
+      <rect x="24" y="244" width="176" height="86" rx="6" fill="#2a2440" stroke="#A98FC4"/>
+      <text class="st" x="112" y="268" text-anchor="middle" font-weight="600">LocomotionProfile</text>
+      <text class="ss" x="112" y="287" text-anchor="middle">por especie,</text>
+      <text class="ss" x="112" y="303" text-anchor="middle">override por stance</text>
+      <text class="ss" x="112" y="319" text-anchor="middle">¿eje Y libre?</text>
+
+      <rect x="212" y="244" width="176" height="86" rx="6" fill="#2a2440" stroke="#A98FC4"/>
+      <text class="st" x="300" y="268" text-anchor="middle" font-weight="600">Kit activo</text>
+      <text class="ss" x="300" y="287" text-anchor="middle">lo reescribe el</text>
+      <text class="ss" x="300" y="303" text-anchor="middle">StanceSystem</text>
+      <text class="ss" x="300" y="319" text-anchor="middle">Libre ↔ Sujeción…</text>
+
+      <rect x="400" y="244" width="176" height="86" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="488" y="268" text-anchor="middle" font-weight="600">AbilityCaster</text>
+      <text class="ss" x="488" y="287" text-anchor="middle">valida energía y</text>
+      <text class="ss" x="488" y="303" text-anchor="middle">coste/CD por SLOT</text>
+      <text class="ss" x="488" y="319" text-anchor="middle">→ dispara anim</text>
+
+      <rect x="588" y="244" width="148" height="86" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="662" y="268" text-anchor="middle" font-weight="600">BasicChain</text>
+      <text class="ss" x="662" y="287" text-anchor="middle">cadena + procs</text>
+      <text class="ss" x="662" y="303" text-anchor="middle">override por stance</text>
+      <text class="ss" x="662" y="319" text-anchor="middle">y temporal (buff)</text>
+      <line x1="380" y1="346" x2="380" y2="364" stroke="#7d7869" stroke-width="1.5" marker-end="url(#ar)"/>
+
+      <text class="sm" x="8" y="380">4 · EFECTOS — disparados por ANIM-EVENTS, no por el frame del input</text>
+      <rect x="8" y="388" width="744" height="48" rx="7" fill="#1d2a24" stroke="#7FB574"/>
+      <text class="st" x="26" y="409" font-weight="600">AbilityEffect[]</text>
+      <text class="ss" x="26" y="426">daño · estado · mov. propio · desplazar ajeno · proyectil · hazard · marca · irradiar · buff · stance</text>
+      <line x1="380" y1="438" x2="380" y2="456" stroke="#7d7869" stroke-width="1.5" marker-end="url(#ar)"/>
+
+      <text class="sm" x="8" y="472">5 · MUNDO</text>
+      <rect x="8" y="480" width="180" height="34" rx="6" fill="#2e2119" stroke="#DA6A3E"/><text class="st" x="98" y="502" text-anchor="middle">ReactionSystem</text>
+      <rect x="196" y="480" width="180" height="34" rx="6" fill="#2e2119" stroke="#DA6A3E"/><text class="st" x="286" y="502" text-anchor="middle">Hazards</text>
+      <rect x="384" y="480" width="180" height="34" rx="6" fill="#2e2119" stroke="#DA6A3E"/><text class="st" x="474" y="502" text-anchor="middle">Marcas de especie</text>
+      <rect x="572" y="480" width="180" height="34" rx="6" fill="#2e2119" stroke="#DA6A3E"/><text class="st" x="662" y="502" text-anchor="middle">Combatientes</text>
+    </svg>
+  </figure>
+
+  <div class="note"><strong>Solo dos piezas son intercambiables</strong>, y ambas son datos: el <code>LocomotionProfile</code> y el <code>Kit activo</code>. Todo lo demás es código fijo. Las dos costuras que hay que dejar abiertas desde el principio son <code>IBrain</code> (por donde entrarán IA y órdenes) y los <strong>anim-events</strong> (que ponen el game feel en manos del diseñador).</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">02</span><h2>Actuador vs payload</h2></div>
+  <p>Casi nada se aplica directamente: <strong>algo tiene que llevarlo</strong>. Por eso los efectos de una habilidad son de dos naturalezas que no se conocen entre sí — y ahí está la clave de que se puedan componer en el inspector sin escribir código.</p>
+
+  <figure class="fig">
+    <figcaption>El actuador entrega · el payload consecuencia · reportHit es el pegamento</figcaption>
+    <svg viewBox="0 0 760 300" role="img" aria-label="Un actuador crea el vehículo y reporta impactos; los payloads se ejecutan al recibir ese aviso.">
+      <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+
+      <rect x="8" y="16" width="300" height="104" rx="7" fill="#22232f" stroke="#9FC7D6"/>
+      <text class="sm" x="26" y="38">ACTUADOR — entrega</text>
+      <text class="ss" x="26" y="60">MeleeHitbox · SpawnProjectile</text>
+      <text class="ss" x="26" y="78">ThrowHeld · SpawnHazard · PullField</text>
+      <text class="ss" x="26" y="103" style="fill:#9FC7D6">crea el vehículo y avisa de cada impacto</text>
+
+      <path d="M316 68 L436 68" stroke="#7d7869" stroke-width="1.5" marker-end="url(#ar2)"/>
+      <text class="sm" x="376" y="58" text-anchor="middle" style="fill:#D9A441">reportHit</text>
+
+      <rect x="452" y="16" width="300" height="104" rx="7" fill="#22232f" stroke="#7FB574"/>
+      <text class="sm" x="470" y="38">PAYLOAD — consecuencia</text>
+      <text class="ss" x="470" y="60">DealDamage · ApplyStatus · Knockback</text>
+      <text class="ss" x="470" y="78">RadiateElement · DropMark</text>
+      <text class="ss" x="470" y="103" style="fill:#7FB574">declara cuándo: OnCast u OnHit</text>
+
+      <text class="ss" x="380" y="150" text-anchor="middle" style="fill:var(--ink-2)">El payload no sabe quién lo entregó — el mismo DealDamage sirve para un puñetazo, un proyectil o una zona pisada.</text>
+
+      <text class="sm" x="8" y="188">TRES TIEMPOS DE VIDA</text>
+      <rect x="8" y="198" width="240" height="84" rx="6" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="26" y="220" font-weight="600">Instantánea</text>
+      <text class="ss" x="26" y="240">resuelve dentro de la animación</text>
+      <text class="ss" x="26" y="262" style="fill:var(--ink-3)">MeleeHitbox · AreaBurst</text>
+
+      <rect x="260" y="198" width="240" height="84" rx="6" fill="#191a24" stroke="#EAC94B"/>
+      <text class="st" x="278" y="220" font-weight="600">En vuelo</text>
+      <text class="ss" x="278" y="240">resuelve al impactar, segundos después</text>
+      <text class="ss" x="278" y="262" style="fill:var(--ink-3)">proyectil · roca lanzada</text>
+
+      <rect x="512" y="198" width="240" height="84" rx="6" fill="#191a24" stroke="#EAC94B"/>
+      <text class="st" x="530" y="220" font-weight="600">Persistente</text>
+      <text class="ss" x="530" y="240">ciclo propio: al entrar o al permanecer</text>
+      <text class="ss" x="530" y="262" style="fill:var(--ink-3)">zonas · tornados · marcas</text>
+    </svg>
+  </figure>
+
+  <div class="note"><strong>Los dos últimos sobreviven a la habilidad que los creó.</strong> Por eso el actuador entrega al vehículo una <strong>copia del payload y un snapshot del contexto</strong>, nunca una referencia viva al lanzador. Dos casos reales lo obligan: Ottorock <em>lanza la roca y sale de Sujeción en el mismo gesto</em> —si el proyectil leyera su estado al impactar, la reacción sellada ya no existiría—, y si noquean a Pyrecko tras detonar, <em>sus zonas siguen ardiendo</em>.</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">03</span><h2>Las 10 primitivas</h2></div>
+  <p>Las nueve habilidades de las tres criaturas se descomponen en diez primitivas. Esta lista <strong>es</strong> la librería de efectos — y que tres criaturas diseñadas a propósito para romper el sistema no pidan nada más es la mejor señal de que el catálogo no se disparará con las especies 4 y 5.</p>
+  <table>
+    <tr><th>Primitiva</th><th>Tipo</th><th>Estado</th></tr>
+    <tr><td><strong>Daño</strong></td><td>payload</td><td style="color:var(--ok)">en scaffold</td></tr>
+    <tr><td><strong>Estado</strong> — quemadura, slow, stun, parálisis</td><td>payload</td><td style="color:var(--warn)">parcial (falta stacking)</td></tr>
+    <tr><td><strong>Movimiento propio</strong> — dash, impulso vertical</td><td>actuador sobre uno mismo</td><td style="color:var(--ok)">DashMotion</td></tr>
+    <tr><td><strong>Desplazar ajeno</strong> — knockback, pull, arrastre</td><td>payload + actuador</td><td style="color:var(--no)">ola Mantagale</td></tr>
+    <tr><td><strong>Proyectil</strong> — recto, homing, objeto lanzado</td><td>actuador</td><td style="color:var(--no)">olas Pyrecko / Ottorock</td></tr>
+    <tr><td><strong>Hazard</strong> — zona estática o móvil</td><td>actuador persistente</td><td style="color:var(--no)">ola Pyrecko</td></tr>
+    <tr><td><strong>Marca de especie</strong></td><td>payload persistente</td><td style="color:var(--no)">ola Pyrecko</td></tr>
+    <tr><td><strong>Elemento irradiado</strong> / reacción sellada</td><td>payload</td><td style="color:var(--warn)">API vieja — ticket T1.0</td></tr>
+    <tr><td><strong>Buff temporal</strong> — incluido reescribir el básico</td><td>modificador propio</td><td style="color:var(--no)">ola Mantagale</td></tr>
+    <tr><td><strong>Stance</strong> — override de kit y locomoción</td><td>sistema</td><td style="color:var(--no)">ola Ottorock</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">04</span><h2>Locomoción y orden de construcción</h2></div>
+  <p><strong>No existe "la locomoción del jugador".</strong> Las tres criaturas se mueven de forma radicalmente distinta y dos de ellas cambian de modo en pleno combate — por eso el perfil de locomoción tiene que ser un dato intercambiable, no código.</p>
+  <table>
+    <tr><th>Especie</th><th>Locomoción</th></tr>
+    <tr><td><strong style="color:var(--mineral)">Ottorock</strong></td><td>cuadrúpedo ágil (Libre) ↔ bípedo pesado (Sujeción)</td></tr>
+    <tr><td><strong style="color:var(--fuego)">Pyrecko</strong></td><td>normal ↔ muy rápido (Sigilo)</td></tr>
+    <tr><td><strong style="color:var(--aire)">Mantagale</strong></td><td>vuelo permanente, altura variable como eje propio — nunca camina</td></tr>
+  </table>
+
+  <div class="note"><strong>El eje vertical hay que preverlo, no construirlo.</strong> Mantagale es Nivel B, pero lo que se hornee en Fase 0 decide si algún día es viable: T0.3 no debe asumir que el personaje está pegado al suelo · T0.4 no debe asumir objetivos a ras de suelo · T0.5 debe contemplar objetivos elevados · y el <code>ReactionSystem</code> debe emitir un evento al resolver una reacción.</div>
+
+  <h3>Las cuatro olas</h3>
+  <table>
+    <tr><th>Ola</th><th>Cuándo</th><th>Qué se extrae</th></tr>
+    <tr><td><strong>1 · Gate</strong></td><td>Fase 1</td><td>Ottorock-Libre: dash, hitbox, daño, slow, cadena de básicos, coste/CD por slot. <em>Todo bespoke — el objetivo es el feel, no la arquitectura.</em></td></tr>
+    <tr><td><strong>2 · Stances</strong></td><td>Fase 2–3</td><td>StanceSystem, GrabChunk/ThrowHeld, reacción sellada, escudo-roca, básicos por stance</td></tr>
+    <tr><td><strong>3 · Pyrecko</strong></td><td>Fase 4</td><td>reusa StanceSystem para Sigilo · marcas de especie · proyectil homing · DoT</td></tr>
+    <tr><td><strong>4 · Mantagale</strong></td><td>Nivel B</td><td>vuelo y altura · desplazamiento · override temporal del básico · interacción hazard↔hazard</td></tr>
+  </table>
+  <p><strong>El payoff del bespoke-primero:</strong> el StanceSystem se extrae de Ottorock y Pyrecko lo consume gratis. Y el test de validez es honesto — si en la ola 3 el Sigilo no encaja limpio en la abstracción de la ola 2, la abstracción estaba mal. Mejor descubrirlo con dos criaturas que con doce.</p>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">05</span><h2>Reglas vigentes</h2></div>
+  <table>
+    <tr><td><strong>1 · Bespoke primero, extraer después</strong></td><td>Nada se generaliza hasta tener ≥2 usos reales.</td></tr>
+    <tr><td><strong>2 · Datos, no código</strong></td><td>Añadir criatura o reacción = editar assets. Si obliga a tocar C#, es un hueco del catálogo → anotarlo.</td></tr>
+    <tr><td><strong>3 · Anim-events</strong></td><td>Los efectos se disparan en eventos de animación, nunca en el frame del input.</td></tr>
+    <tr><td><strong>4 · Payload desacoplado</strong></td><td>Todo lo que sobrevive a su habilidad viaja con copia y snapshot.</td></tr>
+    <tr><td><strong>5 · Mandan los docs</strong></td><td>El scaffold arrastra deuda conocida → ticket T1.0.</td></tr>
+    <tr><td><strong>6 · Diagrama nuevo → aquí</strong></td><td>Si hace falta explicar algo visualmente y no está en esta página, se añade a esta página.</td></tr>
+  </table>
+</section>
+
+<footer>
+  <p>Tatemis3D — Architecture Design Document · hecho por <strong>Arzpal</strong><br>
+  Documento vivo. Especificación en código: <code>ARCHITECTURE.md</code> · Extracción y huecos: <code>ABILITY-EXTRACTION.md</code> · Texto de esta página: <code>add.md</code></p>
+</footer>
+</div>

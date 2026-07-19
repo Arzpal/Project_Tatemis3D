@@ -1,0 +1,611 @@
+<title>Tatemis3D — GDD</title>
+<style>
+  :root{
+    --ground:#13131b;
+    --ground-2:#191a24;
+    --ground-3:#22232f;
+    --ground-4:#2b2c3a;
+    --ink:#ECE6D8;
+    --ink-2:#B4AD9C;
+    --ink-3:#7d7869;
+    --line:rgba(236,230,216,.10);
+    --line-2:rgba(236,230,216,.16);
+    --gold:#D9A441;
+    --gold-lt:#EBC069;
+    --gold-dk:#a87a2c;
+    /* elemental spectrum — contained to the element system */
+    --naturaleza:#79B06A;
+    --agua:#4E9FC0;
+    --fuego:#DA6A3E;
+    --mineral:#A98FC4;
+    --rayo:#EAC94B;
+    --aire:#9FC7D6;
+    --in:#7FB574;
+    --future:#7f8196;
+
+    --serif:"Palatino Linotype","Book Antiqua","Iowan Old Style",Palatino,Georgia,serif;
+    --sans:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --mono:"Consolas","SF Mono","JetBrains Mono",Menlo,monospace;
+
+    --maxw:760px;
+    --step-hero:clamp(2.7rem,7vw,5rem);
+    --step-h2:clamp(1.55rem,3.4vw,2.25rem);
+    --step-h3:1.18rem;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:1.0625rem;
+    line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:rgba(217,164,65,.30);color:#fff}
+
+  .progress{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--gold-dk),var(--gold-lt));z-index:60;transition:width .1s linear}
+
+  a{color:var(--gold-lt);text-decoration:none}
+  a:hover{text-decoration:underline;text-underline-offset:3px}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);
+    background:
+      radial-gradient(120% 90% at 82% -10%,rgba(217,164,65,.10),transparent 55%),
+      radial-gradient(90% 80% at 10% 110%,rgba(78,159,192,.09),transparent 60%),
+      linear-gradient(180deg,#101017,#15151f);}
+  #dust{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .hero-inner{position:relative;z-index:2;max-width:1080px;margin:0 auto;padding:clamp(3.2rem,8vw,6.5rem) 1.5rem clamp(2.6rem,6vw,4.2rem)}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin:0}
+  .hero h1{font-family:var(--serif);font-weight:600;font-size:var(--step-hero);line-height:.98;letter-spacing:.01em;margin:.5rem 0 0;text-wrap:balance}
+  .hero h1 .ph{display:block;font-size:.24em;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);font-family:var(--mono);margin-top:1.1rem}
+  .lede{font-family:var(--serif);font-size:clamp(1.15rem,2.3vw,1.5rem);line-height:1.5;color:var(--ink);max-width:34ch;margin:1.6rem 0 0;font-style:italic}
+  .lede b{font-style:normal;color:var(--gold-lt);font-weight:600}
+  .meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:2.2rem}
+  .tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);
+    border:1px solid var(--line-2);border-radius:999px;padding:.34rem .7rem;white-space:nowrap}
+  .tag.on{color:var(--gold-lt);border-color:rgba(217,164,65,.4)}
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:1080px;margin:0 auto;padding:0 1.5rem;
+    display:grid;grid-template-columns:230px minmax(0,1fr);gap:clamp(1.5rem,4vw,3.5rem);align-items:start}
+  nav.toc{position:sticky;top:0;max-height:100vh;overflow-y:auto;padding:2.4rem 0;display:flex;flex-direction:column;gap:.1rem}
+  nav.toc .toc-h{font-family:var(--mono);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);padding:0 .2rem .7rem;border-bottom:1px solid var(--line);margin-bottom:.5rem}
+  nav.toc a{display:flex;gap:.55rem;align-items:baseline;color:var(--ink-2);padding:.32rem .4rem;border-radius:6px;font-size:.82rem;line-height:1.3;border-left:2px solid transparent}
+  nav.toc a .n{font-family:var(--mono);font-size:.68rem;color:var(--ink-3);min-width:1.3em}
+  nav.toc a:hover{color:var(--ink);background:var(--ground-2);text-decoration:none}
+  nav.toc a.active{color:var(--gold-lt);border-left-color:var(--gold);background:linear-gradient(90deg,rgba(217,164,65,.08),transparent)}
+  nav.toc a.active .n{color:var(--gold)}
+
+  main{padding:2.4rem 0 5rem;min-width:0}
+
+  .chapter{padding:2.4rem 0;border-top:1px solid var(--line);scroll-margin-top:1rem}
+  .chapter:first-child{border-top:none;padding-top:.6rem}
+  .ch-head{display:flex;align-items:baseline;gap:.9rem;margin-bottom:.4rem}
+  .ch-num{font-family:var(--mono);font-size:.8rem;color:var(--gold);letter-spacing:.1em;padding-top:.2rem}
+  .chapter h2{font-family:var(--serif);font-weight:600;font-size:var(--step-h2);line-height:1.1;margin:0;text-wrap:balance}
+  .sub{color:var(--ink-2);font-size:1rem;margin:.2rem 0 1.4rem;max-width:62ch}
+  .chapter h3{font-family:var(--sans);font-weight:700;font-size:var(--step-h3);letter-spacing:.005em;margin:1.8rem 0 .6rem;color:var(--ink)}
+  p{max-width:66ch;margin:.7rem 0}
+  strong{color:#fff;font-weight:650}
+  .content-narrow{max-width:var(--maxw)}
+
+  /* pills / labels */
+  .kicker{font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3)}
+
+  /* cards */
+  .cards{display:grid;gap:1rem;margin:1.4rem 0}
+  .cols-3{grid-template-columns:repeat(3,1fr)}
+  .cols-2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--ground-2);border:1px solid var(--line);border-radius:10px;padding:1.2rem 1.25rem}
+  .card .pn{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;color:var(--gold);text-transform:uppercase}
+  .card h4{font-family:var(--serif);font-size:1.22rem;font-weight:600;margin:.5rem 0 .4rem;line-height:1.15}
+  .card p{font-size:.95rem;color:var(--ink-2);margin:0;max-width:none}
+
+  /* scope panels */
+  .scope{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0}
+  .panel{border:1px solid var(--line);border-radius:10px;padding:1.2rem 1.3rem;background:var(--ground-2)}
+  .panel.in{border-color:rgba(127,181,116,.32);background:linear-gradient(180deg,rgba(127,181,116,.06),transparent)}
+  .panel-h{display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase}
+  .panel.in .panel-h{color:var(--in)}
+  .panel.out .panel-h{color:var(--future)}
+  .dotm{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+  .checklist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.55rem}
+  .checklist li{position:relative;padding-left:1.5rem;font-size:.94rem;color:var(--ink-2);line-height:1.5}
+  .checklist li::before{position:absolute;left:0;top:0;font-family:var(--mono);font-size:.9rem}
+  .panel.in .checklist li::before{content:"›";color:var(--in);font-weight:700}
+  .panel.out .checklist li::before{content:"◇";color:var(--future)}
+
+  /* loop flow */
+  .flow{display:flex;flex-wrap:wrap;gap:.5rem;align-items:stretch;margin:1.4rem 0;counter-reset:step}
+  .step{flex:1 1 120px;background:var(--ground-2);border:1px solid var(--line);border-radius:9px;padding:.85rem .9rem;position:relative;min-width:120px}
+  .step .si{font-family:var(--mono);font-size:.68rem;color:var(--gold);letter-spacing:.1em}
+  .step b{display:block;font-size:.92rem;margin-top:.25rem;color:var(--ink);font-weight:600}
+  .step small{color:var(--ink-3);font-size:.78rem;line-height:1.35;display:block;margin-top:.15rem}
+
+  /* tables */
+  .tbl-wrap{overflow-x:auto;margin:1.3rem 0;border:1px solid var(--line);border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:.92rem;min-width:520px}
+  th,td{text-align:left;padding:.7rem .9rem;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:.68rem;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);background:var(--ground-2);position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--ground-2)}
+  td strong{color:var(--gold-lt);font-weight:600}
+  .arch{font-family:var(--serif);font-size:1.02rem;color:var(--ink);font-weight:600}
+
+  /* element system */
+  .triads{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin:1.5rem 0}
+  .triad{background:var(--ground-2);border:1px solid var(--line);border-radius:12px;padding:1rem .8rem 1.3rem}
+  .triad h4{text-align:center;font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);margin:.3rem 0 .2rem}
+  .triad svg{display:block;width:100%;height:auto;max-width:340px;margin:0 auto}
+  .ele-legend{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-top:.4rem}
+  .chip{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--ink-2);font-family:var(--mono);letter-spacing:.04em}
+  .chip i{width:9px;height:9px;border-radius:2px;transform:rotate(45deg);display:inline-block}
+
+  .note{border-left:2px solid var(--gold);background:linear-gradient(90deg,rgba(217,164,65,.07),transparent);
+    padding:.9rem 1.1rem;border-radius:0 8px 8px 0;margin:1.4rem 0;font-size:.95rem;color:var(--ink-2)}
+  .note b{color:var(--gold-lt)}
+  .note.crystal{border-left-color:var(--agua);background:linear-gradient(90deg,rgba(78,159,192,.08),transparent)}
+  .note.crystal b{color:var(--aire)}
+
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1rem;margin:1rem 0;font-size:.94rem}
+  .kv dt{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding-top:.15rem}
+  .kv dd{margin:0;color:var(--ink-2)}
+
+  .lore-flow{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:1.1rem 0;font-family:var(--mono);font-size:.82rem;color:var(--ink-2)}
+  .lore-flow span{background:var(--ground-3);border:1px solid var(--line);border-radius:6px;padding:.4rem .65rem}
+  .lore-flow em{color:var(--gold);font-style:normal}
+
+  footer{border-top:1px solid var(--line);padding:2.4rem 1.5rem 3rem;text-align:center;color:var(--ink-3);font-family:var(--mono);font-size:.74rem;letter-spacing:.08em}
+
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+  @media (max-width:860px){
+    .wrap{grid-template-columns:1fr;padding:0 1.15rem}
+    nav.toc{position:static;max-height:none;flex-direction:row;flex-wrap:wrap;gap:.3rem;padding:1.2rem 0;border-bottom:1px solid var(--line)}
+    nav.toc .toc-h{width:100%;border:none;padding-bottom:.3rem}
+    nav.toc a{border-left:none;border:1px solid var(--line);border-radius:999px;padding:.3rem .6rem}
+    nav.toc a.active{border-color:var(--gold);background:rgba(217,164,65,.1)}
+    nav.toc a .n{display:none}
+    .cols-3,.cols-2,.scope,.triads{grid-template-columns:1fr}
+    main{padding-top:1.4rem}
+  }
+</style>
+
+<div class="progress" id="prog"></div>
+
+<header class="hero">
+  <canvas id="dust"></canvas>
+  <div class="hero-inner">
+    <p class="eyebrow">Game Design Document · v0.1 · Hecho por Arzpal</p>
+    <h1>Tatemis3D<span class="ph">nombre placeholder</span></h1>
+    <p class="lede">Un creature-collector de <b>acción en tiempo real</b>. No coleccionas cientos de bestias — te <b>vinculas</b> con unas pocas y las controlas por completo.</p>
+    <div class="meta">
+      <span class="tag on">Vertical Slice</span>
+      <span class="tag">Unity · URP</span>
+      <span class="tag">PC / Consola</span>
+      <span class="tag">Cell-shaded</span>
+      <span class="tag">Soulslike + Character-action</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc" id="toc">
+    <div class="toc-h">Índice</div>
+    <a href="#vision"><span class="n">01</span><span>Visión y pilares</span></a>
+    <a href="#alcance"><span class="n">02</span><span>Alcance del slice</span></a>
+    <a href="#narrativa"><span class="n">03</span><span>Narrativa y mundo</span></a>
+    <a href="#loop"><span class="n">04</span><span>Loop de juego</span></a>
+    <a href="#combate"><span class="n">05</span><span>Combate</span></a>
+    <a href="#elementos"><span class="n">06</span><span>Sistema elemental</span></a>
+    <a href="#captura"><span class="n">07</span><span>Ambiente y captura</span></a>
+    <a href="#criaturas"><span class="n">08</span><span>Criaturas y evolución</span></a>
+    <a href="#tamer"><span class="n">09</span><span>El Tamer y el vínculo</span></a>
+    <a href="#mundo"><span class="n">10</span><span>Mundo y PvP</span></a>
+    <a href="#tech"><span class="n">11</span><span>Arte y tecnología</span></a>
+    <a href="#roadmap"><span class="n">12</span><span>Roadmap del slice</span></a>
+    <a href="#riesgos"><span class="n">13</span><span>Riesgos abiertos</span></a>
+    <a href="#glosario"><span class="n">14</span><span>Glosario</span></a>
+  </nav>
+
+  <main>
+    <!-- 01 -->
+    <section class="chapter reveal" id="vision">
+      <div class="ch-head"><span class="ch-num">01</span><h2>Visión y pilares</h2></div>
+      <p class="sub">El corazón del juego no son ataques que se repiten, sino <strong>combinar</strong> las habilidades únicas de cada criatura con su elemento y el ambiente. Tono cálido y accesible al estilo <em>Cómo entrenar a tu dragón</em>, con lore oscuro reservado para quien explore.</p>
+      <div class="cards cols-3">
+        <div class="card"><span class="pn">Pilar I</span><h4>Combate expresivo</h4><p>Combinar habilidades + elemento + ambiente: golpear el suelo para levantar polvo, controlar la nieve, generar tornados, manchar el terreno para provocar reacciones.</p></div>
+        <div class="card"><span class="pn">Pilar II</span><h4>Vínculo, no colección</h4><p>Equipo máximo de 3. Elegir a tus compañeros es una decisión con peso narrativo y estratégico. <em>Conectar, no coleccionar.</em></p></div>
+        <div class="card"><span class="pn">Pilar III</span><h4>El mundo narra</h4><p>Historia ligera en la superficie; el lore profundo (los Tomos) queda en pistas sutiles, para revelarse en secuelas.</p></div>
+      </div>
+      <p class="kicker">Referencias · Temtem · Pokémon Leyendas Z-A · con combate de acción y lock-on</p>
+    </section>
+
+    <!-- 02 -->
+    <section class="chapter reveal" id="alcance">
+      <div class="ch-head"><span class="ch-num">02</span><h2>Alcance del vertical slice</h2></div>
+      <p class="sub">Meta inmediata: un slice pulido para presentar la idea al studio. La regla de oro para priorizar: <strong>¿esto demuestra que el loop central y el USP se sienten increíbles?</strong> Si no, se documenta como futuro pero no se construye ahora.</p>
+      <div class="scope">
+        <div class="panel in">
+          <div class="panel-h"><span class="dotm"></span>En el slice</div>
+          <ul class="checklist">
+            <li>1 bioma semiabierto con su elemento base y clima.</li>
+            <li>Combate en tiempo real completo (swap, lock-on, kit, energía, bloqueo, noqueo).</li>
+            <li>6 tipos elementales + reacciones ambientales (3–4 demostrables).</li>
+            <li>Captura completa: aturdimiento → noqueo → Tótem.</li>
+            <li>Equipo de 3 · liberar para reclutar.</li>
+            <li>3–5 especies "héroe" (una por arquetipo) + 1 cadena de evolución completa.</li>
+            <li>1 mazmorra corta con jefe narrativo · starter de regalo.</li>
+          </ul>
+        </div>
+        <div class="panel out">
+          <div class="panel-h"><span class="dotm"></span>Futuro · documentado</div>
+          <ul class="checklist">
+            <li>PvP y cualquier netcode.</li>
+            <li>Roster completo (10–20 especies) — solo diseño en papel.</li>
+            <li>Mini-misiones de evolución de todas las especies.</li>
+            <li>Combate propio del Tamer y complicidad Tamer–criatura.</li>
+            <li>Postgame, almacenamiento ampliado, crianza.</li>
+            <li>Mundo completo / múltiples biomas.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 -->
+    <section class="chapter reveal" id="narrativa">
+      <div class="ch-head"><span class="ch-num">03</span><h2>Narrativa y mundo</h2></div>
+      <p class="sub">Dos capas: una accesible en la superficie, otra oculta para las secuelas.</p>
+      <div class="cards cols-2">
+        <div class="card"><span class="pn">Capa superficial · HTTYD</span><h4>Del miedo al vínculo</h4><p>La aldea del protagonista teme a los monstruos. Una aldea rival ataca con bestias. Para defender a los suyos, aprende a conectar con los monstruos en lugar de temerlos — demostrando que humanos y bestias pueden vivir en armonía.</p></div>
+        <div class="card"><span class="pn">Capa oculta · pistas sutiles</span><h4>La Era de los Tomos</h4><p>Ocho Grandes Tomos otorgaban control elemental. Un Gran Líder los destruyó; su esencia se fundió con la naturaleza y nacieron las bestias elementales. <em>En este juego no se explica: solo se insinúa.</em></p></div>
+      </div>
+      <h3>Del Polvo al Tótem</h3>
+      <p>La materia pura de los Tomos se convirtió en <strong>Polvo sagrado (Pulvis)</strong>. Así funciona la captura, justificada en el lore:</p>
+      <div class="lore-flow">
+        <span>Polvo (Pulvis)</span><em>+</em><span>Agua</span><em>→</em><span>Sludge</span><em>→</em><span>se cristaliza</span><em>→</em><span>Tótem (vasija)</span>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chapter reveal" id="loop">
+      <div class="ch-head"><span class="ch-num">04</span><h2>Loop de juego</h2></div>
+      <p class="sub">El slice debe demostrar este loop completo, de principio a fin, en un solo bioma.</p>
+      <div class="flow">
+        <div class="step"><span class="si">01</span><b>Explorar</b><small>bioma semiabierto</small></div>
+        <div class="step"><span class="si">02</span><b>Combate</b><small>en tiempo real</small></div>
+        <div class="step"><span class="si">03</span><b>Aturdir</b><small>combos + reacciones</small></div>
+        <div class="step"><span class="si">04</span><b>Noquear</b><small>fin del combate</small></div>
+        <div class="step"><span class="si">05</span><b>Capturar</b><small>sludge → Tótem</small></div>
+        <div class="step"><span class="si">06</span><b>Vincular</b><small>equipo de 3</small></div>
+        <div class="step"><span class="si">07</span><b>Evolucionar</b><small>mini-misiones</small></div>
+      </div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chapter reveal" id="combate">
+      <div class="ch-head"><span class="ch-num">05</span><h2>Combate</h2></div>
+      <p class="sub">Una criatura activa a la vez, controlada por completo en tercera persona con lock-on. Híbrido de stats + habilidad. El Tamer no es objetivo: narrativamente es intocable.</p>
+
+      <h3>Kit por criatura</h3>
+      <p>Cuatro habilidades que consumen <strong>energía elemental</strong> (modelo tinta de Splatoon, regenera por segundo):</p>
+      <div class="kv">
+        <dt>Movilidad</dt><dd>desplazamiento o sigilo</dd>
+        <dt>Efecto</dt><dd>CC, buff, AoE o debuff al enemigo</dd>
+        <dt>Ataque</dt><dd>daño directo</dd>
+        <dt>Signature</dt><dd>única de la especie</dd>
+      </div>
+      <p>Más tres acciones universales: <strong>salto</strong>, <strong>noqueo</strong> (rematar para capturar) y <strong>bloqueo</strong>.</p>
+      <div class="note"><b>Bloqueo = convertirse en elemento puro.</b> Defiende y recarga energía más rápido, pero <b>no puede atacar</b> mientras bloquea, y recibe <b>2× de daño de su elemento débil</b>. Stance comprometido: la decisión pesa.</div>
+
+      <h3>Arquetipos</h3>
+      <p>Los stats principales (Daño · Vida · Velocidad) definen el arquetipo, modulado por la naturaleza de cada criatura.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Arquetipo</th><th>Rol en combate de acción</th></tr></thead>
+          <tbody>
+            <tr><td class="arch">Guardián</td><td>Aguanta daño, protege, controla espacio (CC / taunt)</td></tr>
+            <tr><td class="arch">Luchador</td><td>DPS cuerpo a cuerpo sostenido, supervivencia media</td></tr>
+            <tr><td class="arch">Ejecutor</td><td>Burst + movilidad, alto riesgo (glass cannon)</td></tr>
+            <tr><td class="arch">Zonificador</td><td>Rango, proyectiles, negación de área</td></tr>
+            <tr><td class="arch">Controlador</td><td>CC, debuffs, manipulación de terreno, soporte</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 06 -->
+    <section class="chapter reveal" id="elementos">
+      <div class="ch-head"><span class="ch-num">06</span><h2>Sistema elemental</h2></div>
+      <p class="sub">Seis elementos en <strong>dos triángulos</strong> de piedra-papel-tijera. Cada elemento tiene una sola debilidad (×2) y una sola resistencia (×0.5) → legibilidad total. Cruzar de un triángulo al otro es neutral.</p>
+
+      <div class="triads">
+        <div class="triad">
+          <h4>Triángulo inicial · Starters</h4>
+          <svg viewBox="0 0 320 300" role="img" aria-label="Triángulo: Naturaleza supera a Agua, Agua supera a Fuego, Fuego supera a Naturaleza">
+            <use href="#tri-arrows"/>
+            <g class="node" style="color:var(--naturaleza)"><use href="#gem" x="138" y="48" width="44" height="44"/><text x="160" y="112" class="elabel">Naturaleza</text></g>
+            <g class="node" style="color:var(--agua)"><use href="#gem" x="228" y="198" width="44" height="44"/><text x="250" y="262" class="elabel">Agua</text></g>
+            <g class="node" style="color:var(--fuego)"><use href="#gem" x="48" y="198" width="44" height="44"/><text x="70" y="262" class="elabel">Fuego</text></g>
+          </svg>
+        </div>
+        <div class="triad">
+          <h4>Segundo triángulo</h4>
+          <svg viewBox="0 0 320 300" role="img" aria-label="Triángulo: Mineral supera a Rayo, Rayo supera a Aire, Aire supera a Mineral">
+            <use href="#tri-arrows"/>
+            <g class="node" style="color:var(--mineral)"><use href="#gem" x="138" y="48" width="44" height="44"/><text x="160" y="112" class="elabel">Mineral</text></g>
+            <g class="node" style="color:var(--rayo)"><use href="#gem" x="228" y="198" width="44" height="44"/><text x="250" y="262" class="elabel">Rayo</text></g>
+            <g class="node" style="color:var(--aire)"><use href="#gem" x="48" y="198" width="44" height="44"/><text x="70" y="262" class="elabel">Aire</text></g>
+          </svg>
+        </div>
+      </div>
+
+      <h3>Lógica de los matchups</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Triángulo inicial</th><th></th><th>Segundo triángulo</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><strong>Naturaleza › Agua</strong></td><td>las raíces beben el agua</td><td><strong>Mineral › Rayo</strong></td><td>la roca hace tierra a la descarga</td></tr>
+            <tr><td><strong>Agua › Fuego</strong></td><td>lo apaga</td><td><strong>Rayo › Aire</strong></td><td>la tormenta domina los cielos</td></tr>
+            <tr><td><strong>Fuego › Naturaleza</strong></td><td>la quema</td><td><strong>Aire › Mineral</strong></td><td>el viento erosiona la piedra</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note"><b>Identidad de "Mineral" = roca / piedra / cristal</b> (no metal refinado). La roca es aislante → hace tierra al rayo. El <b>Acero puro conductor</b> se reserva como elemento de secuela, y ese sí será débil al Rayo — contraste perfecto.</div>
+
+      <h3>Mapeo con el lore y reservas</h3>
+      <div class="kv">
+        <dt>En el juego</dt><dd>Naturaleza · Agua · Fuego · Mineral · Rayo · Aire</dd>
+        <dt>Secuelas</dt><dd>Hielo · Acero (metal, débil al Rayo) · <strong>Sangre</strong> (asimétrico — fuera del piedra-papel-tijera, elemento de antagonista/jefe)</dd>
+        <dt>Secundario</dt><dd>algunas criaturas ganan un 2.º elemento en su forma final: solo utilidad, no altera debilidades</dd>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chapter reveal" id="captura">
+      <div class="ch-head"><span class="ch-num">07</span><h2>Ambiente y captura</h2></div>
+      <p class="sub">El USP vive aquí: el ambiente es un arma, y la captura recompensa jugar bien — no repetir botones.</p>
+      <div class="cards cols-2">
+        <div class="card"><span class="pn">Sistema A</span><h4>Reacciones elementales</h4><p>El terreno tiene un elemento base. Al mancharlo con el elemento que lo supera, se genera un AoE (estilo Genshin). Una reacción por terreno → el "círculo continuo" que conecta a los 6.</p></div>
+        <div class="card"><span class="pn">Sistema B</span><h4>Física y clima</h4><p>Independiente de la tabla de tipos: polvo al golpear el suelo, esquirlas con la nieve, tornados con el viento. Puede nevar sin que exista un "tipo Hielo".</p></div>
+      </div>
+
+      <h3>Captura — nunca se mata</h3>
+      <p>El protagonista busca armonía: las criaturas se <strong>subyugan</strong>, no se matan. El enemigo tiene Vida + una <strong>barra de Aturdimiento visible</strong>, que los combos y las reacciones ambientales llenan mucho más rápido.</p>
+      <div class="flow">
+        <div class="step"><span class="si">01</span><b>Aturdir</b><small>combos + reacciones</small></div>
+        <div class="step"><span class="si">02</span><b>Noquear</b><small>finisher · fin del combate</small></div>
+        <div class="step"><span class="si">03</span><b>Ventana</b><small>lanzar Sludge</small></div>
+        <div class="step"><span class="si">04</span><b>Resistir</b><small>o huye y desaparece</small></div>
+      </div>
+      <div class="note crystal"><b>Los Tótems son físicos.</b> El jugador los lleva puestos como accesorios (brazaletes, collares, aretes — al estilo de las Mega Piedras), con la forma simplificada de la criatura que contienen.</div>
+    </section>
+
+    <!-- 08 -->
+    <section class="chapter reveal" id="criaturas">
+      <div class="ch-head"><span class="ch-num">08</span><h2>Criaturas y evolución</h2></div>
+      <p class="sub">Pocas, pero profundas. En el slice, 3–5 especies "héroe"; el resto, diseño en papel.</p>
+
+      <h3>El trío del slice</h3>
+      <p>Tres especies diseñadas a fondo. Cada una usa el <strong>mismo tablero elemental</strong> de una forma opuesta — ese contraste es el que demuestra que el framework aguanta criaturas radicalmente distintas.</p>
+      <div class="cards">
+        <div class="card">
+          <span class="pn" style="color:var(--fuego)">Fuego · Zonificador · gecko</span>
+          <h4>Pyrecko</h4>
+          <p>Cañón de cristal camuflado. Siembra el campo de <strong>combustible invisible</strong> —a tiros o dejando rastro en sigilo— y luego lo <strong>prende todo de golpe</strong>. Frágil a propósito: su defensa son las zonas ardiendo. <em>Acumular y detonar.</em></p>
+        </div>
+        <div class="card">
+          <span class="pn" style="color:var(--mineral)">Mineral · Luchador · nutria</span>
+          <h4>Ottorock</h4>
+          <p>Arranca un trozo del suelo y pelea con él (y detrás de él). Al agarrarlo <strong>sella una combinación elemental</strong> que repite en cada golpe, en cualquier superficie: elige su reacción eligiendo dónde agarra. <em>Comprometerse y repetir.</em></p>
+        </div>
+        <div class="card">
+          <span class="pn" style="color:var(--aire)">Aire · Controlador · mantarraya aérea</span>
+          <h4>Mantagale</h4>
+          <p>Vuela siempre, y <strong>sube cada vez que provoca una reacción</strong>: la recompensa de jugar bien es volverse inalcanzable. Siembra tornados y con su ciclón <strong>arrastra al enemigo por el mapa</strong> hasta hacerlo estallar contra el terreno. <em>Improvisar.</em></p>
+        </div>
+      </div>
+      <p><span class="arch">Triángulo estratégico</span> — y no sale de la tabla de tipos, sale de sus kits: <strong>Pyrecko › Mantagale › Ottorock › Pyrecko</strong>. Pyrecko no necesita acercarse; Mantagale mantiene a raya al lento; Ottorock aguanta la distancia y llega al melee.</p>
+
+      <div class="kv">
+        <dt>Roster final</dt><dd>10–20 especies · 2–4 formas cada una (incluida la base "bebé")</dd>
+        <dt>Rareza</dt><dd>sutil: las de stats más altos tienen fase inicial más difícil y más formas evolutivas (estilo pseudolegendario)</dd>
+      </div>
+      <h3>Evolución progresiva = sus "niveles"</h3>
+      <p>Cada especie tiene <strong>mini-misiones mid-gameplay</strong> para evolucionar. La evolución es <strong>progresiva</strong>: pequeños cambios visuales acumulativos que suben stats de forma regular. Entre forma y forma hay 2–3 niveles; al evolucionar, algunas habilidades mejoran o son reemplazadas.</p>
+    </section>
+
+    <!-- 09 -->
+    <section class="chapter reveal" id="tamer">
+      <div class="ch-head"><span class="ch-num">09</span><h2>El Tamer y el vínculo</h2></div>
+      <p class="sub">Explora, dirige y potencia a las criaturas — pero no combate directamente y es intocable en las peleas entre monstruos.</p>
+      <div class="cards cols-2">
+        <div class="card"><span class="pn">Progresión</span><h4>Capacidad de vínculo</h4><p>Subir el vínculo eleva el equipo activo (1 → 2 → 3). Empiezas solo con el inicial de regalo y debes conocer otras criaturas antes de sumar la segunda: onboarding natural. También mejora el aprovechamiento del entorno (estilo Leyendas Arceus).</p></div>
+        <div class="card"><span class="pn">Filosofía</span><h4>Conectar, no coleccionar</h4><p>Equipo máximo de 3. Para reclutar una nueva hay que liberar una (con forma de rebuscar a las últimas 3 liberadas). El vínculo potencia sus habilidades; tener demasiadas lo diluiría.</p></div>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section class="chapter reveal" id="mundo">
+      <div class="ch-head"><span class="ch-num">10</span><h2>Mundo y PvP</h2></div>
+      <div class="kv">
+        <dt>Estructura</dt><dd>semiabierto, por biomas ligados a elementos (cada uno con su elemento base y clima)</dd>
+        <dt>Ancient Spots</dt><dd>mazmorras / puntos de interés con jefes de contexto narrativo (slice: 1 mazmorra corta + jefe)</dd>
+        <dt>Economía</dt><dd>Polvo (Pulvis) + agua = Sludge, el recurso de captura</dd>
+      </div>
+      <div class="note"><b>PvP · fuera del slice.</b> Estilo Pokémon en espacios controlados (lobbies, torneos, matchmaking). Se diseñará a fondo por separado, pero no se construye netcode en el slice — es de los sistemas más caros y no es lo que vende el pitch.</div>
+    </section>
+
+    <!-- 11 -->
+    <section class="chapter reveal" id="tech">
+      <div class="ch-head"><span class="ch-num">11</span><h2>Arte y tecnología</h2></div>
+      <div class="kv">
+        <dt>Estilo</dt><dd>estilizado / cell-shaded, tono cálido HTTYD-Zelda</dd>
+        <dt>Motor</dt><dd>Unity + URP con toon shader (Shader Graph), post-procesado ligero</dd>
+        <dt>Cámara / Input</dt><dd>Cinemachine + lock-on · Input System (mando + teclado/ratón)</dd>
+      </div>
+      <h3>Arquitectura propuesta · data-driven</h3>
+      <p>Datos como ScriptableObjects (<span class="kicker">ElementData · CreatureSpeciesData · AbilityData · EvolutionQuestData</span>) para iterar diseño sin tocar código. Tabla de tipos como asset central; combate por máquina de estados con sistema de habilidades desacoplado, gestor de energía elemental y de aturdimiento; capa de "manchado" de terreno + tabla de reacciones.</p>
+    </section>
+
+    <!-- 12 -->
+    <section class="chapter reveal" id="roadmap">
+      <div class="ch-head"><span class="ch-num">12</span><h2>Roadmap del slice</h2></div>
+      <p class="sub">Reparto tentativo para el kickoff. Equipo de 3: Arzpal (prog + diseño), 1 programador, 1 diseñador.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Área</th><th>Entregable mínimo</th><th>Owner</th></tr></thead>
+          <tbody>
+            <tr><td class="arch">Combate core</td><td>Control, swap, lock-on, kit de 4 + salto/noqueo/bloqueo, energía</td><td>Programación</td></tr>
+            <tr><td class="arch">Elementos + reacciones</td><td>Tabla de 2 triángulos + 3–4 reacciones ambientales</td><td>Prog + Diseño</td></tr>
+            <tr><td class="arch">Captura</td><td>Aturdimiento → noqueo → ventana → Tótem</td><td>Programación</td></tr>
+            <tr><td class="arch">Criaturas</td><td>3–5 especies con kit + 1 cadena de evolución completa</td><td>Diseño + Prog</td></tr>
+            <tr><td class="arch">Bioma</td><td>1 bioma semiabierto con elemento base y clima</td><td>Diseño</td></tr>
+            <tr><td class="arch">Mazmorra / jefe</td><td>1 mazmorra corta + 1 jefe narrativo</td><td>Diseño + Prog</td></tr>
+            <tr><td class="arch">Arte</td><td>Look cell-shaded · 3–5 criaturas + entorno</td><td>Arte / Diseño</td></tr>
+            <tr><td class="arch">UX / Onboarding</td><td>Elección de starter, tutorial ligero, HUD (energía, aturdimiento)</td><td>Diseño</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 13 -->
+    <section class="chapter reveal" id="riesgos">
+      <div class="ch-head"><span class="ch-num">13</span><h2>Riesgos y decisiones abiertas</h2></div>
+      <ul class="checklist" style="max-width:66ch">
+        <li>Legibilidad de las reacciones ambientales en pleno combate 3D — playtest temprano con feedback visual claro.</li>
+        <li>Balance de los 6 elementos con triángulos separados: validar si el neutral entre triángulos se siente plano; añadir cruces si hace falta.</li>
+        <li>Coste de las mini-misiones de evolución — mantener 1 cadena completa en el slice; el resto en papel.</li>
+        <li>Nombres finales de elementos y del juego (Tatemis3D es placeholder).</li>
+        <li>Vulnerabilidad futura del Tamer y complicidad Tamer–criatura: concepto marcado, sin diseñar.</li>
+      </ul>
+    </section>
+
+    <!-- 14 -->
+    <section class="chapter reveal" id="glosario">
+      <div class="ch-head"><span class="ch-num">14</span><h2>Glosario</h2></div>
+      <div class="kv">
+        <dt>Pulvis</dt><dd>materia elemental pura de los Tomos destruidos; recurso de captura</dd>
+        <dt>Sludge</dt><dd>mezcla de Polvo + agua; se lanza para capturar</dd>
+        <dt>Tótem</dt><dd>cristalización del sludge con forma de la criatura; su vasija; se lleva como accesorio</dd>
+        <dt>Tamer</dt><dd>el jugador; recolecta Polvo y se vincula con criaturas</dd>
+        <dt>Ancient Spots</dt><dd>ruinas de la civilización antigua; mazmorras</dd>
+        <dt>Aturdimiento</dt><dd>barra que, al llenarse, permite noquear y capturar</dd>
+        <dt>Tomos</dt><dd>los Ocho Grandes libros elementales originales (lore oculto)</dd>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>Tatemis3D · GDD v0.1 (draft) · Hecho por Arzpal · documento vivo — se actualiza conforme se pulen decisiones</footer>
+
+<!-- SVG defs: crystal gem + triangle arrows -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="gem" viewBox="0 0 44 44">
+      <polygon points="22,2 40,13 40,31 22,42 4,31 4,13" fill="currentColor" fill-opacity="0.20" stroke="currentColor" stroke-width="1.6"/>
+      <polygon points="22,2 31,10 22,15 13,10" fill="currentColor" fill-opacity="0.28"/>
+      <path d="M4,13 22,15 40,13 M22,15 22,42 M13,10 4,31 M31,10 40,31" stroke="currentColor" stroke-width="0.8" stroke-opacity="0.5" fill="none"/>
+    </symbol>
+    <g id="tri-arrows">
+      <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="rgba(236,230,216,.55)"/>
+      </marker>
+      <path d="M182,96 Q244,120 236,190" class="arw" fill="none" stroke="rgba(236,230,216,.32)" stroke-width="1.6" marker-end="url(#ah)"/>
+      <path d="M224,232 Q160,256 96,232" class="arw" fill="none" stroke="rgba(236,230,216,.32)" stroke-width="1.6" marker-end="url(#ah)"/>
+      <path d="M82,190 Q70,120 138,96" class="arw" fill="none" stroke="rgba(236,230,216,.32)" stroke-width="1.6" marker-end="url(#ah)"/>
+    </g>
+  </defs>
+</svg>
+
+<style>
+  .node .glyph{font-family:var(--serif);font-size:20px;font-weight:600;fill:var(--ink);text-anchor:middle;paint-order:stroke;opacity:.92}
+  .node .elabel{font-family:var(--mono);font-size:12px;letter-spacing:.06em;fill:currentColor;text-anchor:middle;text-transform:uppercase}
+  .arw{fill:none;stroke:rgba(236,230,216,.30);stroke-width:1.6;marker-end:url(#ah)}
+</style>
+
+<script>
+(function(){
+  var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // scroll progress
+  var prog = document.getElementById('prog');
+  function onScroll(){
+    var h = document.documentElement;
+    var max = h.scrollHeight - h.clientHeight;
+    prog.style.width = (max>0 ? (h.scrollTop/max*100) : 0) + '%';
+  }
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+  // reveal on scroll
+  var revs = document.querySelectorAll('.reveal');
+  if(rm){ revs.forEach(function(r){r.classList.add('in');}); }
+  else if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, {threshold:.12, rootMargin:'0px 0px -8% 0px'});
+    revs.forEach(function(r){ io.observe(r); });
+  } else { revs.forEach(function(r){r.classList.add('in');}); }
+
+  // scroll-spy TOC
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+  var map = {}; links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  if('IntersectionObserver' in window){
+    var spy = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){
+          links.forEach(function(l){l.classList.remove('active');});
+          var a = map[e.target.id]; if(a){ a.classList.add('active'); }
+        }
+      });
+    }, {rootMargin:'-30% 0px -60% 0px', threshold:0});
+    document.querySelectorAll('.chapter').forEach(function(s){ spy.observe(s); });
+  }
+
+  // dust particles in hero
+  var cv = document.getElementById('dust');
+  if(cv && !rm){
+    var ctx = cv.getContext('2d'), W, H, DPR = Math.min(window.devicePixelRatio||1, 2), ps = [];
+    function size(){
+      var r = cv.parentElement.getBoundingClientRect();
+      W = r.width; H = r.height;
+      cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0);
+    }
+    function init(){
+      ps = [];
+      var n = Math.min(70, Math.floor(W/16));
+      for(var i=0;i<n;i++){
+        ps.push({x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.6+0.4,
+          vx:(Math.random()-0.5)*0.18, vy:-(Math.random()*0.28+0.06),
+          a:Math.random()*0.5+0.15, t:Math.random()*6.28});
+      }
+    }
+    function frame(){
+      ctx.clearRect(0,0,W,H);
+      for(var i=0;i<ps.length;i++){
+        var p=ps[i]; p.x+=p.vx; p.y+=p.vy; p.t+=0.01;
+        if(p.y< -6){ p.y=H+6; p.x=Math.random()*W; }
+        if(p.x< -6) p.x=W+6; if(p.x>W+6) p.x=-6;
+        var tw = p.a * (0.65 + 0.35*Math.sin(p.t));
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.2832);
+        ctx.fillStyle = 'rgba(217,164,65,'+tw.toFixed(3)+')';
+        ctx.shadowColor='rgba(235,192,105,'+ (tw*0.6).toFixed(3) +')'; ctx.shadowBlur=6;
+        ctx.fill();
+      }
+      requestAnimationFrame(frame);
+    }
+    size(); init(); requestAnimationFrame(frame);
+    var to; window.addEventListener('resize', function(){ clearTimeout(to); to=setTimeout(function(){ size(); init(); },200); });
+  }
+})();
+</script>
