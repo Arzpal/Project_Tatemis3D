@@ -21,7 +21,8 @@ namespace Tatemis
         public ElementalEnergy casterEnergy;
         public ICombatant lockTarget;    // objetivo del lock-on al lanzar
         public Vector3 aimPoint;
-        public Element element;
+        [Tooltip("null = golpe NEUTRO (x1, sin reacción). Los básicos van así por regla de diseño.")]
+        public Element? element;
 
         public bool buttonHeld;          // para OnButtonReleased
         public bool pressedAgain;        // para OnSecondPress

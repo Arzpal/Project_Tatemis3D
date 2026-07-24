@@ -223,7 +223,7 @@
       <div class="ch-head"><span class="ch-num">01</span><h2>Visión y pilares</h2></div>
       <p class="sub">El corazón del juego no son ataques que se repiten, sino <strong>combinar</strong> las habilidades únicas de cada criatura con su elemento y el ambiente. Tono cálido y accesible al estilo <em>Cómo entrenar a tu dragón</em>, con lore oscuro reservado para quien explore.</p>
       <div class="cards cols-3">
-        <div class="card"><span class="pn">Pilar I</span><h4>Combate expresivo</h4><p>Combinar habilidades + elemento + ambiente: golpear el suelo para levantar polvo, controlar la nieve, generar tornados, manchar el terreno para provocar reacciones.</p></div>
+        <div class="card"><span class="pn">Pilar I</span><h4>Combate expresivo</h4><p>Combinar habilidades + elemento + ambiente: golpear el suelo para levantar polvo, controlar la nieve, generar tornados, elegir <em>dónde</em> impactar para que tu elemento reaccione con el terreno.</p></div>
         <div class="card"><span class="pn">Pilar II</span><h4>Vínculo, no colección</h4><p>Equipo máximo de 3. Elegir a tus compañeros es una decisión con peso narrativo y estratégico. <em>Conectar, no coleccionar.</em></p></div>
         <div class="card"><span class="pn">Pilar III</span><h4>El mundo narra</h4><p>Historia ligera en la superficie; el lore profundo (los Tomos) queda en pistas sutiles, para revelarse en secuelas.</p></div>
       </div>
@@ -239,9 +239,9 @@
           <div class="panel-h"><span class="dotm"></span>En el slice</div>
           <ul class="checklist">
             <li>1 bioma semiabierto con su elemento base y clima.</li>
-            <li>Combate en tiempo real completo (swap, lock-on, kit, energía, bloqueo, noqueo).</li>
+            <li>Combate en tiempo real completo (swap, lock-on, kit, energía, bloqueo, captura).</li>
             <li>6 tipos elementales + reacciones ambientales (3–4 demostrables).</li>
-            <li>Captura completa: aturdimiento → noqueo → Tótem.</li>
+            <li>Captura completa: aturdimiento → debilitado → Tótem.</li>
             <li>Equipo de 3 · liberar para reclutar.</li>
             <li>3–5 especies "héroe" (una por arquetipo) + 1 cadena de evolución completa.</li>
             <li>1 mazmorra corta con jefe narrativo · starter de regalo.</li>
@@ -297,15 +297,16 @@
       <p class="sub">Una criatura activa a la vez, controlada por completo en tercera persona con lock-on. Híbrido de stats + habilidad. El Tamer no es objetivo: narrativamente es intocable.</p>
 
       <h3>Kit por criatura</h3>
-      <p>Cuatro habilidades que consumen <strong>energía elemental</strong> (modelo tinta de Splatoon, regenera por segundo):</p>
+      <p><strong>Tres habilidades</strong> que consumen <strong>energía elemental</strong> (modelo tinta de Splatoon, regenera por segundo):</p>
       <div class="kv">
-        <dt>Movilidad</dt><dd>desplazamiento o sigilo</dd>
-        <dt>Efecto</dt><dd>CC, buff, AoE o debuff al enemigo</dd>
-        <dt>Ataque</dt><dd>daño directo</dd>
-        <dt>Signature</dt><dd>única de la especie</dd>
+        <dt>Movilidad</dt><dd>desplazamiento o sigilo · hace las veces de esquiva</dd>
+        <dt>Flex</dt><dd>daño directo <em>o</em> efecto (CC, buff, AoE, debuff), según la especie</dd>
+        <dt>Signature</dt><dd>única de la especie · puede ser algo completamente nuevo</dd>
       </div>
-      <p>Más tres acciones universales: <strong>salto</strong>, <strong>noqueo</strong> (rematar para capturar) y <strong>bloqueo</strong>.</p>
-      <div class="note"><b>Bloqueo = convertirse en elemento puro.</b> Defiende y recarga energía más rápido, pero <b>no puede atacar</b> mientras bloquea, y recibe <b>2× de daño de su elemento débil</b>. Stance comprometido: la decisión pesa.</div>
+      <p>Más las acciones universales: <strong>ataque básico</strong> (cadena gratuita, la columna vertebral del combate), <strong>salto</strong>, <strong>bloqueo</strong>, <strong>apuntado</strong> y una acción <strong>contextual</strong> para interactuar con el mundo.</p>
+      <div class="note"><b>El básico no lleva elemento.</b> Es la acción que más repites, así que imbuirla haría <em>imposible</em> —no difícil— pelear contra quien te supera. El elemento es una palanca del kit, no un impuesto sobre cada golpe. La excepción: el <b>último eslabón de la cadena</b> puede estallar en el elemento de la especie, como recompensa por sostenerla entera.</div>
+      <div class="note"><b>Bloqueo = convertirse en elemento puro.</b> Defiende y recarga energía más rápido, pero <b>no puede atacar</b> mientras bloquea, y recibe <b>2× de daño de su elemento débil</b> (el único sitio donde existe el ×2). Puede reposicionarse a paso corto: comprometerse no es quedarse clavado.</div>
+      <div class="note"><b>Rematar es seguir atacando.</b> No hay botón de noqueo: al caer, el enemigo queda <b>debilitado con unos segundos invulnerables</b> para que decidas — seguir pegando lo mata, el menú del Tamer lo captura. Ese margen es lo que convierte matar en una elección y no en la inercia de tu combo.</div>
 
       <h3>Arquetipos</h3>
       <p>Los stats principales (Daño · Vida · Velocidad) definen el arquetipo, modulado por la naturaleza de cada criatura.</p>
@@ -326,7 +327,7 @@
     <!-- 06 -->
     <section class="chapter reveal" id="elementos">
       <div class="ch-head"><span class="ch-num">06</span><h2>Sistema elemental</h2></div>
-      <p class="sub">Seis elementos en <strong>dos triángulos</strong> de piedra-papel-tijera. Cada elemento tiene una sola debilidad (×2) y una sola resistencia (×0.5) → legibilidad total. Cruzar de un triángulo al otro es neutral.</p>
+      <p class="sub">Seis elementos en <strong>dos triángulos</strong> de piedra-papel-tijera. Cada elemento tiene una sola debilidad (<strong>×1.5</strong>) y una sola resistencia (×0.5) → legibilidad total. Cruzar de un triángulo al otro es neutral. <em>El ×2 solo existe contra quien está en su forma elemental pura (bloqueando): es el riesgo del stance.</em></p>
 
       <div class="triads">
         <div class="triad">
@@ -376,18 +377,19 @@
       <div class="ch-head"><span class="ch-num">07</span><h2>Ambiente y captura</h2></div>
       <p class="sub">El USP vive aquí: el ambiente es un arma, y la captura recompensa jugar bien — no repetir botones.</p>
       <div class="cards cols-2">
-        <div class="card"><span class="pn">Sistema A</span><h4>Reacciones elementales</h4><p>El terreno tiene un elemento base. Al mancharlo con el elemento que lo supera, se genera un AoE (estilo Genshin). Una reacción por terreno → el "círculo continuo" que conecta a los 6.</p></div>
+        <div class="card"><span class="pn">Sistema A</span><h4>Reacciones elementales</h4><p><b>El terreno tiene su elemento y no cambia nunca</b>: es el tablero, no un lienzo que se mancha. Las habilidades <b>irradian su elemento al impactar</b>, y la reacción es un <b>efecto temporal</b> sobre ese terreno fijo. Siempre se resuelve contra el suelo — nunca contra otro efecto activo —, así la matriz se queda en 6×6 en vez de explotar.</p></div>
         <div class="card"><span class="pn">Sistema B</span><h4>Física y clima</h4><p>Independiente de la tabla de tipos: polvo al golpear el suelo, esquirlas con la nieve, tornados con el viento. Puede nevar sin que exista un "tipo Hielo".</p></div>
       </div>
 
-      <h3>Captura — nunca se mata</h3>
-      <p>El protagonista busca armonía: las criaturas se <strong>subyugan</strong>, no se matan. El enemigo tiene Vida + una <strong>barra de Aturdimiento visible</strong>, que los combos y las reacciones ambientales llenan mucho más rápido.</p>
+      <h3>Captura — matar es una elección, no una regla</h3>
+      <p>El protagonista busca armonía: el sistema te <strong>permite</strong> matar, pero el tema te pide no hacerlo. Un tema que puedes traicionar pesa más que uno impuesto. El enemigo tiene Vida + una <strong>barra de Aturdimiento visible</strong> (tipo postura), que los combos y las reacciones ambientales llenan mucho más rápido.</p>
       <div class="flow">
         <div class="step"><span class="si">01</span><b>Aturdir</b><small>combos + reacciones</small></div>
-        <div class="step"><span class="si">02</span><b>Noquear</b><small>finisher · fin del combate</small></div>
-        <div class="step"><span class="si">03</span><b>Ventana</b><small>lanzar Sludge</small></div>
-        <div class="step"><span class="si">04</span><b>Resistir</b><small>o huye y desaparece</small></div>
+        <div class="step"><span class="si">02</span><b>Debilitar</b><small>cae · unos segundos invulnerable</small></div>
+        <div class="step"><span class="si">03</span><b>Decidir</b><small>rematar o capturar</small></div>
+        <div class="step"><span class="si">04</span><b>Sludge</b><small>resiste, o huye y desaparece</small></div>
       </div>
+      <div class="note"><b>El margen invulnerable es la mecánica, no un detalle.</b> Sin él, el siguiente golpe de tu combo remataría por inercia justo al que querías capturar — y capturar dejaría de ser una decisión para depender de tus reflejos.</div>
       <div class="note crystal"><b>Los Tótems son físicos.</b> El jugador los lleva puestos como accesorios (brazaletes, collares, aretes — al estilo de las Mega Piedras), con la forma simplificada de la criatura que contienen.</div>
     </section>
 
@@ -466,9 +468,9 @@
         <table>
           <thead><tr><th>Área</th><th>Entregable mínimo</th><th>Owner</th></tr></thead>
           <tbody>
-            <tr><td class="arch">Combate core</td><td>Control, swap, lock-on, kit de 4 + salto/noqueo/bloqueo, energía</td><td>Programación</td></tr>
+            <tr><td class="arch">Combate core</td><td>Control, swap, lock-on, kit de 3 + básico/salto/bloqueo/apuntado, energía</td><td>Programación</td></tr>
             <tr><td class="arch">Elementos + reacciones</td><td>Tabla de 2 triángulos + 3–4 reacciones ambientales</td><td>Prog + Diseño</td></tr>
-            <tr><td class="arch">Captura</td><td>Aturdimiento → noqueo → ventana → Tótem</td><td>Programación</td></tr>
+            <tr><td class="arch">Captura</td><td>Aturdimiento → debilitado + gracia → decisión → Tótem</td><td>Programación</td></tr>
             <tr><td class="arch">Criaturas</td><td>3–5 especies con kit + 1 cadena de evolución completa</td><td>Diseño + Prog</td></tr>
             <tr><td class="arch">Bioma</td><td>1 bioma semiabierto con elemento base y clima</td><td>Diseño</td></tr>
             <tr><td class="arch">Mazmorra / jefe</td><td>1 mazmorra corta + 1 jefe narrativo</td><td>Diseño + Prog</td></tr>

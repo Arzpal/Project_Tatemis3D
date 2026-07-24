@@ -13,11 +13,17 @@
 | [ABILITY-SYSTEM.md](ABILITY-SYSTEM.md) | Catálogo de efectos/targeting/stances a triagear + estrategia (bespoke primero, extraer después) | diseñar o implementar habilidades concretas |
 | [ABILITY-EXTRACTION.md](ABILITY-EXTRACTION.md) | Análisis modular vs bespoke de los 2 kits reales + 9 huecos del catálogo + orden en 3 olas | implementar los kits de Pyrecko/Ottorock o refactorizar el sistema de habilidades |
 | [ELEMENTAL-REACTIONS.md](ELEMENTAL-REACTIONS.md) | **Fuente de verdad del sistema elemental** (✅ cerrado 2026-07-18): terreno fijo, 3 salidas, reglas R1–R6, la tabla de 15 parejas, marcas de especie, legibilidad | implementar reacciones / terreno / clima |
+| [CAMERA-TARGETING.md](CAMERA-TARGETING.md) | Cámara y lock-on: **spec a replicar de BotW/TOTK** + qué medir/investigar + estado del código (**⚠️ pendiente, nada implementado**) | tocar cámara, apuntado, lock-on u orientación del personaje |
 | [VITALITY-DEATH.md](VITALITY-DEATH.md) | Vitalidad, muerte real, noqueo/rescate del caído, derrota total y persecución del Tamer (**🟡 en discusión**) | diseñar/implementar muerte, KO, derrota, swap de emergencia o manadas |
-| [CREATURES.md](CREATURES.md) | Índice de especies + plantilla de los 18 campos + razonamiento del trío | diseñar una criatura nueva / ver qué especie hace qué |
+| [TAMER.md](TAMER.md) | **La línea monstruo ↔ Tamer** + el **menú del Tamer** (capturar, objetos, órdenes, swap) + qué queda del botón contextual + el finisher sin botón (**🟡 sin ratificar**) | tocar el esquema de control, la captura, los objetos, las órdenes o el swap |
+| [TATEMIS-BASE.md](TATEMIS-BASE.md) · **[tatemis-base.html](tatemis-base.html)** | **Anatomía de un tatemis jugable** (referencia: Ottorock-Libre): cómo encajan movimiento, cámara, habilidades, elemento, feedback visual/físico, combos aéreos y noqueo, con los números del gate. El `.html` es la versión visual con diagramas | entender el conjunto de "cómo se siente y funciona un tatemis" · onboarding de feel |
+| **[crear-tatemis.html](crear-tatemis.html)** | **Pipeline de construcción de una especie, de inicio a fin** (9 pasos: hueco que llena → ficha → hexágono → locomoción → kit → componer habilidades → generar assets → afinar → cerrar), con las relaciones entre números que no se pueden romper y la tabla síntoma→palanca. **Solo HTML**: es un documento de proceso visual, sin `.md` fuente | arrancar una especie nueva · onboarding de un colaborador · saber qué palanca tocar en playtest |
+| [CREATURES.md](CREATURES.md) | Índice de especies + plantilla de los 18 campos + razonamiento del trío + **mapeo hexágono→HP** | diseñar una criatura nueva / ver qué especie hace qué |
 | CREATURE-PYRECKO · CREATURE-OTTOROCK · CREATURE-MANTAGALE (.md) | Ficha completa de cada especie (18 campos + reglas propias + abiertas) | implementar o ajustar el kit de ESA especie |
 | [GDD.md](GDD.md) | Visión completa de diseño — ir **por sección**: §3 alcance slice · §6 combate · §7 elementos · §8 ambiente+captura · §9 criaturas · §10 Tamer · §11 mundo · §13 arte/audio | dudas de diseño, visión, lore o alcance |
-| gdd.html | Pitch visual autocontenido para humanos — **NO leerlo**, duplica al GDD | nunca (solo para presentar) |
+| gdd.html | Pitch visual autocontenido para humanos — **NO leerlo**, duplica al GDD (⚠️ desfasado, regenerar antes de presentar) | nunca (solo para presentar) |
+
+> **Los `.html` son para humanos, no para contexto:** duplican contenido que ya está en los `.md`, así que **no se leen** para trabajar — se abren en el navegador para presentar o para entender algo de un vistazo. La excepción es `crear-tatemis.html`, que no tiene `.md` detrás.
 
 > **Reparto ADD ↔ ARCHITECTURE** (para no duplicar, regla 1): **add** = cómo encaja y **por qué**, con diagramas · **ARCHITECTURE** = qué clase hace qué, con código. Un diagrama nuevo va **siempre** a `add.html`, no al chat.
 
@@ -27,7 +33,6 @@ Un sistema = un archivo en `docs/`. Al crear uno: añadir su línea a la tabla d
 
 - `CAPTURE.md` — captura, Sludge y Tótems a detalle (si supera lo que cubre ARCHITECTURE §4)
 - `WORLD.md` — biomas, clima, estructura del mundo, mazmorras
-- `TAMER.md` — el Tamer, filosofía de equipo, vínculo criatura–Tamer
 - `UI-UX.md` — HUD, menús, onboarding, accesibilidad
 - `ART.md` — dirección de arte, pipeline de assets, integración del concept art
 - `AUDIO.md` — dirección de audio, música, SFX

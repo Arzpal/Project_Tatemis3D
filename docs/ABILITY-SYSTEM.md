@@ -59,17 +59,23 @@ AbilityData (asset)
 - [ ] **RootSelf** — anclarse (para canalizadas) 🟡
 
 ### 3.2 Control del enemigo (movimiento)
-- [ ] **Knockback** — empujar 🟢
+- [x] **Knockback** — empujar 🟢 *(un empujón por golpe recibido)*. Tres palancas más, añadidas el 2026-07-22: **`useMotionDirection`** (arrastra en la dirección **3D** del dash, no en el frente horizontal → embestir en diagonal se lleva al enemigo hacia arriba contigo, ref. *side B* de Meta Knight), **`lift`** (elevación extra) y **`hang`** (ver abajo).
+- [x] **LaunchAirborne** — elevar al enemigo (juggles) 🟢 *(`Knockback.lift` + `hang`)*
+
+> 🔒 **Suspensión en el aire (juggle), 2026-07-22.** Golpear y ser golpeado **suspenden la caída** un instante, en los dos bandos: sin eso, un combo aéreo se cae solo a media cadena y no existe. Lo lleva `HitReactor.ApplyHang` (enemigos) y `CreatureController.GrantHang` (jugador). **El guardarraíl es un presupuesto acumulable (`maxHang` ≈ 1.2 s) que solo se recarga al tocar suelo** — si no, cualquiera se sostendría indefinidamente a base de pegar, y el juggle infinito es el fallo clásico del género.
+>
+> ⚠️ Efecto secundario a vigilar: elevar enemigos exige que la **cámara y el lock-on** aguanten objetivos en alto. Ya está previsto (era requisito de Mantagale, [§8.2](ABILITY-EXTRACTION.md)), pero ahora deja de ser hipotético y hay que probarlo.
+- [ ] **Empuje continuo** (tornados de Mantagale, arrastre del Ciclón) 🟡 — sigue pendiente, ver [H12](ABILITY-EXTRACTION.md). *No confundir con el multi-hit: arrollar se resuelve repartiendo golpes (§4.1), pero un tornado empuja sin golpear a cadencia.*
 - [ ] **Pull** — atraer 🟡
-- [ ] **LaunchAirborne** — elevar al enemigo (juggles) 🟡
 - [ ] **Interrupt** — romper su acción actual 🟢
 - [ ] **Reposition/Grab** — agarrar y colocar ⚪
 
 ### 3.3 Daño / impacto
-- [ ] **DealDamage** — daño con multiplicador de tipo 🟢
-- [ ] **AddStagger** — llenar aturdimiento (clave para captura) 🟢
-- [ ] **AreaDamage** — AoE por radio 🟢
-- [ ] **DamageOverTime** — daño por tick 🟡
+- [x] **DealDamage** — daño con multiplicador de tipo 🟢
+- [x] **MultiHit** — N golpes durante la duración 🟢 *(2026-07-22: `SweepHitbox.hitInterval`, ver §4.1)*
+- [x] **AreaDamage** — AoE por radio 🟢 *(`ElementalBurst`: estalla en el elemento de la especie)*
+- [ ] **AddStagger** — llenar aturdimiento (clave para captura) 🟢 *(hoy va dentro de los efectos de daño)*
+- [ ] **DamageOverTime** — daño por tick 🟡 *(cadencia por reloj, como el multi-hit — nunca por frame)*
 - [ ] **MultiHit** — N golpes durante la duración 🟡
 - [ ] **ConeSweep** — daño en cono/barrido 🟡
 - [ ] **Execute** — bonus vs vida baja / aturdido (apoya el noqueo) 🟡
@@ -85,6 +91,19 @@ El **daño —y cualquier payload: estado, knockback…— es agnóstico de la e
 - [ ] **Hitscan** — línea instantánea (tipo francotirador) 🟡
 - [ ] **AreaAtPoint** — AoE en el objetivo/punto 🟢
 - [ ] **Aura/Self** — aplica alrededor del lanzador 🟡
+
+### 4.1 · Ataques que duran: multi-hit 🔒
+
+> **Un ataque que se prolonga no hace "daño mientras te toca": reparte GOLPES.** Ref. el Drill Rush de Meta Knight (Smash Ultimate). La embestida *tiene* ~4 golpes repartidos por su recorrido; lo que cambia es **cuántos te alcanzan** — rozarla al esquivar cuesta uno, comerla entera cuesta todos.
+>
+> Por qué este modelo y no "daño por tiempo de contacto" *(decidido el 2026-07-22)*:
+> - **Converge con los anim-events** (T1.6, regla 3 del [ADD](add.md)): un golpe en un momento concreto del ataque es exactamente lo que dispara una animación. El reloj de hoy lo sustituye un anim-event mañana **sin tocar nada más**. "Daño por tiempo tocando" no se convierte en un anim-event nunca.
+> - **Es autoral y determinista:** el diseñador coloca los golpes y el balance se lee solo (4 × 8 = 32 si te alcanzan todos).
+> - **Los payloads no se enteran:** cada golpe es un `HitInfo` normal, así que `DealDamage`, `Knockback` y compañía sirven tal cual. Sin efectos especiales de "daño sostenido" — se probaron y sobraban.
+>
+> 🔒 **Regla de oro del muestreo:** *la detección se muestrea; las consecuencias se cronometran.* El framerate decide cuántas veces se **mira**, nunca cuántas veces **pasa** algo. En la práctica: ① la **cadencia** de los golpes va por reloj de la habilidad (como los frames de animación de un juego de lucha), nunca uno por frame; ② cada golpe **barre el tramo recorrido desde el golpe anterior** (`SphereCast`), no muestrea un punto suelto — si no, a poco framerate un enemigo se cuela **entre dos muestras** y no lo golpea nadie.
+>
+> ❌ **Descartado (2026-07-22):** el **último golpe distinto** del modelo de Smash (*finishing hit* con knockback grande). Se valoró y **no hace falta**: con golpes iguales el empuje ya se siente bien, y el remate lo pone el **estallido elemental** al frenar. Si alguna habilidad futura lo pide, se resuelve con una fase extra, no con un caso especial en el multi-hit.
 
 > Regla: los efectos de §3.3–3.6 son el **payload** (qué le pasa a quien lo reciba); la **entrega** decide **a quién y cómo**. Un proyectil teledirigido que solo ralentiza = `Projectile(homing)` + `Slow`, sin `DealDamage`. Un espadazo que empuja = `MeleeHitbox` + `DealDamage` + `Knockback`.
 

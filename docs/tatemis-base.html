@@ -1,0 +1,423 @@
+<title>Tatemis3D — Anatomía de un tatemis</title>
+<style>
+  :root{
+    --ground:#13131b; --ground-2:#191a24; --ground-3:#22232f;
+    --ink:#ECE6D8; --ink-2:#B4AD9C; --ink-3:#7d7869;
+    --line:rgba(236,230,216,.10); --line-2:rgba(236,230,216,.16);
+    --gold:#D9A441; --gold-lt:#EBC069;
+    --fuego:#DA6A3E; --mineral:#A98FC4; --aire:#9FC7D6; --ok:#7FB574; --warn:#EAC94B; --no:#7f8196;
+    --serif:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+    --sans:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+    --mono:"Consolas","SF Mono","JetBrains Mono",Menlo,monospace;
+    --maxw:900px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:1.0625rem;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 1.5rem}
+  header{padding:4.5rem 0 2.5rem;border-bottom:1px solid var(--line)}
+  h1{font-family:var(--serif);font-size:clamp(2.2rem,5vw,3.4rem);font-weight:600;margin:0 0 .6rem;line-height:1.05}
+  .sub{color:var(--ink-2);max-width:62ch;margin:.4rem 0}
+  .tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);border:1px solid var(--line-2);border-radius:100px;padding:.3rem .75rem;display:inline-block;margin:.25rem .3rem .25rem 0}
+  section{padding:3rem 0;border-bottom:1px solid var(--line)}
+  .ch-head{display:flex;align-items:baseline;gap:1rem;margin-bottom:.6rem}
+  .ch-num{font-family:var(--mono);font-size:.75rem;letter-spacing:.16em;color:var(--gold)}
+  h2{font-family:var(--serif);font-size:clamp(1.5rem,3.2vw,2.1rem);font-weight:600;margin:0}
+  h3{font-family:var(--serif);font-size:1.18rem;font-weight:600;margin:2rem 0 .5rem;color:var(--ink)}
+  p{max-width:68ch}
+  .fig{background:var(--ground-2);border:1px solid var(--line);border-radius:12px;padding:1.4rem;margin:1.5rem 0;overflow-x:auto}
+  .fig figcaption{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:1rem}
+  table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.93rem}
+  th{text-align:left;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line-2);padding:.5rem .6rem}
+  td{padding:.5rem .6rem;border-bottom:1px solid var(--line);color:var(--ink-2);vertical-align:top}
+  td strong{color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--ground-3);padding:.12em .4em;border-radius:4px;color:var(--gold-lt)}
+  .note{border-left:2px solid var(--gold);padding:.2rem 0 .2rem 1rem;margin:1.4rem 0;color:var(--ink-2)}
+  .note strong{color:var(--ink)}
+  .rule{border-left:2px solid var(--ok);padding:.2rem 0 .2rem 1rem;margin:1.4rem 0;color:var(--ink-2)}
+  .rule strong{color:var(--ink)}
+  footer{padding:3rem 0 5rem;color:var(--ink-3);font-size:.9rem}
+  a{color:var(--gold-lt)}
+  svg{display:block;max-width:100%;height:auto;margin:0 auto}
+  .st{font-family:var(--sans);font-size:12px;fill:var(--ink)}
+  .ss{font-family:var(--sans);font-size:10.5px;fill:var(--ink-2)}
+  .sm{font-family:var(--mono);font-size:9.5px;fill:var(--ink-3);letter-spacing:.1em}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin:1.4rem 0}
+  .card{background:var(--ground-2);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem}
+  .card h4{margin:0 0 .35rem;font-family:var(--serif);font-size:1.02rem;font-weight:600}
+  .card p{margin:0;font-size:.9rem;color:var(--ink-2);max-width:none}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Anatomía de un tatemis</h1>
+  <p class="sub">Cómo se <strong>siente y funciona</strong> una criatura jugable de Tatemis3D, consolidado a partir de la primera especie real: <strong>Ottorock, modo Libre</strong>. Todo lo de aquí está implementado y jugado.</p>
+  <div>
+    <span class="tag">Referencia · Ottorock-Libre</span>
+    <span class="tag">Fase 1 · core feel</span>
+    <span class="tag">2026-07-22</span>
+  </div>
+  <p class="sub" style="margin-top:1.4rem;font-size:.95rem">Texto completo → <code>TATEMIS-BASE.md</code> · Arquitectura → <code>add.md</code> / <code>ARCHITECTURE.md</code></p>
+</header>
+
+<section>
+  <div class="ch-head"><span class="ch-num">01</span><h2>Movimiento</h2></div>
+  <p>La velocidad la manda el stick, no la inercia. Son <strong>dos capas independientes</strong> que no hay que mezclar: cuánto corres (lineal con la deflexión) y cómo se ve (umbrales visuales que no tocan la velocidad).</p>
+
+  <figure class="fig">
+    <figcaption>Deflexión del stick → velocidad · los andares solo cambian la animación</figcaption>
+    <svg viewBox="0 0 760 300" role="img" aria-label="Curva lineal de velocidad con tres umbrales de andar.">
+      <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+      <line x1="70" y1="240" x2="700" y2="240" stroke="#7d7869" stroke-width="1.5" marker-end="url(#a1)"/>
+      <line x1="70" y1="240" x2="70" y2="40" stroke="#7d7869" stroke-width="1.5" marker-end="url(#a1)"/>
+      <text class="sm" x="612" y="262">DEFLEXIÓN DEL STICK</text>
+      <text class="sm" x="18" y="46">VELOCIDAD</text>
+
+      <rect x="70" y="40" width="88" height="200" fill="#7FB574" opacity=".07"/>
+      <text class="sm" x="76" y="58" fill="#7FB574">BLOQUEO</text>
+      <text class="sm" x="76" y="72" fill="#7FB574">TOPE 0.25</text>
+
+      <line x1="133" y1="40" x2="133" y2="240" stroke="rgba(236,230,216,.16)" stroke-dasharray="3 3"/>
+      <line x1="385" y1="40" x2="385" y2="240" stroke="rgba(236,230,216,.16)" stroke-dasharray="3 3"/>
+      <line x1="542" y1="40" x2="542" y2="240" stroke="rgba(236,230,216,.16)" stroke-dasharray="3 3"/>
+
+      <line x1="70" y1="240" x2="700" y2="60" stroke="#D9A441" stroke-width="2.5"/>
+
+      <circle cx="133" cy="222" r="4" fill="#D9A441"/>
+      <circle cx="385" cy="150" r="4" fill="#D9A441"/>
+      <circle cx="542" cy="105" r="4" fill="#D9A441"/>
+
+      <text class="ss" x="88" y="262">0.1</text>
+      <text class="ss" x="342" y="262">0.5</text>
+      <text class="ss" x="500" y="262">0.75</text>
+      <text class="ss" x="672" y="262">1.0</text>
+
+      <text class="st" x="140" y="212" font-weight="600">Paso corto</text>
+      <text class="st" x="392" y="140" font-weight="600">Caminar</text>
+      <text class="st" x="440" y="88" font-weight="600" fill="#EBC069">Deslizamiento</text>
+      <text class="ss" x="440" y="103">se ve igual de 0.75 a 1, pero va más rápido</text>
+      <text class="ss" x="620" y="48">moveSpeed = 6</text>
+    </svg>
+  </figure>
+
+  <div class="rule"><strong>El deslizamiento es un ANDAR, no física.</strong> Parece que patina, pero responde 1:1: soltar el stick para en seco. Se evaluó inercia real y se descartó — con lock-on y strafe, un cuerpo que resbala al esquivar arruina la precisión. La única inercia del juego vive <em>dentro</em> de habilidades (<code>DashMotion.easeOut</code>), donde ya has comprometido la acción.</div>
+
+  <div class="grid2">
+    <div class="card"><h4>No hay botón de correr</h4><p>Correr es identidad de especie (stances), no acción universal: Pyrecko va rápido en Sigilo, Mantagale vuela. Y el presupuesto de inputs no da para más.</p></div>
+    <div class="card"><h4>Bloquear no clava</h4><p>Recorta la deflexión a paso corto usando todo el recorrido del stick, en vez de convertirlo en un interruptor.</p></div>
+    <div class="card"><h4>Stances sobrescriben el perfil</h4><p>Ottorock-Sujeción quita la banda de deslizamiento y limita al 0.75: con la roca en brazos no patina.</p></div>
+    <div class="card"><h4>El mando es el control estrella</h4><p>WASD es digital, así que la finura se pierde: solo queda una rampa corta. Es un argumento técnico, no una preferencia.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">02</span><h2>Cámara</h2></div>
+  <p>Tres estados, los tres <strong>elegidos por el jugador</strong>, unidos por un invariante: <em>el ataque va siempre hacia donde encara el cuerpo</em>. Solo cambia quién lo decide.</p>
+
+  <figure class="fig">
+    <figcaption>Los tres estados · quién orienta el cuerpo en cada uno</figcaption>
+    <svg viewBox="0 0 760 250" role="img" aria-label="Tres estados de cámara: libre, lock y apuntado.">
+      <rect x="8" y="20" width="240" height="200" rx="9" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="24" y="44">LIBRE</text>
+      <circle cx="128" cy="110" r="16" fill="#D9A441" opacity=".85"/>
+      <line x1="128" y1="110" x2="128" y2="72" stroke="#D9A441" stroke-width="2" />
+      <text class="st" x="24" y="176" font-weight="600">Tu movimiento</text>
+      <text class="ss" x="24" y="194">orbita por detrás · el trail-behind</text>
+      <text class="ss" x="24" y="208">va desactivado (perseguirte marea)</text>
+
+      <rect x="260" y="20" width="240" height="200" rx="9" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="276" y="44">LOCK · toggle</text>
+      <circle cx="330" cy="110" r="16" fill="#D9A441" opacity=".85"/>
+      <circle cx="440" cy="110" r="13" fill="#DA6A3E" opacity=".8"/>
+      <line x1="346" y1="110" x2="424" y2="110" stroke="#EBC069" stroke-width="2" stroke-dasharray="4 3"/>
+      <text class="st" x="276" y="176" font-weight="600">El enemigo</text>
+      <text class="ss" x="276" y="194">la visión hace falta para FIJAR,</text>
+      <text class="ss" x="276" y="208">no para mantener (gracia 2.5 s)</text>
+
+      <rect x="512" y="20" width="240" height="200" rx="9" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="528" y="44">APUNTADO · mantener</text>
+      <circle cx="600" cy="118" r="16" fill="#D9A441" opacity=".85"/>
+      <line x1="588" y1="76" x2="612" y2="76" stroke="#ECE6D8" stroke-width="1.5"/>
+      <line x1="600" y1="64" x2="600" y2="88" stroke="#ECE6D8" stroke-width="1.5"/>
+      <text class="st" x="528" y="176" font-weight="600">La cámara</text>
+      <text class="ss" x="528" y="194">al hombro, SIN muelle de posición:</text>
+      <text class="ss" x="528" y="208">rígida = precisa</text>
+    </svg>
+  </figure>
+
+  <div class="rule"><strong>Principio:</strong> el jugador manda sobre la cámara; todo automatismo que compita con su input marea. La cámara puede reaccionar a lo que el jugador <em>no</em> controla (un enemigo fijado, el eje de una habilidad ya lanzada), nunca a su propio movimiento. Se aprendió tres veces: el temblor del apuntado, el trail-behind y el encuadre del dash.</div>
+
+  <p>Una habilidad puede <strong>pedir cámara</strong> (efecto <code>CameraShot</code>) con valores absolutos que mandan mientras dura y se sueltan al terminar — colocada sobre el <em>eje de la acción</em>, no sobre el cuerpo. Rig propio, sin Cinemachine.</p>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">03</span><h2>Habilidades</h2></div>
+  <p>Kit de 3 (con coste) + cadena de básicos (gratis). Cada habilidad son <strong>fases</strong>, y cada fase una lista de <strong>efectos que no se conocen entre sí</strong>. La embestida de Ottorock es el ejemplo completo:</p>
+
+  <figure class="fig">
+    <figcaption>Embestida Garra · 3 fases · el cuerpo y la cámara nunca se mueven a la vez</figcaption>
+    <svg viewBox="0 0 760 330" role="img" aria-label="Las tres fases de la embestida y qué hace cada una.">
+      <rect x="8" y="30" width="228" height="120" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".5"/>
+      <text class="sm" x="24" y="52">① CARGA · 0.30 s</text>
+      <text class="st" x="24" y="76" font-weight="600">Cuerpo: CLAVADO</text>
+      <text class="ss" x="24" y="94">rooted — ni control, ni inercia,</text>
+      <text class="ss" x="24" y="108">ni gravedad (flota si carga en el aire)</text>
+      <text class="ss" x="24" y="132" fill="#EBC069">Cámara: viaja hasta su sitio</text>
+
+      <rect x="266" y="30" width="228" height="120" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".5"/>
+      <text class="sm" x="282" y="52">② EMBESTIDA · 0.35 s</text>
+      <text class="st" x="282" y="76" font-weight="600">Cuerpo: 6 u de recorrido</text>
+      <text class="ss" x="282" y="94">multi-hit (~4 golpes) + arrastre 3D</text>
+      <text class="ss" x="282" y="108">+ correa que lo mantiene a tiro</text>
+      <text class="ss" x="282" y="132" fill="#EBC069">Cámara: ya colocada, quieta</text>
+
+      <rect x="524" y="30" width="228" height="120" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".5"/>
+      <text class="sm" x="540" y="52">③ DESLIZAMIENTO · 0.36 s</text>
+      <text class="st" x="540" y="76" font-weight="600">Cuerpo: patina y frena</text>
+      <text class="ss" x="540" y="94">estalla en Mineral (hitstop fuerte)</text>
+      <text class="ss" x="540" y="108">+ slow a quien pille la explosión</text>
+      <text class="ss" x="540" y="132" fill="#EBC069">Cámara: viaje de vuelta</text>
+
+      <text class="sm" x="8" y="192">DENTRO DE UNA FASE</text>
+      <rect x="8" y="204" width="238" height="94" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="24" y="228" font-weight="600" fill="#9FC7D6">ACTUADOR</text>
+      <text class="ss" x="24" y="248">entrega y reporta impactos</text>
+      <text class="ss" x="24" y="266">SweepHitbox · MeleeHitbox</text>
+      <text class="ss" x="24" y="282">DashMotion · ElementalBurst</text>
+
+      <rect x="262" y="204" width="238" height="94" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="278" y="228" font-weight="600" fill="#DA6A3E">PAYLOAD</text>
+      <text class="ss" x="278" y="248">la consecuencia (OnCast / OnHit)</text>
+      <text class="ss" x="278" y="266">DealDamage · Knockback</text>
+      <text class="ss" x="278" y="282">CarryToFront · ApplyStatus</text>
+
+      <rect x="516" y="204" width="236" height="94" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="532" y="228" font-weight="600" fill="#A98FC4">PRESENTACIÓN</text>
+      <text class="ss" x="532" y="248">ni entrega ni causa: encuadra</text>
+      <text class="ss" x="532" y="266">CameraShot</text>
+      <text class="ss" x="532" y="282">(la cámara no sabe de habilidades)</text>
+    </svg>
+  </figure>
+
+  <h3>Cuatro reglas que se pagan si se olvidan</h3>
+  <table>
+    <tr><th style="width:34%">Regla</th><th>Qué pasa si no</th></tr>
+    <tr><td><strong>Los payloads son de la FASE, no del actuador</strong></td><td>Dos actuadores que reporten en la misma fase <strong>duplican el daño</strong>. Un actuador con payload propio va en su propia fase.</td></tr>
+    <tr><td><strong>Un ataque que dura reparte GOLPES</strong>, no daño continuo</td><td>El "daño por tiempo tocando" nunca se convierte en un anim-event; el multi-hit sí. Además arrollar y rozar dejan de distinguirse.</td></tr>
+    <tr><td><strong>La detección se muestrea; las consecuencias se cronometran</strong></td><td>Si la cadencia va por frame, el daño depende del framerate. Si la hitbox muestrea un punto en vez de barrer el tramo, a bajo FPS el enemigo se cuela entre muestras.</td></tr>
+    <tr><td><strong>El estado por activación va en el blackboard</strong>, nunca en un campo del efecto</td><td>El efecto vive en un asset compartido: un contador se pisa entre criaturas y entre activaciones.</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">04</span><h2>Elemento</h2></div>
+  <p>El multiplicador solo se aplica a lo que <strong>imbuye elemento</strong>. Los básicos van neutros: si la acción que más repites llevara elemento, pelear contra quien te supera sería <em>imposible</em> en vez de difícil.</p>
+
+  <figure class="fig">
+    <figcaption>Quién lleva elemento en el kit de Ottorock</figcaption>
+    <svg viewBox="0 0 760 200" role="img" aria-label="Los básicos son neutros salvo el remate; el kit lleva elemento.">
+      <rect x="8" y="30" width="120" height="56" rx="7" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="30" y="54" font-weight="600">Básico 1</text><text class="ss" x="34" y="72">neutro ×1</text>
+      <rect x="140" y="30" width="120" height="56" rx="7" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="162" y="54" font-weight="600">Básico 2</text><text class="ss" x="166" y="72">neutro ×1</text>
+      <rect x="272" y="30" width="120" height="56" rx="7" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="294" y="54" font-weight="600">Básico 3</text><text class="ss" x="298" y="72">neutro ×1</text>
+      <rect x="404" y="30" width="120" height="56" rx="7" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="426" y="54" font-weight="600">Básico 4</text><text class="ss" x="430" y="72">neutro ×1</text>
+      <rect x="536" y="30" width="216" height="56" rx="7" fill="#22232f" stroke="#A98FC4" stroke-opacity=".7"/>
+      <text class="st" x="558" y="54" font-weight="600" fill="#A98FC4">5º · Garra sísmica</text>
+      <text class="ss" x="558" y="72">golpe neutro + ESTALLA en Mineral</text>
+
+      <rect x="8" y="112" width="366" height="56" rx="7" fill="#22232f" stroke="#A98FC4" stroke-opacity=".7"/>
+      <text class="st" x="30" y="136" font-weight="600" fill="#A98FC4">Kit (Movilidad · Flex · Signature)</text>
+      <text class="ss" x="30" y="154">elemento de la especie — aquí sí hay ×1.5 / ×0.5</text>
+
+      <rect x="392" y="112" width="360" height="56" rx="7" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="414" y="136" font-weight="600">ElementalBurst</text>
+      <text class="ss" x="414" y="154">SIEMPRE el elemento de la especie, aunque el golpe sea neutro</text>
+    </svg>
+  </figure>
+  <p>Corolario para el terreno: un básico neutro <strong>no dispara reacciones ambientales</strong> — quien irradia elemento al suelo es la habilidad o el estallido.</p>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">05</span><h2>Golpear · lo que ves</h2></div>
+  <p>Un solo punto convierte cada golpe en feedback, y <strong>todo escala con una sola noción</strong>: el peso del golpe. Nunca cinco cosas afinadas por separado que deberían decir lo mismo.</p>
+
+  <figure class="fig">
+    <figcaption>Un peso, cinco canales · 60% daño relativo a ESE monstruo + 40% avance del combo</figcaption>
+    <svg viewBox="0 0 760 260" role="img" aria-label="El peso del golpe alimenta destello, número, VFX, hitstop y sacudida.">
+      <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+      <rect x="284" y="20" width="192" height="62" rx="9" fill="#22232f" stroke="#D9A441"/>
+      <text class="st" x="306" y="44" font-weight="600" fill="#EBC069">HitFeedback.Weight</text>
+      <text class="ss" x="306" y="64">contundencia 0 → 1</text>
+
+      <line x1="330" y1="82" x2="110" y2="140" stroke="#7d7869" marker-end="url(#a2)"/>
+      <line x1="370" y1="82" x2="280" y2="140" stroke="#7d7869" marker-end="url(#a2)"/>
+      <line x1="380" y1="82" x2="400" y2="140" stroke="#7d7869" marker-end="url(#a2)"/>
+      <line x1="400" y1="82" x2="530" y2="140" stroke="#7d7869" marker-end="url(#a2)"/>
+      <line x1="440" y1="82" x2="672" y2="140" stroke="#7d7869" marker-end="url(#a2)"/>
+
+      <rect x="20" y="148" width="132" height="88" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="34" y="172" font-weight="600">Destello</text>
+      <text class="ss" x="34" y="192">color = efectividad</text>
+      <text class="ss" x="34" y="208">duración = peso</text>
+      <text class="ss" x="34" y="224">0.10 → 0.22 s</text>
+
+      <rect x="164" y="148" width="132" height="88" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="178" y="172" font-weight="600">Número</text>
+      <text class="ss" x="178" y="192">vuela con el empuje</text>
+      <text class="ss" x="178" y="208">tamaño = peso</text>
+      <text class="ss" x="178" y="224">solo el resultado</text>
+
+      <rect x="308" y="148" width="132" height="88" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="322" y="172" font-weight="600">VFX</text>
+      <text class="ss" x="322" y="192">pop núcleo + anillo</text>
+      <text class="ss" x="322" y="208">1.3 → 3.2 u</text>
+      <text class="ss" x="322" y="224">color = efectividad</text>
+
+      <rect x="452" y="148" width="132" height="88" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="466" y="172" font-weight="600">Hitstop</text>
+      <text class="ss" x="466" y="192">0.02 → 0.09 s</text>
+      <text class="ss" x="466" y="208">no se acumula</text>
+      <text class="ss" x="466" y="224">tiempo real</text>
+
+      <rect x="596" y="148" width="144" height="88" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="610" y="172" font-weight="600">Sacudida</text>
+      <text class="ss" x="610" y="192">desplazamiento +</text>
+      <text class="ss" x="610" y="208">giro angular (0.15→0.9°)</text>
+      <text class="ss" x="610" y="224">el giro se nota más</text>
+    </svg>
+  </figure>
+
+  <div class="note"><strong>Una tabla de color para todo:</strong> cálido = le haces ×1.5 · blanco = neutral · frío = resiste. El destello, el número y el VFX la comparten, así que nunca se contradicen. Los <strong>estados</strong> (Ralentizado, etc.) no vuelan: van como <strong>etiqueta anclada</strong> sobre quien los sufre — un número de daño es un evento, un estado es una condición.</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">06</span><h2>Golpear · lo que empuja</h2></div>
+  <p>Golpear y ser golpeado <strong>suspenden la caída</strong> un instante, en los dos bandos. Sin eso, un combo aéreo se cae solo a media cadena y no existe.</p>
+
+  <figure class="fig">
+    <figcaption>Línea de tiempo de un combo aéreo · cada golpe renueva la suspensión</figcaption>
+    <svg viewBox="0 0 760 260" role="img" aria-label="Cronología del hang time durante un combo aéreo.">
+      <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+      <line x1="40" y1="200" x2="720" y2="200" stroke="#7d7869" stroke-width="1.5" marker-end="url(#a3)"/>
+      <text class="sm" x="656" y="222">TIEMPO</text>
+
+      <rect x="60" y="120" width="300" height="14" rx="7" fill="#D9A441" opacity=".28"/>
+      <rect x="300" y="120" width="230" height="14" rx="7" fill="#D9A441" opacity=".28"/>
+      <rect x="470" y="120" width="200" height="14" rx="7" fill="#D9A441" opacity=".28"/>
+      <text class="sm" x="60" y="112" fill="#D9A441">SUSPENSIÓN ACTIVA · CADA GOLPE LA RENUEVA</text>
+
+      <line x1="60" y1="140" x2="60" y2="200" stroke="#DA6A3E" stroke-width="2"/>
+      <circle cx="60" cy="200" r="5" fill="#DA6A3E"/>
+      <text class="ss" x="34" y="220">Embestida</text>
+      <text class="ss" x="26" y="234">(eleva)</text>
+
+      <line x1="300" y1="140" x2="300" y2="200" stroke="#DA6A3E" stroke-width="2"/>
+      <circle cx="300" cy="200" r="5" fill="#DA6A3E"/>
+      <text class="ss" x="278" y="220">Mordisco</text>
+
+      <line x1="470" y1="140" x2="470" y2="200" stroke="#DA6A3E" stroke-width="2"/>
+      <circle cx="470" cy="200" r="5" fill="#DA6A3E"/>
+      <text class="ss" x="452" y="220">Básico</text>
+
+      <line x1="670" y1="134" x2="670" y2="200" stroke="#7f8196" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <text class="ss" x="612" y="220">dejas de pegar</text>
+      <text class="ss" x="636" y="234" fill="#7f8196">→ caes</text>
+
+      <path d="M60,60 Q180,26 300,44 T530,62 Q600,72 670,150" fill="none" stroke="#9FC7D6" stroke-width="2"/>
+      <text class="ss" x="150" y="26" fill="#9FC7D6">altura del enemigo</text>
+      <text class="sm" x="40" y="184">SUELO</text>
+    </svg>
+  </figure>
+
+  <div class="grid2">
+    <div class="card"><h4>El hang cubre las fases, no solo los golpes</h4><p>Tras una embestida pasan ~0.7 s de recuperación antes de poder encadenar. Si el hang dura menos, caes antes de rematar.</p></div>
+    <div class="card"><h4>Guardarraíl: presupuesto que se recarga</h4><p>~3 s acumulables que miden <em>tiempo suspendido</em>, no golpes, y solo se recargan al tocar suelo. Es lo que impide el juggle infinito.</p></div>
+    <div class="card"><h4>Cola al parar</h4><p>Al dejar de encadenar caes aunque quedara hang. El hang largo es para cubrir habilidades, no para flotar cuando ya paraste.</p></div>
+    <div class="card"><h4>Solo la embestida eleva</h4><p>El resto sostiene (<code>lift = 0</code>). Si cada golpe empujara hacia arriba, el combo subiría solo hasta el techo.</p></div>
+  </div>
+
+  <div class="note"><strong>La correa (<code>CarryToFront.matchHeight</code>).</strong> El empuje nunca puede ir más rápido que tu propio dash, o el enemigo se escapa por delante. Pero en vez de depender de que las velocidades cuadren, hay un tope por construcción: el enemigo no se aleja más de X ni se despega de tu altura. Así el remate aéreo <strong>llega siempre</strong>.</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">07</span><h2>Aturdimiento y noqueo</h2></div>
+  <p>El aturdimiento es una barra <strong>tipo postura</strong> (ref. Sekiro): proporcional a la vida, sube con el combo, decae si dejas de golpear. Al caer del todo se abre una decisión, no un final.</p>
+
+  <figure class="fig">
+    <figcaption>Del primer golpe al desenlace · la gracia es lo que convierte matar en una elección</figcaption>
+    <svg viewBox="0 0 760 250" role="img" aria-label="Máquina de estados del noqueo con ventana de gracia.">
+      <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+      <rect x="8" y="60" width="150" height="56" rx="8" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="46" y="84" font-weight="600">Peleando</text>
+      <text class="ss" x="26" y="102">postura sube con combo</text>
+
+      <line x1="158" y1="88" x2="196" y2="88" stroke="#7d7869" marker-end="url(#a4)"/>
+
+      <rect x="200" y="60" width="150" height="56" rx="8" fill="#22232f" stroke="#EAC94B" stroke-opacity=".6"/>
+      <text class="st" x="228" y="84" font-weight="600" fill="#EAC94B">Aturdido</text>
+      <text class="ss" x="218" y="102">postura llena · se recupera</text>
+
+      <line x1="275" y1="116" x2="275" y2="150" stroke="#7d7869" marker-end="url(#a4)"/>
+      <text class="ss" x="284" y="140">vida a 0</text>
+
+      <rect x="200" y="156" width="230" height="66" rx="8" fill="#22232f" stroke="#9FC7D6"/>
+      <text class="st" x="220" y="180" font-weight="600" fill="#9FC7D6">DEBILITADO · gracia 3–5 s</text>
+      <text class="ss" x="220" y="199">INVULNERABLE — tus golpes en curso</text>
+      <text class="ss" x="220" y="213">no cuentan. Es el margen para decidir.</text>
+
+      <line x1="430" y1="176" x2="486" y2="150" stroke="#7d7869" marker-end="url(#a4)"/>
+      <line x1="430" y1="190" x2="486" y2="190" stroke="#7d7869" marker-end="url(#a4)"/>
+      <line x1="430" y1="204" x2="486" y2="228" stroke="#7d7869" marker-end="url(#a4)"/>
+
+      <rect x="490" y="124" width="262" height="42" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="508" y="150" font-weight="600">Atacar → <tspan fill="#DA6A3E">rematar</tspan> (muerte por elección)</text>
+
+      <rect x="490" y="172" width="262" height="42" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="508" y="198" font-weight="600">Menú del Tamer → <tspan fill="#7FB574">capturar</tspan></text>
+
+      <rect x="490" y="220" width="262" height="30" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="508" y="240">No decides → se retira / huye</text>
+    </svg>
+  </figure>
+
+  <div class="rule"><strong>Por qué existe la gracia.</strong> El finisher no tiene botón: rematar es <em>seguir atacando</em>. Sin un margen invulnerable, el siguiente golpe de tu combo remataría por inercia justo al que querías capturar — y capturar dejaría de ser una elección para pasar a depender de tus reflejos. Con el bucle principal del juego en juego, eso no vale.</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">08</span><h2>Ottorock-Libre · los números del gate</h2></div>
+  <p>Placeholders de caja gris, afinados en playtest. <code>Editor/OttorockContent.cs</code> los genera como assets reales.</p>
+
+  <p><strong>Stats:</strong> Vida <strong>4000</strong> (8/10 del hexágono × 500 HP/punto) · daño base <strong>14</strong> · <code>moveSpeed</code> <strong>6</strong> (con el stick a fondo).</p>
+
+  <table>
+    <tr><th>Habilidad</th><th>Coste / CD</th><th>Daño</th><th>Clave de feel</th></tr>
+    <tr><td><strong>Básicos 1–4</strong></td><td>gratis</td><td>14 / 14 / 18 / 20</td><td>step-in <em>mayor</em> que el empuje → la cadena cierra distancia sola</td></tr>
+    <tr><td><strong>5º · Garra sísmica</strong></td><td>gratis</td><td>26 + estallido 16</td><td>remate lento (0.62 s); estalla en Mineral; no eleva</td></tr>
+    <tr><td><strong>Embestida Garra</strong> <span class="tag" style="margin:0">Movilidad</span></td><td>12 / 2.5 s</td><td>8 ×~4 + estallido 14</td><td>3 fases · <strong>abre la ventana aérea</strong> · cámara propia · slow del estallido</td></tr>
+    <tr><td><strong>Mordisco Ferroso</strong> <span class="tag" style="margin:0">Flex</span></td><td>20 / 3 s</td><td>50 + estallido 15</td><td>el golpe fuerte; sostiene en el aire, no eleva</td></tr>
+    <tr><td><strong>Signature</strong></td><td>—</td><td>—</td><td>Cambio Libre ↔ Sujeción · <em>post-gate</em></td></tr>
+  </table>
+
+  <p><strong>Locomoción:</strong> andares en 0.1 / 0.5 / 0.75 · tope de bloqueo 0.25 · sin límite de velocidad (Sujeción irá al 0.75).</p>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">09</span><h2>Lo que aplica a cualquier tatemis</h2></div>
+  <div class="grid2">
+    <div class="card"><h4>Datos, no código</h4><p>Una especie nueva = editar assets. Si obliga a tocar C#, es un hueco del catálogo y se anota.</p></div>
+    <div class="card"><h4>Bespoke primero, extraer después</h4><p>No se generaliza hasta tener ≥2 usos reales. Ottorock ya extrajo multi-hit, perfil de locomoción y cámara por habilidad.</p></div>
+    <div class="card"><h4>Toda especie es autosuficiente</h4><p>Su control de masas prepara su propio daño: puede ganar sola, no depende de un compañero.</p></div>
+    <div class="card"><h4>Una sola noción de contundencia</h4><p>Destello, número, VFX, hitstop y sacudida beben del mismo peso. Cinco afinados sueltos se contradicen.</p></div>
+    <div class="card"><h4>El jugador manda</h4><p>Los automatismos que compiten con su input marean: vale para cámara, para inercia y para el juggle.</p></div>
+    <div class="card"><h4>"Cuánto" y "cómo se ve" son capas separadas</h4><p>Velocidad vs. andar, daño vs. VFX. Acoplarlos hace que afinar una cosa rompa la otra.</p></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="padding:0">
+    Tatemis3D · Arzpal — Texto completo en <code>TATEMIS-BASE.md</code>. Cómo se construye uno de cero → <code>crear-tatemis.html</code>.
+  </div>
+</footer>
+</div>

@@ -1,6 +1,6 @@
 # Tatemis3D — Vitalidad, muerte y derrota
 
-> **TL;DR:** Los tatemis pueden morir de verdad. Salvajes: solo como **elección deliberada** del jugador (seguir golpeando tras el noqueo). Propios: por **heridas graves** que drenan una barra de **Vitalidad** externa al combate; a 0 → muerte permanente, pero **siempre evitable** jugando bien (swap de emergencia sin cooldown + defender al caído). Derrota total = el Tamer es perseguido y debe escapar.
+> **TL;DR:** Los tatemis pueden morir de verdad. Salvajes: solo como **elección deliberada** del jugador (seguir golpeando tras el noqueo, con una **ventana de gracia** para decidir → [TAMER.md §4.1](TAMER.md)). Propios: por una barra de **Vitalidad** externa al combate que drena **poco al ser noqueados** y **mucho si les pegan estando caídos**; a 0 → muerte permanente, pero **siempre evitable** jugando bien (swap de emergencia sin cooldown + defender al caído). Derrota total = el Tamer es perseguido y debe escapar.
 > **Estado: 🟡 en discusión** — diseñado en sesión con PA; pendiente ratificar con PB/DS. Nada de esto entra en Fase 0–1.
 > **Mapa:** §1 principios · §2 vitalidad · §3 muerte de salvajes · §4 noqueo/rescate/swap · §5 derrota total y Tamer · §6 abiertas (IA aliada, manadas) · §7 impacto en docs y roadmap
 
@@ -11,7 +11,14 @@
 
 ## 2. Vitalidad (barra externa al combate) ✅ decidido
 - Cada tatemis propio tiene **Vitalidad**, separada de la Vida de combate. La Vitalidad **persiste entre combates**.
-- **Solo drena por heridas graves:** golpes recibidos mientras está **noqueado/tirado en el suelo** (§4). El daño normal de combate nunca la toca.
+- **Dos fuentes de drenaje, y solo dos** *(la segunda añadida el 2026-07-22)*. El daño normal de combate **nunca** la toca:
+
+| Qué | Drenaje | Por qué |
+|---|---|---|
+| **Que lo noqueen** | **bajo** | Dejar que caiga ya es negligencia, aunque el rescate salga perfecto. Sin esto, noquearse infinitas veces sale gratis mientras rescates bien, y la "negligencia acumulada" no acumula nada |
+| **Golpes recibidos estando noqueado** (§4) | **alto** | Es la herida grave de verdad: tu compañero indefenso en el suelo mientras siguen pegándole |
+
+> ⚠️ **Guardarraíl de la regla de oro (§1.2):** el drenaje por noqueo tiene que ser **pequeño de verdad**. Quien está aprendiendo se noquea mucho, y si eso solo drena, la muerte deja de ser evitable y pasa a ser una cuenta atrás. La proporción entre ambas fuentes es lo que decide si el sistema castiga *aprender* o castiga *abandonar a tu compañero* — y solo debe castigar lo segundo.
 - **Vitalidad 0 → muerte real y permanente.**
 - Se recupera **fuera de combate**. *Propuesta:* recuperación por **cuidado activo** (descanso en base, alimentar, ritual), no solo por tiempo — cuidar de tu criatura *es* el vínculo hecho mecánica. Tiempos por definir (ojo: con equipo de 3, una recuperación larga te deja sin roster).
 - *Propuesta — sin espiral de muerte:* la Vitalidad baja **no debuffea stats** en combate; solo se comunica visualmente (cojea, vendajes, postura). Vitalidad baja = estar más cerca de la muerte, no ser peor peleando.

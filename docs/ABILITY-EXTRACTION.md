@@ -64,7 +64,7 @@ Cada pieza de los kits se clasifica:
 ### Huecos añadidos por Mantagale (2026-07-18) — los más caros del proyecto
 10. **Locomoción aérea con eje vertical** ⚠️ *el más caro, y el único que hay que prever YA*. Vuelo permanente a altura variable, planeo, tope de altura. Toca `CreatureController`, cámara (T0.4) y lock-on (T0.5). Ver §8.
 11. **Eventos del `ReactionSystem`** — la pasiva de altura necesita escuchar «se ha formado una reacción». Hoy `Impact()` no notifica nada. Barato si se prevé; caro si se retrofitea.
-12. **Desplazamiento de criaturas** (`Knockback` puntual · `Pull` · **empuje continuo** de los tornados · **arrastre por el suelo** del Ciclón). Afecta al diseño físico del receptor de golpes y a cómo interactúa con el `CharacterController`. Era un punto ciego conocido (§7); ahora es requisito.
+12. **Desplazamiento de criaturas** (`Knockback` puntual · `Pull` · **empuje continuo** de los tornados · **arrastre por el suelo** del Ciclón). Afecta al diseño físico del receptor de golpes y a cómo interactúa con el `CharacterController`. Era un punto ciego conocido (§7); ahora es requisito. ⚠️ *Ojo (2026-07-22): que la embestida de Ottorock distinga arrollar de rozar **no** cubre esto — se resolvió repartiendo **golpes** (multi-hit, [ABILITY-SYSTEM §4.1](ABILITY-SYSTEM.md)), y un tornado empuja sin golpear a cadencia. El empuje continuo sigue entero por hacer.*
 13. **Buff que modifica el ataque básico** durante N golpes (AoE + knockback + spawn). Extiende el sistema de básicos [H5] con una capa de override **temporal**, distinta del override **por stance** que piden Ottorock y Pyrecko.
 14. **Fuerzas que actúan sobre hazards, no solo sobre criaturas** — el Ciclón atrae a los tornados. Implica que los hazards tengan posición mutable y respondan a fuerzas.
 15. **Detonación por colisión de dos efectos** — el tornado (empuje) y el Ciclón (atracción) se destruyen mutuamente y disparan la reacción en el punto de encuentro. Es interacción hazard↔hazard, que hoy no existe.
@@ -115,6 +115,28 @@ Las tres se mueven de forma **radicalmente distinta**, y dos de ellas cambian de
 | **Mantagale** | **vuelo permanente**, altura variable como eje propio, planeo — nunca camina |
 
 ➡️ **Decisión:** el `CreatureController` **no** puede tener la locomoción hardcodeada. Necesita un **perfil de locomoción intercambiable** (velocidad, aceleración, giro, gravedad, salto, y si el eje Y es libre), seleccionable por **especie** y sobrescribible por **stance**. Es barato ahora (un `ScriptableObject` de parámetros + una interfaz) y carísimo después.
+
+✅ **Implementado el 2026-07-22** — `Data/LocomotionProfile.cs` (SO) + `EvolutionForm.locomotion`. Modelo elegido (ver 8.1b): **andares por deflexión del stick**, no inercia.
+
+### 8.1b · Andares, no inercia — y por qué NO hay botón de correr 🔒 *(2026-07-22)*
+
+Se planteó añadir **sprint** y se **descartó**. Razones:
+- **Correr ya es identidad de especie, no acción universal:** Pyrecko va "muy rápido" en Sigilo, Mantagale vuela, Ottorock cambia de peso con el stance. Un botón genérico sería la respuesta enlatada a una pregunta que las fichas ya responden mejor.
+- **No cabe:** §8.3 celebra que los 3 kits no piden ningún botón nuevo, y el presupuesto de inputs fue **la razón** de recortar el kit a 3 (GDD §6.3).
+
+**El modelo — dos capas que NO hay que mezclar:**
+- **Velocidad: lineal con la deflexión** del stick. Moverlo un poco más siempre te mueve un poco más rápido, sin escalones. `moveSpeed` de la forma = velocidad con el stick a fondo.
+- **Andares: umbrales puramente VISUALES** — a qué deflexión cambia la animación, sin tocar la velocidad. Ottorock-Libre: `Paso corto (0.1) → Caminar (0.5) → Deslizamiento (0.75)`. Entre 0.75 y 1 te deslizas cada vez más rápido, pero **se ve igual**.
+
+Bloquear no clava: recorta la deflexión a **paso corto** (`blockMaxInput`), usando todo el recorrido del stick en vez de convertirlo en un interruptor.
+
+> 🔒 **La regla que lo hace funcionar: el deslizamiento es un ANDAR, no física.** Parece que patina, pero responde 1:1 — soltar el stick para en seco. *Se evaluó inercia real y se descartó: en un juego con lock-on y strafe, un cuerpo que resbala al esquivar arruina la precisión.* La única inercia del juego vive **dentro de habilidades concretas** (`DashMotion.easeOut`, el deslizamiento final de la embestida), donde el jugador ya ha comprometido la acción.
+
+**Stances:** el mismo recorrido de stick, otros umbrales y otro tope. Ottorock-Sujeción no tiene umbral de deslizamiento (con la roca en brazos no patina) y su `maxSpeedMultiplier` es **0.75**: a fondo llega a lo que Libre da al 0.75 del stick. El asset ya se genera como referencia, aunque el stance sea post-gate.
+
+**Teclado:** WASD es digital (0 o 1), así que la finura se pierde; lo único que queda es una **rampa corta** (`inputRamp`) que suaviza el salto. Con stick es imperceptible porque la deflexión ya es analógica. **Es el argumento técnico de por qué el mando es el control estrella**, y conviene decirlo en el pitch en vez de disimularlo.
+
+**El caso que sí pide correr:** la **persecución del Tamer** ([VITALITY-DEATH §5](VITALITY-DEATH.md)) — ahí no hay monstruo ni kit, y escapar *es* la mecánica. Es locomoción **del Tamer**, otro perfil, post-gate.
 
 ### 8.2 · El eje vertical hay que preverlo, no construirlo
 Mantagale es Nivel B, pero **lo que se hornee en Fase 0 decide si es viable**. Sin construir vuelo:

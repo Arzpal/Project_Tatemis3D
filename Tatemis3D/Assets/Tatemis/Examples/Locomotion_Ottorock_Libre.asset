@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccd2fbed2c0b0ef45bbcb41ba758ae83, type: 3}
+  m_Name: Locomotion_Ottorock_Libre
+  m_EditorClassIdentifier: Assembly-CSharp::Tatemis.LocomotionProfile
+  gaits:
+  - name: Paso corto
+    threshold: 0.1
+  - name: Caminar
+    threshold: 0.5
+  - name: Deslizamiento
+    threshold: 0.75
+  deadzone: 0.08
+  maxSpeedMultiplier: 1
+  blockMaxInput: 0.25
+  aimMultiplier: 0.5
+  inputRamp: 0.16
+  turnSmoothTime: 0.12
+  gravity: -25
+  jumpSpeed: 8
+  freeVerticalAxis: 0

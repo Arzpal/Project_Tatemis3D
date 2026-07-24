@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d26964f34d832649ab045ade2bf08ec, type: 3}
+  m_Name: Creature_Ottorock
+  m_EditorClassIdentifier: Assembly-CSharp::Tatemis.CreatureSpeciesData
+  id: ottorock
+  displayName: Ottorock
+  element: 3
+  archetype: 1
+  forms:
+  - formName: Libre
+    modelPrefab: {fileID: 0}
+    stats:
+      maxHealth: 4000
+      damage: 14
+      moveSpeed: 6
+    locomotion: {fileID: 11400000, guid: 054f6156e404dea4fa4b4a658058b65c, type: 2}
+    movilidad: {fileID: 11400000, guid: d850563afe08bce4cba3d6de760ed792, type: 2}
+    flex: {fileID: 11400000, guid: fb3e5a202017ae3469cfcc64a4f79e1e, type: 2}
+    signature: {fileID: 0}
+    basicChain:
+    - {fileID: 11400000, guid: 9d51ba16fd186984c9428466cc0040b7, type: 2}
+    - {fileID: 11400000, guid: 2867f979e8eeb284cbf6f4be8e0de01f, type: 2}
+    - {fileID: 11400000, guid: f495b6ccc9454df4c8e261cd50c4f199, type: 2}
+    - {fileID: 11400000, guid: 2893473e735b61347aa8792cdd355dc9, type: 2}
+    - {fileID: 11400000, guid: cbcceb7ca0c45564d8f453f95c0be284, type: 2}
+    block:
+      energyRegenMultiplier: 2.5
+      weaknessDamageMultiplier: 2
+    hasSecondaryElement: 0
+    secondaryElement: 0
+    levelsInForm: 2

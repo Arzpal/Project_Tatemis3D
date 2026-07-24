@@ -23,14 +23,23 @@ namespace Tatemis
         public GameObject modelPrefab;          // placeholder por ahora
         public BaseStats stats;                 // define el arquetipo
 
+        [Tooltip("Cómo se mueve ESTA forma/stance: andares, topes y respuesta. Sin él, velocidad lineal simple. Ver ABILITY-EXTRACTION §8.1")]
+        public LocomotionProfile locomotion;
+
         [Header("Kit (3 habilidades con coste)")]
         public AbilityData movilidad;
         public AbilityData flex;
         public AbilityData signature;
 
         [Header("Acción universal (sin coste)")]
-        [Tooltip("Ataque básico: cadena gratuita, columna vertebral del combate. Ver GDD §6.3.")]
-        public AbilityData basic;
+        [Tooltip("Cadena de básicos en orden: cada golpe encadenado avanza un eslabón y al terminarla vuelve al primero. Se rompe sola si dejas de pegar. El último eslabón es el finisher (Ottorock: estalla en su elemento). Ver GDD §6.3.")]
+        public List<AbilityData> basicChain = new List<AbilityData>();
+
+        /// Eslabón que toca según cuántos básicos llevas encadenados (cicla al completar la cadena).
+        public AbilityData BasicAt(int comboIndex) =>
+            basicChain == null || basicChain.Count == 0
+                ? null
+                : basicChain[((comboIndex % basicChain.Count) + basicChain.Count) % basicChain.Count];
 
         [Header("Forma elemental pura (bloqueo)")]
         public BlockParams block;

@@ -1,0 +1,724 @@
+<title>Tatemis3D — Cómo se arma un tatemis, de inicio a fin</title>
+<style>
+  :root{
+    --ground:#13131b; --ground-2:#191a24; --ground-3:#22232f;
+    --ink:#ECE6D8; --ink-2:#B4AD9C; --ink-3:#7d7869;
+    --line:rgba(236,230,216,.10); --line-2:rgba(236,230,216,.16);
+    --gold:#D9A441; --gold-lt:#EBC069;
+    --fuego:#DA6A3E; --mineral:#A98FC4; --aire:#9FC7D6; --ok:#7FB574; --warn:#EAC94B; --no:#7f8196;
+    --serif:"Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+    --sans:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+    --mono:"Consolas","SF Mono","JetBrains Mono",Menlo,monospace;
+    --maxw:900px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:1.0625rem;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 1.5rem}
+  header{padding:4.5rem 0 2.5rem;border-bottom:1px solid var(--line)}
+  h1{font-family:var(--serif);font-size:clamp(2.2rem,5vw,3.4rem);font-weight:600;margin:0 0 .6rem;line-height:1.05}
+  .sub{color:var(--ink-2);max-width:62ch;margin:.4rem 0}
+  .tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2);border:1px solid var(--line-2);border-radius:100px;padding:.3rem .75rem;display:inline-block;margin:.25rem .3rem .25rem 0}
+  section{padding:3rem 0;border-bottom:1px solid var(--line)}
+  .ch-head{display:flex;align-items:baseline;gap:1rem;margin-bottom:.6rem;flex-wrap:wrap}
+  .ch-num{font-family:var(--mono);font-size:.75rem;letter-spacing:.16em;color:var(--gold)}
+  .ch-who{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line-2);border-radius:100px;padding:.15rem .55rem;margin-left:auto}
+  h2{font-family:var(--serif);font-size:clamp(1.5rem,3.2vw,2.1rem);font-weight:600;margin:0}
+  h3{font-family:var(--serif);font-size:1.18rem;font-weight:600;margin:2rem 0 .5rem;color:var(--ink)}
+  p{max-width:68ch}
+  .fig{background:var(--ground-2);border:1px solid var(--line);border-radius:12px;padding:1.4rem;margin:1.5rem 0;overflow-x:auto}
+  .fig figcaption{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:1rem}
+  table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.93rem}
+  th{text-align:left;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line-2);padding:.5rem .6rem}
+  td{padding:.5rem .6rem;border-bottom:1px solid var(--line);color:var(--ink-2);vertical-align:top}
+  td strong{color:var(--ink)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--ground-3);padding:.12em .4em;border-radius:4px;color:var(--gold-lt)}
+  pre{background:var(--ground-2);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.55;color:var(--ink-2)}
+  pre .k{color:var(--aire)} pre .c{color:var(--ink-3);font-style:italic} pre .v{color:var(--gold-lt)} pre .t{color:var(--mineral)}
+  .note{border-left:2px solid var(--gold);padding:.2rem 0 .2rem 1rem;margin:1.4rem 0;color:var(--ink-2)}
+  .note strong{color:var(--ink)}
+  .rule{border-left:2px solid var(--ok);padding:.2rem 0 .2rem 1rem;margin:1.4rem 0;color:var(--ink-2)}
+  .rule strong{color:var(--ink)}
+  .stop{border-left:2px solid var(--fuego);padding:.2rem 0 .2rem 1rem;margin:1.4rem 0;color:var(--ink-2)}
+  .stop strong{color:var(--ink)}
+  footer{padding:3rem 0 5rem;color:var(--ink-3);font-size:.9rem}
+  a{color:var(--gold-lt)}
+  svg{display:block;max-width:100%;height:auto;margin:0 auto}
+  .st{font-family:var(--sans);font-size:12px;fill:var(--ink)}
+  .ss{font-family:var(--sans);font-size:10.5px;fill:var(--ink-2)}
+  .sm{font-family:var(--mono);font-size:9.5px;fill:var(--ink-3);letter-spacing:.1em}
+  ol.steps{counter-reset:s;list-style:none;padding:0}
+  ol.steps li{position:relative;padding-left:2.4rem;margin:.7rem 0;max-width:68ch;color:var(--ink-2)}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:.1rem;width:1.6rem;height:1.6rem;border-radius:50%;border:1px solid var(--line-2);font-family:var(--mono);font-size:.72rem;display:grid;place-items:center;color:var(--gold)}
+  ol.steps li strong{color:var(--ink)}
+  .chk{list-style:none;padding:0}
+  .chk li{padding:.45rem 0 .45rem 1.7rem;position:relative;border-bottom:1px solid var(--line);color:var(--ink-2);max-width:68ch}
+  .chk li::before{content:"◻";position:absolute;left:0;color:var(--ink-3)}
+  .chk li strong{color:var(--ink)}
+  .toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.5rem 1.4rem;margin:1.5rem 0 0;padding:0;list-style:none}
+  .toc li{font-size:.9rem;color:var(--ink-2)}
+  .toc a{text-decoration:none} .toc a:hover{text-decoration:underline}
+  .toc .n{font-family:var(--mono);font-size:.7rem;color:var(--ink-3);margin-right:.5rem}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Cómo se arma un tatemis</h1>
+  <p class="sub">De la idea al bicho jugable: <strong>diseño → construcción → afinado</strong>. El recorrido real que siguió <strong>Ottorock</strong>, convertido en receta para la siguiente especie. <strong>Todo se monta desde el editor de Unity</strong>: menú Create e inspector, sin escribir código.</p>
+  <div>
+    <span class="tag">Pipeline completo</span>
+    <span class="tag">Datos, no código</span>
+    <span class="tag">2026-07-22</span>
+  </div>
+  <ul class="toc">
+    <li><span class="n">A</span><a href="#s1">Diseño en papel</a> · 01–03</li>
+    <li><span class="n">B</span><a href="#s4">Construcción en Unity</a> · 04–08</li>
+    <li><span class="n">C</span><a href="#s9">Afinado y cierre</a> · 09–11</li>
+  </ul>
+  <p class="sub" style="margin-top:1.4rem;font-size:.95rem">Cómo funciona uno ya montado → <code>tatemis-base.html</code> · Especificación técnica → <code>ARCHITECTURE.md</code></p>
+</header>
+
+<section id="s1">
+  <div class="ch-head"><span class="ch-num">00</span><h2>El mapa del recorrido</h2></div>
+  <p>Once pasos en tres bloques. La regla que los ordena: <strong>nada se programa hasta que la ficha está cerrada</strong>, y nada se afina hasta que se puede jugar.</p>
+
+  <figure class="fig">
+    <figcaption>El recorrido completo · morado = papel · dorado = editor de Unity · azul = playtest</figcaption>
+    <svg viewBox="0 0 760 350" role="img" aria-label="Once pasos agrupados en diseño, código y afinado.">
+      <defs><marker id="p1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+
+      <text class="sm" x="8" y="20">A · DISEÑO EN PAPEL</text>
+      <rect x="8" y="30" width="238" height="62" rx="8" fill="#22232f" stroke="#A98FC4" stroke-opacity=".55"/>
+      <text class="st" x="26" y="52" font-weight="600">1 · El hueco que llena</text>
+      <text class="ss" x="26" y="72">arquetipo + elemento + animal</text>
+
+      <rect x="262" y="30" width="238" height="62" rx="8" fill="#22232f" stroke="#A98FC4" stroke-opacity=".55"/>
+      <text class="st" x="280" y="52" font-weight="600">2 · La ficha de 18 campos</text>
+      <text class="ss" x="280" y="72">kit, plan de juego, sinergia…</text>
+
+      <rect x="516" y="30" width="236" height="62" rx="8" fill="#22232f" stroke="#A98FC4" stroke-opacity=".55"/>
+      <text class="st" x="534" y="52" font-weight="600">3 · Hexágono (Σ=37)</text>
+      <text class="ss" x="534" y="72">→ HP, daño, velocidad</text>
+
+      <line x1="380" y1="92" x2="380" y2="112" stroke="#7d7869" stroke-width="1.5" marker-end="url(#p1)"/>
+
+      <text class="sm" x="8" y="132">B · CONSTRUCCIÓN EN UNITY (menú Create + inspector)</text>
+      <rect x="8" y="142" width="146" height="62" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".55"/>
+      <text class="st" x="24" y="164" font-weight="600">4 · Inventario</text>
+      <text class="ss" x="24" y="184">qué scripts hay</text>
+
+      <rect x="162" y="142" width="146" height="62" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".55"/>
+      <text class="st" x="178" y="164" font-weight="600">5 · Los assets</text>
+      <text class="ss" x="178" y="184">los 4 SO de la especie</text>
+
+      <rect x="316" y="142" width="146" height="62" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".55"/>
+      <text class="st" x="332" y="164" font-weight="600">6 · Habilidades</text>
+      <text class="ss" x="332" y="184">fases → efectos</text>
+
+      <rect x="470" y="142" width="146" height="62" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".55"/>
+      <text class="st" x="486" y="164" font-weight="600">7 · El GameObject</text>
+      <text class="ss" x="486" y="184">qué componentes</text>
+
+      <rect x="624" y="142" width="128" height="62" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".55"/>
+      <text class="st" x="640" y="164" font-weight="600">8 · La escena</text>
+      <text class="ss" x="640" y="184">montar y probar</text>
+
+      <line x1="380" y1="204" x2="380" y2="224" stroke="#7d7869" stroke-width="1.5" marker-end="url(#p1)"/>
+
+      <text class="sm" x="8" y="244">C · AFINADO Y CIERRE</text>
+      <rect x="8" y="254" width="238" height="52" rx="8" fill="#22232f" stroke="#9FC7D6" stroke-opacity=".55"/>
+      <text class="st" x="26" y="285" font-weight="600">9 · El flujo de un golpe</text>
+
+      <rect x="262" y="254" width="238" height="52" rx="8" fill="#22232f" stroke="#9FC7D6" stroke-opacity=".55"/>
+      <text class="st" x="280" y="285" font-weight="600">10 · Afinar en orden</text>
+
+      <rect x="516" y="254" width="236" height="52" rx="8" fill="#22232f" stroke="#9FC7D6" stroke-opacity=".55"/>
+      <text class="st" x="534" y="285" font-weight="600">11 · Cerrar y documentar</text>
+
+      <text class="ss" x="8" y="332" fill="#7d7869">El bloque B se hace ENTERO desde el editor de Unity: menú Create + inspector. Solo se escribe C# cuando el catálogo de efectos no sabe hacer algo.</text>
+    </svg>
+  </figure>
+
+  <div class="rule"><strong>Bespoke primero, extraer después.</strong> Se diseña y programa la criatura <em>concreta</em>, y solo cuando dos especies piden lo mismo se convierte en sistema. Ottorock extrajo así el multi-hit, el perfil de locomoción y la cámara por habilidad — ninguno se diseñó "por si acaso".</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">01</span><h2>El hueco que llena</h2><span class="ch-who">Diseño</span></div>
+  <p>Antes de nada: <strong>¿qué hace esta especie que ninguna otra haga?</strong> Si la respuesta es "pega fuerte", no hay especie todavía. Tres decisiones que se toman juntas porque se condicionan:</p>
+
+  <table>
+    <tr><th style="width:22%">Decisión</th><th>En Ottorock</th><th>Por qué manda</th></tr>
+    <tr><td><strong>Arquetipo</strong></td><td>Luchador</td><td>fija qué eje del hexágono "firma" y cómo se siente en combate</td></tr>
+    <tr><td><strong>Elemento</strong></td><td>Mineral</td><td>decide sus 1.5x/0.5x y su relación con el terreno</td></tr>
+    <tr><td><strong>Animal + fantasía</strong></td><td>nutria marina → agarra una roca y pelea con ella</td><td>no es decoración: <em>la mecánica insignia sale de aquí</em></td></tr>
+  </table>
+
+  <div class="note"><strong>El caso Ottorock, para entender el listón.</strong> Las nutrias marinas usan piedras como herramienta y <em>guardan su favorita</em> bajo el brazo entre inmersiones. De ahí sale su mecánica entera: agarrar un trozo de terreno, sellar su reacción elemental y pelear con ella hasta perderla. El animal no se eligió para luego buscarle un kit — <strong>el comportamiento real del animal ES el kit</strong>.</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">02</span><h2>La ficha de 18 campos</h2><span class="ch-who">Diseño</span></div>
+  <p>El documento de la especie. Se rellena <strong>entero</strong> antes de tocar Unity: es lo que evita descubrir a mitad de la implementación que dos habilidades hacen lo mismo o que el kit no cabe en los botones.</p>
+
+  <figure class="fig">
+    <figcaption>Los 18 campos por bloques · en dorado, los que generan código</figcaption>
+    <svg viewBox="0 0 760 230" role="img" aria-label="Los 18 campos de la ficha agrupados en cuatro bloques.">
+      <rect x="8" y="24" width="176" height="186" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="24" y="46">IDENTIDAD</text>
+      <text class="ss" x="24" y="70">1 · Nombre</text>
+      <text class="ss" x="24" y="88">2 · Elemento</text>
+      <text class="ss" x="24" y="106">3 · Arquetipo</text>
+      <text class="ss" x="24" y="124">4 · Silueta y tamaño</text>
+
+      <rect x="196" y="24" width="176" height="186" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="212" y="46">CUERPO</text>
+      <text class="ss" x="212" y="70" fill="#EBC069">5 · Vida/Daño/Velocidad</text>
+      <text class="ss" x="212" y="88">6 · Peso percibido</text>
+      <text class="ss" x="212" y="106" fill="#EBC069">7 · Locomoción</text>
+
+      <rect x="384" y="24" width="176" height="186" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="400" y="46">KIT</text>
+      <text class="ss" x="400" y="70" fill="#EBC069">8 · Movilidad</text>
+      <text class="ss" x="400" y="88" fill="#EBC069">9 · Flex</text>
+      <text class="ss" x="400" y="106" fill="#EBC069">10 · Signature</text>
+      <text class="ss" x="400" y="124" fill="#EBC069">11 · Ataque básico</text>
+      <text class="ss" x="400" y="142" fill="#EBC069">12 · Bloqueo</text>
+      <text class="ss" x="400" y="160">13 · Plan de juego</text>
+
+      <rect x="572" y="24" width="180" height="186" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="588" y="46">MUNDO</text>
+      <text class="ss" x="588" y="70" fill="#EBC069">14 · Sinergia ambiental</text>
+      <text class="ss" x="588" y="88">15 · Como salvaje (IA)</text>
+      <text class="ss" x="588" y="106">16 · Orden de aliado</text>
+      <text class="ss" x="588" y="124">17 · Formas evolutivas</text>
+      <text class="ss" x="588" y="142">18 · Abiertas</text>
+    </svg>
+  </figure>
+
+  <div class="stop"><strong>Puerta de salida.</strong> Si el campo 8, 9, 10 u 11 dice algo que el catálogo de efectos no sabe hacer, eso es un <em>hueco</em>: se anota antes de programar, con su coste. Descubrirlo a media implementación es lo que revienta una estimación.</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">03</span><h2>El hexágono y los números</h2><span class="ch-who">Diseño</span></div>
+  <p>Seis ejes, <strong>presupuesto fijo de 37 puntos</strong>. Quien sube uno, baja otro — es lo que mantiene el roster justo sin negociar caso a caso.</p>
+
+  <figure class="fig">
+    <figcaption>Ottorock · silueta redonda (4–8, sin valles) = el generalista</figcaption>
+    <svg viewBox="0 0 760 300" role="img" aria-label="Hexágono de stats de Ottorock y su mapeo a HP.">
+      <polygon points="170,40 265,95 265,205 170,260 75,205 75,95" fill="none" stroke="rgba(236,230,216,.16)"/>
+      <polygon points="170,95 218,122 218,178 170,205 122,178 122,122" fill="none" stroke="rgba(236,230,216,.10)"/>
+      <line x1="170" y1="150" x2="170" y2="40" stroke="rgba(236,230,216,.10)"/>
+      <line x1="170" y1="150" x2="265" y2="95" stroke="rgba(236,230,216,.10)"/>
+      <line x1="170" y1="150" x2="265" y2="205" stroke="rgba(236,230,216,.10)"/>
+      <line x1="170" y1="150" x2="170" y2="260" stroke="rgba(236,230,216,.10)"/>
+      <line x1="170" y1="150" x2="75" y2="205" stroke="rgba(236,230,216,.10)"/>
+      <line x1="170" y1="150" x2="75" y2="95" stroke="rgba(236,230,216,.10)"/>
+
+      <polygon points="170,62 227,117 218,178 170,194 103,189 103,112" fill="#A98FC4" fill-opacity=".22" stroke="#A98FC4" stroke-width="2"/>
+      <circle cx="170" cy="62" r="3.5" fill="#A98FC4"/><circle cx="227" cy="117" r="3.5" fill="#A98FC4"/>
+      <circle cx="218" cy="178" r="3.5" fill="#A98FC4"/><circle cx="170" cy="194" r="3.5" fill="#A98FC4"/>
+      <circle cx="103" cy="189" r="3.5" fill="#A98FC4"/><circle cx="103" cy="112" r="3.5" fill="#A98FC4"/>
+
+      <text class="st" x="146" y="30" font-weight="600">Vida 8</text>
+      <text class="st" x="274" y="92">Daño 6</text>
+      <text class="st" x="274" y="212">Velocidad 5</text>
+      <text class="st" x="138" y="278">Alcance 4</text>
+      <text class="st" x="6" y="212">Control 7</text>
+      <text class="st" x="4" y="92">Sinergia 7</text>
+
+      <text class="sm" x="360" y="52">DEL HEXÁGONO A LOS NÚMEROS</text>
+      <rect x="360" y="66" width="392" height="52" rx="8" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="378" y="90" font-weight="600">Vida 8 × 500 HP/punto = 4000 HP</text>
+      <text class="ss" x="378" y="108">el ancla NO es el número: es el TIEMPO de combate</text>
+
+      <rect x="360" y="130" width="392" height="76" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="378" y="152">Early game · debe caer en 1–2 min</text>
+      <text class="ss" x="378" y="172">Combate importante · 4–6 min (≈ 3× vida, o fases)</text>
+      <text class="ss" x="378" y="192" fill="#EAC94B">⚠ recalcular la escala cada vez que cambie el daño de un kit</text>
+
+      <rect x="360" y="218" width="392" height="62" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="378" y="240">Ottorock rinde ~65 dps contra un saco quieto…</text>
+      <text class="ss" x="378" y="260">…pero el <tspan fill="#ECE6D8">uptime real</tspan> contra algo que se mueve es ~1/3 → 23 dps</text>
+    </svg>
+  </figure>
+</section>
+
+<section id="s4">
+  <div class="ch-head"><span class="ch-num">04</span><h2>El inventario: qué hay ya escrito</h2><span class="ch-who">Código</span></div>
+  <p>Antes de escribir nada, saber qué existe. El código se reparte en <strong>tres capas que no se mezclan</strong>: datos (assets que edita el diseñador), runtime (componentes que viven en la escena) y editor (herramientas que generan contenido).</p>
+
+  <figure class="fig">
+    <figcaption>Los 39 scripts por capa · en dorado, los assets que creas al hacer una especie</figcaption>
+    <svg viewBox="0 0 760 420" role="img" aria-label="Las tres capas de scripts del proyecto.">
+      <text class="sm" x="8" y="20">CAPA 1 · DATOS — ScriptableObjects y structs que el diseñador edita</text>
+      <rect x="8" y="30" width="744" height="86" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".5"/>
+      <text class="st" x="26" y="52" font-weight="600" fill="#EBC069">CreatureSpeciesData</text>
+      <text class="ss" x="180" y="52">la especie · contiene EvolutionForm[] (una por forma/stance)</text>
+      <text class="st" x="26" y="72" font-weight="600" fill="#EBC069">AbilityData</text>
+      <text class="ss" x="180" y="72">una habilidad · slot, elemento, coste, CD, List&lt;AbilityPhase&gt;</text>
+      <text class="st" x="26" y="92" font-weight="600" fill="#EBC069">LocomotionProfile</text>
+      <text class="ss" x="180" y="92">andares, topes, gravedad, salto · por forma</text>
+      <text class="st" x="26" y="110" font-weight="600">TypeChart</text>
+      <text class="ss" x="180" y="110">los 2 triángulos elementales · uno global, no por especie</text>
+
+      <text class="sm" x="8" y="146">CAPA 2 · RUNTIME — componentes de la escena</text>
+      <rect x="8" y="156" width="366" height="128" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="24" y="176">EN LA CRIATURA JUGABLE</text>
+      <text class="ss" x="24" y="196"><tspan fill="#ECE6D8">CreatureController</tspan> — el orquestador</text>
+      <text class="ss" x="24" y="214"><tspan fill="#ECE6D8">AbilityCaster</tspan> — valida y tickea habilidades</text>
+      <text class="ss" x="24" y="232"><tspan fill="#ECE6D8">ElementalEnergy</tspan> · <tspan fill="#ECE6D8">InputReader</tspan></text>
+      <text class="ss" x="24" y="250"><tspan fill="#ECE6D8">TargetingSystem</tspan> · <tspan fill="#ECE6D8">PlayerCameraRig</tspan></text>
+      <text class="ss" x="24" y="268"><tspan fill="#ECE6D8">StatusController</tspan> · CharacterController</text>
+
+      <rect x="386" y="156" width="366" height="128" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="402" y="176">EN QUIEN RECIBE GOLPES</text>
+      <text class="ss" x="402" y="196"><tspan fill="#ECE6D8">StaggerReceiver</tspan> — vida, postura, noqueo</text>
+      <text class="ss" x="402" y="214"><tspan fill="#ECE6D8">HitReactor</tspan> — empuje, correa, gravedad, hang</text>
+      <text class="ss" x="402" y="232"><tspan fill="#ECE6D8">HitFlash</tspan> — destello del impacto</text>
+      <text class="ss" x="402" y="250"><tspan fill="#ECE6D8">StatusController</tspan> — estados temporales</text>
+      <text class="ss" x="402" y="268">CharacterController</text>
+
+      <rect x="8" y="292" width="366" height="56" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="24" y="312">GLOBALES (objeto "Systems")</text>
+      <text class="ss" x="24" y="334"><tspan fill="#ECE6D8">CombatBootstrap</tspan> → CombatServices · <tspan fill="#ECE6D8">DebugHUD</tspan></text>
+
+      <rect x="386" y="292" width="366" height="56" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="402" y="312">SE AUTO-CREAN AL PRIMER GOLPE</text>
+      <text class="ss" x="402" y="334"><tspan fill="#ECE6D8">DamagePopups</tspan> · <tspan fill="#ECE6D8">ImpactFeel</tspan> · <tspan fill="#ECE6D8">ImpactVFX</tspan></text>
+
+      <text class="sm" x="8" y="378">CAPA 3 · EDITOR — herramientas opcionales, no van en la build</text>
+      <rect x="8" y="388" width="744" height="26" rx="8" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="26" y="406">SubclassSelectorDrawer (el desplegable de efectos) · OttorockContent + SandboxBuilder (atajos) · TypeChartValidator</text>
+    </svg>
+  </figure>
+
+  <div class="rule"><strong>Para una especie nueva no escribes ningún script.</strong> Todo lo de las capas 2 y 3 ya existe y se reutiliza: creas <em>assets</em> desde el menú de Unity y los rellenas en el inspector. Si te ves obligado a tocar la capa 2, es la señal de que el kit pide un efecto que no está en el catálogo — y eso es un <em>hueco</em> que hay que anotar, no un parche que hacer sobre la marcha.</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">05</span><h2>Los assets de la especie</h2><span class="ch-who">Unity</span></div>
+  <p>Cuatro tipos de asset, anidados. Esto es lo que Ottorock necesita para existir:</p>
+
+  <figure class="fig">
+    <figcaption>Cómo se anidan los datos de Ottorock-Libre</figcaption>
+    <svg viewBox="0 0 760 340" role="img" aria-label="Estructura anidada de los assets de Ottorock.">
+      <rect x="8" y="16" width="744" height="316" rx="10" fill="#191a24" stroke="#D9A441" stroke-opacity=".5"/>
+      <text class="sm" x="26" y="40">CREATURE_OTTOROCK.ASSET · CreatureSpeciesData</text>
+      <text class="ss" x="26" y="60">id "ottorock" · displayName "Ottorock" · element Mineral · archetype Luchador</text>
+
+      <rect x="26" y="74" width="708" height="242" rx="8" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="44" y="96">forms[0] · EvolutionForm "Libre"  (clase serializable, no asset)</text>
+      <text class="ss" x="44" y="116">stats: maxHealth 4000 · damage 14 · moveSpeed 6      levelsInForm 2</text>
+      <text class="ss" x="44" y="134">block: energyRegen ×2.5 · weaknessDamage ×2</text>
+
+      <rect x="44" y="148" width="220" height="60" rx="7" fill="#191a24" stroke="#A98FC4" stroke-opacity=".6"/>
+      <text class="ss" x="60" y="170" fill="#A98FC4">locomotion →</text>
+      <text class="ss" x="60" y="188">Locomotion_Ottorock_Libre</text>
+      <text class="sm" x="60" y="202">LOCOMOTIONPROFILE</text>
+
+      <rect x="278" y="148" width="220" height="60" rx="7" fill="#191a24" stroke="#9FC7D6" stroke-opacity=".6"/>
+      <text class="ss" x="294" y="170" fill="#9FC7D6">movilidad → EmbestidaGarra</text>
+      <text class="ss" x="294" y="188" fill="#9FC7D6">flex → MordiscoFerroso</text>
+      <text class="sm" x="294" y="202">ABILITYDATA · signature = null</text>
+
+      <rect x="512" y="148" width="222" height="60" rx="7" fill="#191a24" stroke="#9FC7D6" stroke-opacity=".6"/>
+      <text class="ss" x="528" y="170" fill="#9FC7D6">basicChain[5] →</text>
+      <text class="ss" x="528" y="188" fill="#9FC7D6">Basico1…4 + Basico5</text>
+      <text class="sm" x="528" y="202">ABILITYDATA · en orden</text>
+
+      <text class="ss" x="44" y="236" fill="#7d7869">Cada AbilityData contiene a su vez:</text>
+      <rect x="44" y="248" width="690" height="54" rx="7" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="60" y="270">List&lt;AbilityPhase&gt; → cada fase: nombre, exit (cuándo acaba), flags (rooted/iFrames/superArmor)</text>
+      <text class="ss" x="60" y="290">y List&lt;AbilityEffect&gt; con [SerializeReference] — por eso se pueden mezclar tipos distintos en una lista</text>
+    </svg>
+  </figure>
+
+  <h3>Crearlos en Unity, uno a uno</h3>
+  <p>Todos estos tipos llevan <code>[CreateAssetMenu]</code>, así que aparecen en el menú <strong><code>Assets ▸ Create ▸ Tatemis</code></strong> (o clic derecho en el Project). El orden importa: <strong>de dentro hacia fuera</strong>, porque cada asset referencia a los anteriores.</p>
+
+  <figure class="fig">
+    <figcaption>El menú Create de Tatemis · y en qué orden usarlo</figcaption>
+    <svg viewBox="0 0 760 250" role="img" aria-label="Orden de creación de los assets desde el menú de Unity.">
+      <defs><marker id="p5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+      <rect x="8" y="16" width="200" height="132" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="26" y="38">ASSETS ▸ CREATE ▸ TATEMIS</text>
+      <text class="ss" x="26" y="62">▸ Creature Species</text>
+      <text class="ss" x="26" y="82">▸ Ability</text>
+      <text class="ss" x="26" y="102">▸ Locomotion Profile</text>
+      <text class="ss" x="26" y="122">▸ Type Chart</text>
+      <text class="ss" x="26" y="142" fill="#7d7869">(clic derecho en Project)</text>
+
+      <rect x="252" y="16" width="164" height="60" rx="8" fill="#22232f" stroke="#A98FC4" stroke-opacity=".7"/>
+      <text class="st" x="270" y="40" font-weight="600">1 · Locomotion</text>
+      <text class="ss" x="270" y="60">no depende de nada</text>
+
+      <line x1="334" y1="76" x2="334" y2="94" stroke="#7d7869" marker-end="url(#p5)"/>
+
+      <rect x="252" y="98" width="164" height="60" rx="8" fill="#22232f" stroke="#9FC7D6" stroke-opacity=".7"/>
+      <text class="st" x="270" y="122" font-weight="600">2 · Abilities</text>
+      <text class="ss" x="270" y="142">una por habilidad</text>
+
+      <line x1="416" y1="128" x2="452" y2="128" stroke="#7d7869" marker-end="url(#p5)"/>
+
+      <rect x="456" y="66" width="296" height="124" rx="8" fill="#22232f" stroke="#D9A441"/>
+      <text class="st" x="476" y="92" font-weight="600" fill="#EBC069">3 · Creature Species</text>
+      <text class="ss" x="476" y="114">la última: referencia a todas las anteriores</text>
+      <text class="ss" x="476" y="136">dentro, la lista <tspan fill="#ECE6D8">forms</tspan> — pulsa "+" y rellena</text>
+      <text class="ss" x="476" y="156">los campos de la forma <tspan fill="#ECE6D8">inline</tspan> (no es un asset</text>
+      <text class="ss" x="476" y="176">aparte: vive dentro de la especie)</text>
+
+      <text class="ss" x="8" y="182" fill="#7d7869">El TypeChart es GLOBAL:</text>
+      <text class="ss" x="8" y="200" fill="#7d7869">se crea una vez para todo</text>
+      <text class="ss" x="8" y="218" fill="#7d7869">el juego, no por especie.</text>
+
+      <text class="ss" x="252" y="200" fill="#EAC94B">⚠ Las referencias se arrastran</text>
+      <text class="ss" x="252" y="218" fill="#EAC94B">desde el Project al inspector.</text>
+    </svg>
+  </figure>
+
+  <ol class="steps">
+    <li><strong>Locomotion Profile.</strong> Rellena <code>gaits</code> (pulsa "+" por cada andar: nombre + <code>threshold</code>), el <code>blockMaxInput</code> y, si es un stance limitado, el <code>maxSpeedMultiplier</code>.</li>
+    <li><strong>Una Ability por habilidad</strong> — para Ottorock son 7 (5 de la cadena + Embestida + Mordisco). Se detallan en el paso 06.</li>
+    <li><strong>Creature Species.</strong> Rellena <code>id</code>, <code>displayName</code>, <code>element</code> y <code>archetype</code>. Luego, en la lista <code>forms</code>, pulsa "+" para añadir una forma y despliégala.</li>
+    <li><strong>Dentro de la forma</strong> (se edita <em>inline</em>, no es un asset aparte): <code>formName</code>, los <code>stats</code>, y arrastra desde el Project el <code>locomotion</code>, las habilidades a <code>movilidad</code>/<code>flex</code>/<code>signature</code> y cada eslabón a <code>basicChain</code> <strong>en orden</strong>.</li>
+  </ol>
+
+  <div class="note"><strong>Los <code>EvolutionForm</code> no son assets.</strong> Son una clase serializable que vive <em>dentro</em> del <code>CreatureSpeciesData</code>, así que una especie con dos stances (Ottorock: Libre y Sujeción) es <strong>un solo asset con dos entradas</strong> en <code>forms</code>, cada una con su perfil de locomoción y su kit. Cambiar de stance = cambiar el <code>formIndex</code>.</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">06</span><h2>Componer una habilidad</h2><span class="ch-who">Unity</span></div>
+  <p>Una <code>AbilityData</code> es <strong>fases</strong> (los tiempos) que contienen <strong>efectos</strong> (lo que pasa). Todo se monta en el inspector, sin escribir nada.</p>
+
+  <h3>Cómo se añade un efecto</h3>
+  <p>Los campos <code>effects</code> y <code>exit</code> usan <code>[SerializeReference, SubclassSelector]</code>, que es lo que permite meter <strong>tipos distintos en una misma lista</strong>. Al pulsar "+" aparece una entrada vacía con un <strong>desplegable</strong> a la derecha: ahí se elige el tipo concreto.</p>
+
+  <figure class="fig">
+    <figcaption>El desplegable de tipo · lista sola todos los efectos disponibles</figcaption>
+    <svg viewBox="0 0 760 264" role="img" aria-label="Cómo se ve el inspector de una fase y su desplegable de efectos.">
+      <rect x="8" y="16" width="420" height="232" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="26" y="38">INSPECTOR · ABILITY_OTTOROCK_MORDISCO</text>
+      <text class="ss" x="26" y="62">Slot            <tspan fill="#ECE6D8">Flex</tspan></text>
+      <text class="ss" x="26" y="82">Element         <tspan fill="#ECE6D8">Especie</tspan></text>
+      <text class="ss" x="26" y="102">Energy Cost     <tspan fill="#ECE6D8">20</tspan>      Cooldown  <tspan fill="#ECE6D8">3</tspan></text>
+
+      <rect x="26" y="116" width="384" height="118" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="42" y="138">▾ Phases            <tspan fill="#7d7869">1</tspan></text>
+      <text class="ss" x="56" y="158">▾ Element 0</text>
+      <text class="ss" x="72" y="176">Name  <tspan fill="#ECE6D8">Mordisco</tspan></text>
+      <text class="ss" x="72" y="194">Exit  <tspan fill="#EBC069">AfterSeconds ▾</tspan>   <tspan fill="#ECE6D8">0.5</tspan></text>
+      <text class="ss" x="72" y="212">▾ Effects  <tspan fill="#7d7869">5</tspan></text>
+      <text class="ss" x="88" y="228">Element 0  <tspan fill="#EBC069">MeleeHitbox ▾</tspan></text>
+
+      <line x1="428" y1="228" x2="470" y2="200" stroke="#D9A441" stroke-width="1.5"/>
+
+      <rect x="474" y="16" width="278" height="232" rx="8" fill="#22232f" stroke="#D9A441"/>
+      <text class="sm" x="492" y="38">AL PULSAR EL DESPLEGABLE</text>
+      <text class="ss" x="492" y="62" fill="#7d7869">(None)</text>
+      <text class="ss" x="492" y="82">ApplyStatus</text>
+      <text class="ss" x="492" y="100">CameraShot</text>
+      <text class="ss" x="492" y="118">CarryToFront</text>
+      <text class="ss" x="492" y="136">DashMotion</text>
+      <text class="ss" x="492" y="154">DealDamage</text>
+      <text class="ss" x="492" y="172">ElementalBurst</text>
+      <text class="ss" x="492" y="190">GainEnergy</text>
+      <text class="ss" x="492" y="208">Knockback</text>
+      <text class="ss" x="492" y="226">MeleeHitbox · SweepHitbox · StainTerrain</text>
+    </svg>
+  </figure>
+
+  <div class="rule"><strong>El desplegable se rellena solo.</strong> Lista todas las clases que heredan de <code>AbilityEffect</code> y tienen constructor vacío. Consecuencia práctica: <strong>el día que alguien añada un efecto nuevo al catálogo, aparece ahí sin tocar nada más</strong> — no hay que registrarlo en ningún sitio. Lo mismo con <code>exit</code> y sus <code>PhaseExit</code> (<code>AfterSeconds</code>, <code>OnHitLanded</code>, <code>OnButtonReleased</code>, <code>OnSecondPress</code>, <code>Immediate</code>).</div>
+
+  <p>La embestida entera, tal como queda montada — es el ejemplo más completo del kit:</p>
+
+  <pre><span class="c">// Ability_Ottorock_EmbestidaGarra · Movilidad · coste 12 · CD 2.5 s</span>
+
+<span class="k">FASE 1 · "Carga"</span>  0.30 s  <span class="v">rooted</span>          <span class="c">// clavado: telegrafía</span>
+  └ CameraShot        distancia 12, picado 18°, detrás
+
+<span class="k">FASE 2 · "Embestida"</span>  0.35 s
+  ├ CameraShot        <span class="c">(renovado: se suelta al acabar la fase)</span>
+  ├ DashMotion        6 u en 0.28 s, maxPitch 35°
+  ├ SweepHitbox       radio 1.3, <span class="v">hitInterval 0.09</span>   <span class="c">// multi-hit: ~4 golpes</span>
+  ├ DealDamage        8 daño · 6 aturdimiento   <span class="c">(OnHit)</span>
+  ├ Knockback         18 u/s, <span class="v">useMotionDirection</span>, verticalScale 0.6, hang 1 s
+  └ CarryToFront      máx 2.6 u, <span class="v">matchHeight</span>       <span class="c">// la correa: no se escapa</span>
+
+<span class="k">FASE 3 · "Deslizamiento"</span>  0.36 s
+  ├ ElementalBurst    radio 2.6, <span class="v">hitstop 0.14</span>, reportHits
+  ├ ApplyStatus       Ralentizado 2 s          <span class="c">(a quien pille la explosión)</span>
+  └ DashMotion        1.9 u, <span class="v">easeOut + continueForward</span>  <span class="c">// patina y frena</span></pre>
+
+  <figure class="fig">
+    <figcaption>Cómo se eligen los efectos de una fase</figcaption>
+    <svg viewBox="0 0 760 200" role="img" aria-label="Un actuador más varios payloads componen una fase.">
+      <defs><marker id="p2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+      <rect x="8" y="50" width="200" height="80" rx="8" fill="#22232f" stroke="#9FC7D6"/>
+      <text class="sm" x="26" y="74">1 · ELIGE EL ACTUADOR</text>
+      <text class="ss" x="26" y="96">¿cómo llega el golpe?</text>
+      <text class="ss" x="26" y="114">hitbox · barrido · proyectil · zona</text>
+
+      <line x1="208" y1="90" x2="248" y2="90" stroke="#7d7869" marker-end="url(#p2)"/>
+
+      <rect x="252" y="50" width="200" height="80" rx="8" fill="#22232f" stroke="#DA6A3E"/>
+      <text class="sm" x="270" y="74">2 · CUELGA LOS PAYLOADS</text>
+      <text class="ss" x="270" y="96">¿qué le pasa a quien lo reciba?</text>
+      <text class="ss" x="270" y="114">daño · empuje · estado · correa</text>
+
+      <line x1="452" y1="90" x2="492" y2="90" stroke="#7d7869" marker-end="url(#p2)"/>
+
+      <rect x="496" y="50" width="256" height="80" rx="8" fill="#22232f" stroke="#A98FC4"/>
+      <text class="sm" x="514" y="74">3 · ¿PIDE CÁMARA?</text>
+      <text class="ss" x="514" y="96">solo si el gesto necesita verse</text>
+      <text class="ss" x="514" y="114">(un dash largo sí; un jab no)</text>
+
+      <text class="ss" x="8" y="164" fill="#EAC94B">⚠ Dos actuadores que reporten en la MISMA fase comparten payloads → el daño se cobra dos veces.</text>
+      <text class="ss" x="8" y="182" fill="#EAC94B">Si un actuador necesita payload propio (el estallido con su slow), va en SU PROPIA fase.</text>
+    </svg>
+  </figure>
+
+  <h3>El catálogo disponible</h3>
+  <table>
+    <tr><th style="width:24%">Actuadores</th><th style="width:38%">Payloads</th><th>Presentación</th></tr>
+    <tr>
+      <td><code>MeleeHitbox</code><br><code>SweepHitbox</code> (multi-hit)<br><code>DashMotion</code><br><code>ElementalBurst</code><br><code>StainTerrain</code> <span style="color:#7f8196">(Fase 2)</span></td>
+      <td><code>DealDamage</code><br><code>Knockback</code> (3D, lift, hang)<br><code>CarryToFront</code> (correa)<br><code>ApplyStatus</code><br><code>GainEnergy</code></td>
+      <td><code>CameraShot</code></td>
+    </tr>
+  </table>
+
+  <div class="note"><strong>Las relaciones entre números que hay que respetar.</strong> No son opcionales; si se rompen, la habilidad deja de funcionar aunque cada número parezca razonable por separado:
+  <ul style="margin:.6rem 0 0">
+    <li><strong>step-in &gt; empuje</strong> — o el enemigo se aleja más de lo que tú avanzas y la cadena no encadena.</li>
+    <li><strong>empuje ≤ velocidad de tu dash</strong> — o se te escapa por delante.</li>
+    <li><strong>la fase dura más que su <code>DashMotion</code></strong> — o la fase siguiente corta el desplazamiento a medias.</li>
+    <li><strong>el hang cubre las fases de recuperación</strong> — o caes antes de poder encadenar el siguiente golpe.</li>
+    <li><strong><code>lift</code> es velocidad, no distancia</strong> — la altura real es <code>lift × duration</code>.</li>
+  </ul></div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">07</span><h2>El GameObject: montar el cuerpo</h2><span class="ch-who">Unity</span></div>
+  <p>Los assets son la <em>definición</em>; ahora hay que montar el cuerpo en la escena. <strong>Add Component</strong> y arrastrar referencias — nada más.</p>
+
+  <h3>El jugador, en cuatro movimientos</h3>
+  <ol class="steps">
+    <li><strong>Crea el objeto</strong> — una cápsula sirve (<code>GameObject ▸ 3D Object ▸ Capsule</code>). <strong>Bórrale el <code>CapsuleCollider</code></strong>: el <code>CharacterController</code> trae el suyo y los dos juntos se estorban.</li>
+    <li><strong>Add Component → <code>CreatureController</code>.</strong> Unity añade solos <code>CharacterController</code>, <code>ElementalEnergy</code> y <code>AbilityCaster</code>, porque el controller los declara como <code>[RequireComponent]</code>. Tres menos que recordar.</li>
+    <li><strong>Añade a mano los cuatro que faltan:</strong> <code>InputReader</code>, <code>TargetingSystem</code>, <code>StatusController</code> y <code>PlayerCameraRig</code>.</li>
+    <li><strong>Cablea.</strong> En <code>CreatureController</code>, el campo <code>data</code> se rellena inline: arrastra tu especie a <code>species</code> y deja <code>formIndex</code> en 0. En <code>PlayerCameraRig</code>, asigna <code>follow</code> (el propio jugador), <code>targeting</code>, <code>input</code> y <code>cam</code> (la Main Camera).</li>
+  </ol>
+
+  <div class="note"><strong>El rig de cámara va en el JUGADOR, no en la cámara.</strong> Es un script propio que mueve la <code>Main Camera</code> desde <code>LateUpdate</code> — no hay Cinemachine. La cámara de la escena se queda con su <code>Camera</code> y su <code>AudioListener</code> y nada más.</div>
+
+  <p>Estos son todos los componentes y por qué cada uno:</p>
+
+  <figure class="fig">
+    <figcaption>Jugador y maniquí · quién lee a quién</figcaption>
+    <svg viewBox="0 0 760 400" role="img" aria-label="Componentes del jugador y del maniquí y sus relaciones.">
+      <defs><marker id="p3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+
+      <rect x="8" y="24" width="330" height="330" rx="10" fill="#191a24" stroke="#D9A441" stroke-opacity=".5"/>
+      <text class="sm" x="26" y="46">GAMEOBJECT "PLAYER (OTTOROCK)"</text>
+
+      <rect x="26" y="58" width="294" height="34" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="40" y="79"><tspan fill="#ECE6D8">CharacterController</tspan> — colisión y movimiento (Unity)</text>
+
+      <rect x="26" y="98" width="294" height="34" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="40" y="119"><tspan fill="#ECE6D8">InputReader</tspan> — teclado + gamepad + rebinding</text>
+
+      <rect x="26" y="138" width="294" height="34" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="40" y="159"><tspan fill="#ECE6D8">ElementalEnergy</tspan> — recurso tipo tinta</text>
+
+      <rect x="26" y="178" width="294" height="34" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="40" y="199"><tspan fill="#ECE6D8">AbilityCaster</tspan> — cooldowns + tickea la habilidad</text>
+
+      <rect x="26" y="218" width="294" height="34" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="40" y="239"><tspan fill="#ECE6D8">TargetingSystem</tspan> — lock-on</text>
+
+      <rect x="26" y="258" width="294" height="34" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="40" y="279"><tspan fill="#ECE6D8">PlayerCameraRig</tspan> — los 3 estados de cámara</text>
+
+      <rect x="26" y="298" width="294" height="42" rx="6" fill="#22232f" stroke="#D9A441"/>
+      <text class="ss" x="40" y="317"><tspan fill="#EBC069">CreatureController</tspan> — EL ORQUESTADOR</text>
+      <text class="ss" x="40" y="333">+ StatusController · ActionColor (debug)</text>
+
+      <text class="ss" x="346" y="322" fill="#7d7869">data =</text>
+      <text class="ss" x="346" y="338" fill="#7d7869">CreatureInstance</text>
+
+      <rect x="422" y="24" width="330" height="170" rx="10" fill="#191a24" stroke="#DA6A3E" stroke-opacity=".5"/>
+      <text class="sm" x="440" y="46">GAMEOBJECT "MANIQUÍ"</text>
+      <rect x="440" y="58" width="294" height="30" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="454" y="77"><tspan fill="#ECE6D8">StaggerReceiver</tspan> — vida, postura, noqueo <tspan fill="#7d7869">(ICombatant)</tspan></text>
+      <rect x="440" y="94" width="294" height="30" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="454" y="113"><tspan fill="#ECE6D8">HitReactor</tspan> — empuje, correa, gravedad, hang</text>
+      <rect x="440" y="130" width="294" height="30" rx="6" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="454" y="149"><tspan fill="#ECE6D8">HitFlash</tspan> · <tspan fill="#ECE6D8">StatusController</tspan> · CharacterController</text>
+      <text class="ss" x="440" y="180" fill="#7d7869">species → Species_ManiquiRayo (solo da elemento)</text>
+
+      <rect x="422" y="210" width="330" height="76" rx="10" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="440" y="232">GAMEOBJECT "SYSTEMS"</text>
+      <text class="ss" x="440" y="254"><tspan fill="#ECE6D8">CombatBootstrap</tspan> — publica TypeChart en CombatServices</text>
+      <text class="ss" x="440" y="272"><tspan fill="#ECE6D8">DebugHUD</tspan> — barras, cooldowns, andar, F1</text>
+
+      <rect x="422" y="300" width="330" height="54" rx="10" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="sm" x="440" y="322">NO HAY QUE PONERLOS: SE CREAN SOLOS</text>
+      <text class="ss" x="440" y="344">DamagePopups · ImpactFeel · ImpactVFX · HitboxDebug</text>
+
+      <line x1="338" y1="318" x2="420" y2="120" stroke="#7d7869" stroke-dasharray="3 3" marker-end="url(#p3)"/>
+    </svg>
+  </figure>
+
+  <div class="rule"><strong>El <code>CreatureController</code> no contiene la criatura: la <em>referencia</em>.</strong> Su campo <code>data</code> es un <code>CreatureInstance</code> (especie + forma + nivel), así que cambiar de criatura o de stance es cambiar ese puntero, no reconstruir el GameObject. Es lo que hará el swap del equipo y el cambio Libre↔Sujeción.</div>
+
+  <h3>El enemigo y los sistemas</h3>
+  <ol class="steps">
+    <li><strong>Enemigo:</strong> cápsula (sin su collider) + <code>CharacterController</code> + <code>StaggerReceiver</code> + <code>HitReactor</code> + <code>HitFlash</code> + <code>StatusController</code>. En el <code>StaggerReceiver</code>, asigna una especie (basta una mínima que le dé <em>elemento</em>) y pon <code>maxHealth</code> y <code>health</code> al mismo valor.</li>
+    <li><strong>Un objeto "Systems"</strong> con <code>CombatBootstrap</code> — arrástrale el <code>TypeChart</code>. <strong>Sin esto no hay multiplicador elemental</strong>: todo pega ×1 y parece que la tabla no funciona.</li>
+    <li><strong>Opcional:</strong> <code>DebugHUD</code> en ese mismo objeto. Se autocablea buscando lo que necesita, así que basta añadirlo.</li>
+    <li><strong>Nada más.</strong> <code>DamagePopups</code>, <code>ImpactFeel</code> e <code>ImpactVFX</code> se crean solos al primer golpe, y <code>HitFlash</code>/<code>StatusController</code> se auto-añaden si faltan.</li>
+  </ol>
+
+  <div class="stop"><strong>Los tres olvidos que más tiempo cuestan.</strong> Si algo no va, empieza por aquí: ① el <code>CapsuleCollider</code> del primitivo sin borrar, peleándose con el <code>CharacterController</code>; ② el <code>TypeChart</code> sin asignar en <code>CombatBootstrap</code> (todo pega neutro); ③ el enemigo sin <code>HitReactor</code>, que no se inmuta al recibir golpes porque no hay nada que lo desplace.</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">08</span><h2>La escena de pruebas</h2><span class="ch-who">Unity</span></div>
+  <p>Lo mínimo para poder juzgar el feel: suelo, luz, tu criatura, algo a lo que pegar y una cámara.</p>
+
+  <ol class="steps">
+    <li><strong>Suelo y unas paredes</strong> en caja gris. Un par de pilares vienen bien: sirven para probar la oclusión de cámara y el lock-on.</li>
+    <li><strong>Tu criatura</strong> (paso 07) en el centro, y la <code>Main Camera</code> detrás — su posición inicial da igual, el rig la recoloca.</li>
+    <li><strong>Dos o tres enemigos separados</strong>, no uno. Con uno solo no se puede probar el cambio de objetivo ni la adquisición en pantalla, y esos fallos aparecen tarde.</li>
+    <li><strong>Elige su elemento a propósito</strong>: que tu criatura los supere, para <em>ver</em> el multiplicador en cada número. Los maniquíes de Ottorock son de Rayo porque Mineral › Rayo = ×1.5 visible.</li>
+    <li><strong>Play</strong>, y a partir de aquí solo se afina.</li>
+  </ol>
+
+  <div class="note"><strong>Atajo opcional: generarlo por código.</strong> Todo lo de los pasos 05–08 se puede automatizar con un script de editor — es lo que hacen <code>OttorockContent.cs</code> (los assets) y <code>SandboxBuilder.cs</code> (la escena entera), disparables desde el menú <code>Tatemis ▸</code>. <strong>Es una comodidad, no el camino</strong>: sirve para regenerar contenido tras un cambio de estructura, para que todo el equipo tenga la misma escena de pruebas exacta, y para dejar el estado del bicho en git como código revisable. Para <em>diseñar</em> una criatura, el inspector es mejor: ves el resultado mientras tocas los números.</div>
+
+  <div class="stop"><strong>Si usas los generadores, reconstruye tras cada cambio de estructura.</strong> Un asset guardado con un kit de otro número de fases, o de antes de que existiera el perfil de locomoción, se queda a medias. Casi todos los "no me funciona" de una sesión de feel salen de jugar una escena sin regenerar.</div>
+</section>
+
+<section id="s9">
+  <div class="ch-head"><span class="ch-num">09</span><h2>El flujo de un golpe</h2><span class="ch-who">Código</span></div>
+  <p>Lo que pasa entre que pulsas el botón y ves el número. Sirve para <strong>saber dónde poner el breakpoint</strong> cuando algo no ocurre:</p>
+
+  <figure class="fig">
+    <figcaption>De la tecla al número · cada flecha es una llamada real</figcaption>
+    <svg viewBox="0 0 760 480" role="img" aria-label="Flujo completo de un golpe, del input al feedback.">
+      <defs><marker id="p4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+
+      <rect x="230" y="14" width="300" height="34" rx="7" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="248" y="35"><tspan fill="#ECE6D8">InputReader.BasicPressed</tspan> — new Input System</text>
+      <line x1="380" y1="48" x2="380" y2="64" stroke="#7d7869" marker-end="url(#p4)"/>
+
+      <rect x="190" y="68" width="380" height="48" rx="7" fill="#22232f" stroke="#D9A441" stroke-opacity=".5"/>
+      <text class="ss" x="208" y="88"><tspan fill="#EBC069">CreatureController</tspan> → form.BasicAt(combo) → TryCastAbility</text>
+      <text class="ss" x="208" y="106">alinea el cuerpo · construye AbilityCtx (aimPoint, lockTarget, elemento)</text>
+      <line x1="380" y1="116" x2="380" y2="132" stroke="#7d7869" marker-end="url(#p4)"/>
+
+      <rect x="190" y="136" width="380" height="48" rx="7" fill="#22232f" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="208" y="156"><tspan fill="#ECE6D8">AbilityCaster.TryStart</tspan> — ¿cooldown? ¿energía?</text>
+      <text class="ss" x="208" y="174">crea ActiveAbility y la tickea fase a fase</text>
+      <line x1="380" y1="184" x2="380" y2="200" stroke="#7d7869" marker-end="url(#p4)"/>
+
+      <rect x="190" y="204" width="380" height="48" rx="7" fill="#22232f" stroke="#9FC7D6" stroke-opacity=".6"/>
+      <text class="ss" x="208" y="224"><tspan fill="#9FC7D6">ACTUADOR</tspan> (MeleeHitbox / SweepHitbox) — OverlapSphere</text>
+      <text class="ss" x="208" y="242">encuentra ICombatant → <tspan fill="#ECE6D8">ctx.reportHit(HitInfo)</tspan></text>
+      <line x1="380" y1="252" x2="380" y2="268" stroke="#7d7869" marker-end="url(#p4)"/>
+
+      <rect x="190" y="272" width="380" height="34" rx="7" fill="#22232f" stroke="#DA6A3E" stroke-opacity=".6"/>
+      <text class="ss" x="208" y="293"><tspan fill="#DA6A3E">TODOS los payloads OnHit de la fase</tspan> se disparan</text>
+
+      <line x1="290" y1="306" x2="180" y2="336" stroke="#7d7869" marker-end="url(#p4)"/>
+      <line x1="380" y1="306" x2="380" y2="336" stroke="#7d7869" marker-end="url(#p4)"/>
+      <line x1="470" y1="306" x2="590" y2="336" stroke="#7d7869" marker-end="url(#p4)"/>
+
+      <rect x="8" y="340" width="230" height="60" rx="7" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="24" y="360"><tspan fill="#ECE6D8">Knockback</tspan> → HitReactor</text>
+      <text class="ss" x="24" y="378">empuje 3D · lift · hang</text>
+      <text class="ss" x="24" y="394" fill="#7d7869">+ CarryToFront (correa)</text>
+
+      <rect x="252" y="340" width="256" height="60" rx="7" fill="#191a24" stroke="#D9A441" stroke-opacity=".5"/>
+      <text class="ss" x="268" y="360"><tspan fill="#EBC069">DealDamage</tspan> → DamageResolver</text>
+      <text class="ss" x="268" y="378">TypeChart × Vulnerable → dealt</text>
+      <text class="ss" x="268" y="394">→ ICombatant.<tspan fill="#ECE6D8">TakeHit</tspan>()</text>
+
+      <rect x="522" y="340" width="230" height="60" rx="7" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="ss" x="538" y="360"><tspan fill="#ECE6D8">ApplyStatus</tspan> → StatusController</text>
+      <text class="ss" x="538" y="378">slow · vulnerable · quemadura</text>
+      <text class="ss" x="538" y="394" fill="#7d7869">etiqueta sobre el enemigo</text>
+
+      <line x1="380" y1="400" x2="380" y2="418" stroke="#7d7869" marker-end="url(#p4)"/>
+      <rect x="140" y="422" width="480" height="50" rx="7" fill="#22232f" stroke="#D9A441"/>
+      <text class="ss" x="158" y="442"><tspan fill="#EBC069">HitFeedback.Report</tspan> — calcula el PESO y lo reparte:</text>
+      <text class="ss" x="158" y="462">HitFlash · DamagePopups · ImpactVFX · ImpactFeel (hitstop + shake) · GrantHang</text>
+    </svg>
+  </figure>
+
+  <table>
+    <tr><th style="width:36%">Si no ves…</th><th>Mira aquí</th></tr>
+    <tr><td>ningún número al golpear</td><td>¿el objetivo implementa <code>ICombatant</code>? ¿el <code>DealDamage</code> está en la misma fase que el actuador?</td></tr>
+    <tr><td>daño sin multiplicador elemental</td><td><code>CombatBootstrap</code> no publicó el <code>TypeChart</code>, o la habilidad es <code>Neutro</code> (los básicos lo son a propósito)</td></tr>
+    <tr><td>el estado no se aplica</td><td>¿el <code>ApplyStatus</code> está en la fase del actuador que <em>reporta</em>? El estallido solo reporta si <code>reportHits</code></td></tr>
+    <tr><td>el enemigo no se mueve al golpearlo</td><td>le falta <code>HitReactor</code> (o <code>CharacterController</code>, que es quien lo desplaza con colisión)</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">10</span><h2>Afinar · en este orden</h2><span class="ch-who">Playtest</span></div>
+  <p>Afinar sin orden es cambiar cinco cosas y no saber cuál funcionó. <strong>No se sube un peldaño hasta que el anterior se siente bien.</strong></p>
+
+  <figure class="fig">
+    <figcaption>De abajo arriba · cada peldaño asume que el anterior ya está resuelto</figcaption>
+    <svg viewBox="0 0 760 280" role="img" aria-label="Orden de afinado en cinco capas.">
+      <rect x="8" y="16" width="744" height="44" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="28" y="44" font-weight="600">5 · Pulido <tspan class="ss">— VFX, color, sonido. Lo último: maquilla, no arregla.</tspan></text>
+
+      <rect x="8" y="68" width="744" height="44" rx="8" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="28" y="96" font-weight="600">4 · Contundencia <tspan class="ss">— hitstop, sacudida, destello. Todo desde el MISMO peso del golpe.</tspan></text>
+
+      <rect x="8" y="120" width="744" height="44" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".5"/>
+      <text class="st" x="28" y="148" font-weight="600">3 · Consecuencia <tspan class="ss">— empuje, elevación, suspensión aérea, estados.</tspan></text>
+
+      <rect x="8" y="172" width="744" height="44" rx="8" fill="#22232f" stroke="#D9A441" stroke-opacity=".5"/>
+      <text class="st" x="28" y="200" font-weight="600">2 · Tiempos <tspan class="ss">— duración de fases, cadencia del multi-hit, cooldowns.</tspan></text>
+
+      <rect x="8" y="224" width="744" height="44" rx="8" fill="#22232f" stroke="#7FB574"/>
+      <text class="st" x="28" y="252" font-weight="600">1 · Movimiento y cámara <tspan class="ss">— si moverse y mirar no se sienten bien, nada de arriba se puede juzgar.</tspan></text>
+    </svg>
+  </figure>
+
+  <h3>El síntoma dice qué palanca tocar</h3>
+  <table>
+    <tr><th style="width:38%">Lo que notas</th><th>Dónde está la causa (casi siempre)</th></tr>
+    <tr><td>"El golpe no se siente"</td><td>hitstop, no el daño. Y comprueba que el destello dure más que el congelado.</td></tr>
+    <tr><td>"Se me escapa el enemigo"</td><td>relación empuje/step-in, no el alcance de la hitbox.</td></tr>
+    <tr><td>"El combo aéreo se cae"</td><td>el hang no cubre las <em>fases de recuperación</em>, no la altura.</td></tr>
+    <tr><td>"Marea"</td><td>algo mueve la cámara <em>en respuesta a tu propio input</em>. Es un lazo, no una velocidad.</td></tr>
+    <tr><td>"Va lento / va rápido"</td><td>si es al moverse, es el perfil; si es al pegar, son los tiempos de fase.</td></tr>
+    <tr><td>"El efecto no aparece"</td><td>¿el payload está en la fase del actuador correcto? ¿el asset tiene la estructura vieja?</td></tr>
+  </table>
+
+  <div class="rule"><strong>Un número a la vez, y anota el rango.</strong> Cuando encuentres el valor bueno, escribe también los que probaste y por qué fallaban ("0.22 s no se telegrafía, 0.38 s ya se siente lento → 0.30 s"). El siguiente que lo toque no repetirá la búsqueda a ciegas.</div>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">11</span><h2>Antes de darla por hecha</h2><span class="ch-who">Cierre</span></div>
+  <ul class="chk">
+    <li><strong>La ficha refleja lo implementado</strong> — si el playtest cambió una habilidad, el campo 8/9/10 lo dice.</li>
+    <li><strong>Los huecos nuevos están anotados</strong> — lo que obligó a tocar C# va al catálogo, con su coste.</li>
+    <li><strong>Lo que se extrajo está marcado como sistema</strong> — si otra especie ya puede usarlo, deja de ser bespoke.</li>
+    <li><strong>Las decisiones descartadas están escritas</strong>, con el motivo. Ahorra que alguien reproponga lo ya probado.</li>
+    <li><strong>Se juega con mando</strong> — un juego de acción se juzga con mando, no con teclado.</li>
+    <li><strong>La escena se reconstruye limpia</strong> y sigue funcionando desde cero.</li>
+  </ul>
+
+  <div class="note"><strong>El listón real no es "está implementada".</strong> Es que alguien que no la diseñó pueda cogerla, jugarla y <em>entender qué quiere que haga</em> sin que se lo expliquen. Si hace falta un tutorial verbal para que se sienta bien, todavía no está.</div>
+</section>
+
+<footer>
+  <div class="wrap" style="padding:0">
+    Tatemis3D · Arzpal — Cómo funciona un tatemis ya montado → <code>tatemis-base.html</code> · Especificación técnica → <code>ARCHITECTURE.md</code> · Catálogo de efectos → <code>ABILITY-SYSTEM.md</code>
+  </div>
+</footer>
+</div>

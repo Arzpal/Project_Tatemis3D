@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 006e178d6109e75459de1315cda5db36, type: 3}
+  m_Name: Ability_Ottorock_Basico5
+  m_EditorClassIdentifier: Assembly-CSharp::Tatemis.AbilityData
+  id: ottorock_basico_5
+  displayName: "Garra s\xEDsmica"
+  slot: 1
+  element: 0
+  energyCost: 0
+  cooldown: 0.7
+  phases:
+  - name: Remate
+    animTrigger: 
+    effects:
+    - rid: 1790544224151667628
+    - rid: 1790544224151667629
+    - rid: 1790544224151667630
+    - rid: 1790544224151667631
+    - rid: 1790544224151667632
+    exit:
+      rid: 1790544224151667633
+    rooted: 0
+    iFrames: 0
+    superArmor: 0
+    interruptible: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 1790544224151667628
+      type: {class: DashMotion, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        distance: 1.3
+        time: 0.1
+        maxPitch: 35
+        easeOut: 0
+        continueForward: 0
+    - rid: 1790544224151667629
+      type: {class: MeleeHitbox, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        range: 2.2
+        radius: 1.6
+    - rid: 1790544224151667630
+      type: {class: DealDamage, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        amount: 26
+        staggerAmount: 30
+        when: 1
+    - rid: 1790544224151667631
+      type: {class: Knockback, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        speed: 16
+        duration: 0.14
+        flinch: 0.2
+        useMotionDirection: 0
+        lift: 0
+        verticalScale: 1
+        hang: 0.55
+        when: 1
+    - rid: 1790544224151667632
+      type: {class: ElementalBurst, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        radius: 2.8
+        damage: 16
+        staggerAmount: 16
+        forwardOffset: 1.2
+        when: 1
+        reportHits: 0
+        hitstop: 0
+    - rid: 1790544224151667633
+      type: {class: AfterSeconds, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        seconds: 0.62

@@ -1,0 +1,157 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 006e178d6109e75459de1315cda5db36, type: 3}
+  m_Name: Ability_Ottorock_EmbestidaGarra
+  m_EditorClassIdentifier: Assembly-CSharp::Tatemis.AbilityData
+  id: ottorock_embestida
+  displayName: Embestida Garra
+  slot: 0
+  element: 1
+  energyCost: 12
+  cooldown: 2.5
+  phases:
+  - name: Carga
+    animTrigger: 
+    effects:
+    - rid: 1790544224151667605
+    exit:
+      rid: 1790544224151667606
+    rooted: 1
+    iFrames: 0
+    superArmor: 0
+    interruptible: 1
+  - name: Embestida
+    animTrigger: 
+    effects:
+    - rid: 1790544224151667607
+    - rid: 1790544224151667608
+    - rid: 1790544224151667609
+    - rid: 1790544224151667610
+    - rid: 1790544224151667611
+    - rid: 1790544224151667612
+    exit:
+      rid: 1790544224151667613
+    rooted: 0
+    iFrames: 0
+    superArmor: 0
+    interruptible: 1
+  - name: Deslizamiento
+    animTrigger: 
+    effects:
+    - rid: 1790544224151667614
+    - rid: 1790544224151667615
+    - rid: 1790544224151667616
+    exit:
+      rid: 1790544224151667617
+    rooted: 0
+    iFrames: 0
+    superArmor: 0
+    interruptible: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 1790544224151667605
+      type: {class: CameraShot, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        distance: 12
+        pitch: 18
+        fromBehind: 1
+        behindSpeed: 260
+        holdAfter: 0.12
+        alignToAim: 1
+    - rid: 1790544224151667606
+      type: {class: AfterSeconds, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        seconds: 0.3
+    - rid: 1790544224151667607
+      type: {class: CameraShot, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        distance: 12
+        pitch: 18
+        fromBehind: 1
+        behindSpeed: 260
+        holdAfter: 0
+        alignToAim: 1
+    - rid: 1790544224151667608
+      type: {class: DashMotion, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        distance: 6
+        time: 0.28
+        maxPitch: 35
+        easeOut: 0
+        continueForward: 0
+    - rid: 1790544224151667609
+      type: {class: SweepHitbox, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        radius: 1.3
+        forwardOffset: 0.8
+        hitInterval: 0.09
+    - rid: 1790544224151667610
+      type: {class: DealDamage, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        amount: 8
+        staggerAmount: 6
+        when: 1
+    - rid: 1790544224151667611
+      type: {class: Knockback, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        speed: 18
+        duration: 0.14
+        flinch: 0.1
+        useMotionDirection: 1
+        lift: 2
+        verticalScale: 0.6
+        hang: 1
+        when: 1
+    - rid: 1790544224151667612
+      type: {class: CarryToFront, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        distance: 2.6
+        speed: 26
+        duration: 0.3
+        flinch: 0
+        matchHeight: 1
+        heightOffset: 0.3
+        when: 1
+    - rid: 1790544224151667613
+      type: {class: AfterSeconds, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        seconds: 0.35
+    - rid: 1790544224151667614
+      type: {class: ElementalBurst, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        radius: 2.6
+        damage: 14
+        staggerAmount: 14
+        forwardOffset: 0
+        when: 0
+        reportHits: 1
+        hitstop: 0.14
+    - rid: 1790544224151667615
+      type: {class: ApplyStatus, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        type: 2
+        duration: 2
+        tickDamage: 0
+        when: 1
+    - rid: 1790544224151667616
+      type: {class: DashMotion, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        distance: 1.9
+        time: 0.34
+        maxPitch: 35
+        easeOut: 1
+        continueForward: 1
+    - rid: 1790544224151667617
+      type: {class: AfterSeconds, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        seconds: 0.36

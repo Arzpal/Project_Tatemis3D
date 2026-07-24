@@ -13,16 +13,26 @@
 
 ```
 CreatureController (MonoBehaviour, criatura activa)
-├── InputReader            → mover / saltar / ataque básico / lock-on / 3 habilidades / contextual (finisher·Sludge) / bloqueo / órdenes / swap
+├── InputReader            → mover / saltar / ataque básico / lock-on / 3 habilidades / contextual (interactuar) / bloqueo / órdenes / swap
+├── LocomotionProfile (SO) → velocidad LINEAL con el stick + andares visuales por umbral; por forma, sobrescribible por stance (ABILITY-EXTRACTION §8.1b)
 ├── Locomotion + StateMachine (Locomotion, Ability, Block/ElementForm, Hitstun, KO)
-├── AbilityCaster          → valida cooldown + energía, dispara animación, ejecuta efectos
+│                            `IsRooted` ← fases `rooted`: clava el cuerpo (sin control, inercia NI gravedad)
+│                            `GrantHang` ← suspensión en el aire (juggle): golpear/ser golpeado no te desploma; se corta al parar
+├── AbilityCaster          → valida cooldown + energía, dispara animación, ejecuta efectos fase a fase
 ├── ElementalEnergy        → recurso tipo tinta (Splatoon), regenera por segundo
-└── TargetingSystem        → lock-on
+├── TargetingSystem        → lock-on (la línea de visión hace falta para FIJAR, no para MANTENER)
+└── PlayerCameraRig        → los 3 estados de cámara + encuadre por habilidad (CAMERA-TARGETING §7)
 
-CombatantHealth / StaggerReceiver (en enemigos salvajes)
+CombatantHealth / StaggerReceiver (en enemigos salvajes; noqueo total → Downed con gracia invulnerable, TAMER §4)
+StatusController           → estados temporales (slow/vulnerable/aturdido/quemadura-DoT), etiqueta anclada al afectado
+HitReactor                 → knockback (3D) / carry (correa, matchHeight) / flinch / gravedad propia / hang (juggle)
+HitFeedback                → punto único golpe→feedback; calcula el PESO del golpe (daño relativo + combo)
+├── HitFlash               → destello del cuerpo golpeado (color = efectividad, duración = peso)
+└── DamagePopups           → número de daño (color = efectividad, tamaño = peso, vuela con el knockback)
 CaptureSystem              → KO → ventana → Sludge → Tótem
 ReactionSystem + ElementalSurface + ReactionTable → el impacto irradia elemento → reacción = efecto temporal sobre terreno fijo
 TypeChart (SO)             → los 2 triángulos elementales
+CombatBootstrap            → cablea los servicios globales (TypeChart, Reactions) en CombatServices
 TeamManager                → equipo de 3, swap con cooldown
 ```
 
@@ -34,6 +44,8 @@ TeamManager                → equipo de 3, swap con cooldown
 public enum Element { Naturaleza, Agua, Fuego, Mineral, Rayo, Aire }
 public enum Archetype { Guardian, Luchador, Ejecutor, Zonificador, Controlador }
 public enum AbilitySlot { Movilidad, Flex, Signature }
+public enum AbilityElement { Neutro, Especie, Secundario }   // con qué elemento golpea una habilidad;
+                                                            // los BÁSICOS van Neutro por regla (GDD §7)
 
 [CreateAssetMenu(menuName = "Tatemis/Type Chart")]
 public class TypeChart : ScriptableObject
@@ -85,6 +97,8 @@ public class EvolutionForm
     public GameObject modelPrefab;      // placeholder por ahora
     public BaseStats stats;             // define el arquetipo
     public AbilityData movilidad, flex, signature;
+    public List<AbilityData> basicChain; // cadena de básicos EN ORDEN: cada golpe encadenado avanza
+                                         // un eslabón y vuelve al primero al completarla (BasicAt)
     public BlockParams block;           // params de la forma elemental pura
     public Element secondaryElement;    // solo forma final: utilidad, NO cambia debilidades
     public int levelsInForm = 2;        // 2–3 niveles de evolución progresiva
@@ -105,8 +119,17 @@ Casi nada se aplica directamente: **algo tiene que llevarlo**. Por eso los efect
 
 | | Qué hace | Ejemplos |
 |---|---|---|
-| **Actuador (entrega)** | Crea el vehículo y **reporta impactos** vía `ctx.reportHit(HitInfo)` | `MeleeHitbox` · `SpawnProjectile` · `ThrowHeld` · `SpawnHazard` · `AreaBurst` · `PullField` |
-| **Payload (consecuencia)** | Declara **cuándo** aplica con `ApplyWhen { OnCast, OnHit }` y se ejecuta al dispararse ese hook | `DealDamage` · `ApplyStatus` · `Knockback` · `RadiateElement` · `DropMark` · `ReplaySealedReaction` |
+| **Actuador (entrega)** | Crea el vehículo y **reporta impactos** vía `ctx.reportHit(HitInfo)` | `MeleeHitbox` · **`SweepHitbox`** · `SpawnProjectile` · `ThrowHeld` · `SpawnHazard` · **`ElementalBurst`** · `PullField` |
+| **Payload (consecuencia)** | Declara **cuándo** aplica con `ApplyWhen { OnCast, OnHit }` y se ejecuta al dispararse ese hook | `DealDamage` · `ApplyStatus` · **`Knockback`** (3D: `useMotionDirection`/`verticalScale`/`lift`/`hang`) · **`CarryToFront`** (correa, `matchHeight`) · `RadiateElement` |
+| **Presentación** *(3ª categoría, 2026-07-22)* | Ni entrega ni causa daño: **encuadra**. La habilidad pide cámara y la cámara no sabe de habilidades | **`CameraShot`** |
+
+> **Combate aéreo (juggle):** `Knockback.hang` / `CreatureController.GrantHang` **suspenden la caída** al golpear y al ser golpeado, en los dos bandos — sin eso un combo aéreo se cae a media cadena. Guardarraíl: presupuesto acumulable (`maxHang`) que mide tiempo suspendido y se recarga al tocar suelo; cola corta al dejar de encadenar. `CarryToFront.matchHeight` es la **correa** que impide que el enemigo salga del alcance del siguiente golpe. Detalle → [TATEMIS-BASE §6](TATEMIS-BASE.md).
+
+> 🔒 **Los payloads son de la FASE, no del actuador.** `reportHit` los dispara a todos por igual, así que **dos actuadores en una misma fase comparten sus payloads** — y si los dos reportan, el `DealDamage` se cobra dos veces. Regla práctica: *un actuador cuyos impactos necesiten payload propio va en **su propia fase***. Es lo que hace la embestida de Ottorock: el arrollamiento va en la fase ②, y el estallido en la ③ con el `slow` colgado de **sus** impactos, no de los del arrollamiento. *(`ElementalBurst.reportHits` está por defecto en `false` justo por esto: si estalla dentro de una fase que ya tiene un `DealDamage`, reportar duplicaría el daño.)*
+>
+> ⚠️ *Deuda conocida: `ElementalBurst` aplica su propio daño en vez de delegarlo a un `DealDamage` — es actuador y payload a la vez. Se limpia en Fase 2 (al reescribir el elemental) llevando el elemento en el `HitInfo`, que es lo que hoy le obliga a resolver el daño él mismo.*
+
+> **Un ataque que dura reparte GOLPES, no daño continuo.** `SweepHitbox.hitInterval` emite un golpe cada X segundos mientras dura la fase (multi-hit): cada uno es un `HitInfo` normal, así que los payloads sirven tal cual y **no hacen falta efectos de "daño sostenido"**. La cadencia va por **reloj** (nunca por frame) y cada golpe **barre el tramo desde el anterior**. Razones y regla de oro del muestreo → [ABILITY-SYSTEM §4.1](ABILITY-SYSTEM.md).
 
 **El pegamento es `reportHit`.** El payload **no sabe** quién lo entregó: `DealDamage{when=OnHit}` es idéntico venga de un hitbox melee, de un proyectil teledirigido o de una zona que alguien pisó. Eso es lo que permite componer en el inspector sin escribir código nuevo: **un actuador + N payloads**.
 
@@ -121,17 +144,21 @@ Casi nada se aplica directamente: **algo tiene que llevarlo**. Por eso los efect
 
 *Por qué importa, con dos casos reales:* Ottorock **lanza la roca y sale de Sujeción**; si el proyectil leyera su estado actual al impactar, la reacción sellada ya no existiría — y la ficha dice que el impacto **sí** la aplica. Ídem Pyrecko: si lo noquean después de detonar, sus zonas **siguen ardiendo**.
 
+> ⚠️ **El estado por activación va en el blackboard (`ctx.bb`), nunca en un campo del efecto.** La instancia del efecto vive dentro del `AbilityData`, que es un **asset**: la comparten todas las activaciones y todas las criaturas que usen esa habilidad. Un contador en un campo se pisaría entre ellas. Clave única por instancia: `"loQueSea." + GetHashCode()`.
+
 ### 2.2 · Estado del catálogo de actuadores
-- **Ya en el scaffold:** `MeleeHitbox` (reporta con `reportHit`) · `DashMotion` · `StainTerrain` *(→ renombrar a `RadiateElement` con la API nueva, ver T1.0)*.
+- **Ya en el scaffold:** `MeleeHitbox` (reporta con `reportHit`) · **`SweepHitbox`** (multi-hit con barrido continuo) · `DashMotion` (con `maxPitch`, tope de inclinación) · **`ElementalBurst`** (estalla en el elemento de la **especie**, aunque el golpe sea neutro) · **`CameraShot`** · `StainTerrain` *(→ renombrar a `RadiateElement` con la API nueva, ver T1.0)*.
 - **Faltan, por olas:** `SpawnProjectile` (recto/homing) y `SpawnHazard` con `applyOn {Enter, Stay}` → **ola Pyrecko** · `ThrowHeld` → **ola Ottorock** · `PullField` y fuerzas que mueven *otros hazards* → **ola Mantagale** ([ABILITY-EXTRACTION](ABILITY-EXTRACTION.md) H14–H16).
 
 ```csharp
-public struct AbilityContext
+public class AbilityCtx            // vivo durante UNA activación; lo mutan la habilidad y los carriers
 {
     public CreatureController caster;
     public Vector3 aimPoint;
-    public ICombatant target;   // puede ser null (habilidades sin objetivo)
-    public Element element;      // elemento de la criatura que lanza
+    public ICombatant lockTarget;  // puede ser null (habilidades sin objetivo)
+    public Element? element;       // NULL = golpe NEUTRO (x1, sin reacción) — así van los básicos, GDD §7
+    public System.Action<HitInfo> reportHit;
+    public readonly Dictionary<string, object> bb;   // blackboard: estado por activación (ver abajo)
 }
 
 [System.Serializable]

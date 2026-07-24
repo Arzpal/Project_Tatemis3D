@@ -75,8 +75,10 @@ namespace Tatemis.EditorTools
                 new EvolutionForm {
                     formName = "Base",
                     stats = new BaseStats { maxHealth = 120f, damage = 12f, moveSpeed = 6f },
-                    // básico = golpe (universal, sin coste). signature reutiliza golpe como placeholder.
-                    movilidad = embestida, flex = rafaga, signature = golpe, basic = golpe,
+                    // cadena de básicos de un solo eslabón (universal, sin coste); signature reutiliza
+                    // golpe como placeholder. El contenido real del gate lo genera OttorockContent.
+                    movilidad = embestida, flex = rafaga, signature = golpe,
+                    basicChain = new List<AbilityData> { golpe },
                     block = new BlockParams { energyRegenMultiplier = 2.5f, weaknessDamageMultiplier = 2f },
                     levelsInForm = 2,
                 }

@@ -90,4 +90,19 @@
 
 Picos sin solaparse — **Alcance → Pyrecko (10)** · **Vida → Ottorock (8)** · **Velocidad → Mantagale (9)** — cada uno ocupa una esquina distinta del hexágono. Ottorock es el de silueta más redonda (rango 4–8, sin valles profundos) = el generalista. Único empate: Sinergia 8 (Pyrecko = Mantagale), coherente porque ambos viven del terreno; Mantagale se despega por Velocidad + Control.
 
+### Mapeo hexágono → HP 🔒 *(fijado el 2026-07-22)*
+
+**1 punto de Vida = 500 HP.** El ancla no es el número, es el **tiempo de combate**: un monstruo de *early game* debe caer en **1–2 min** y uno de combate importante en **4–6 min**.
+
+| Vida (hex) | HP | Quién |
+|---|---|---|
+| 2 | 1 000 | Pyrecko |
+| 3 | 1 500 | Mantagale |
+| **5** | **2 500** | **referencia estándar** (el maniquí del sandbox) |
+| 8 | 4 000 | Ottorock |
+
+> **Cómo se calculó:** el kit de Ottorock rinde ~65 dps contra un saco quieto, pero contra un enemigo que se mueve y te obliga a defenderte el *uptime* real ronda **un tercio** → ~23 dps efectivos. 2 500 HP ≈ **1,8 min**, dentro del objetivo de early game. *(Antes eran 6 000 = ~4-5 min reales: el combate se hacía largo y ni siquiera había enemigo que se defendiera.)*
+>
+> **Combates importantes** (4–6 min) = ~**3×** esa vida, o fases. ⚠️ Recalcular esta escala **cada vez que cambie el daño de un kit**: el ancla es el tiempo, no los HP.
+
 > Los stats duros (Vida/Daño/Velocidad) salen de las proporciones dictadas en el campo 5 de cada ficha (Pyrecko 15/55/30 · Ottorock 30/35/35 · Mantagale 20/30/50); los otros 3 ejes se derivan del kit. **Huecos libres del hexágono** para especies futuras: un Guardián de Vida ~10, un Ejecutor de Daño+Velocidad glass, un Zonificador aún más extremo.

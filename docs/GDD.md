@@ -124,16 +124,22 @@ Cada criatura tiene **3 habilidades** (cuestan energía), con estos roles de pla
 3. **Característica (signature)** — única de la especie; cualquier categoría o algo completamente nuevo.
 
 Más las **acciones universales** (todas las criaturas):
-- **Ataque básico** — cadena sin coste de energía; columna vertebral del combate y generador base de Aturdimiento.
+- **Ataque básico** — cadena sin coste de energía; columna vertebral del combate y generador base de Aturdimiento. 🔒 **Regla: el básico NO lleva elemento** (daño neutro, siempre x1) salvo que una especie diga lo contrario. *Razón: si la acción que más repites llevara elemento, pelear contra quien te supera pasaría de difícil a imposible — el elemento debe ser una **palanca** que manejas con el kit, no un impuesto sobre cada golpe.* La excepción es el **último eslabón de la cadena**, que puede **estallar en el elemento de la especie**: la recompensa por sostener la cadena entera. *(Ottorock: 4 garras neutras + remate que estalla en Mineral.)*
 - **Salto.**
-- **Noqueo (contextual)** — sin botón dedicado: al llenarse el Aturdimiento (o con vida muy baja) aparece el **prompt de finisher** en el botón contextual (compartido con Sludge/interactuar). La única ruta al noqueo es jugar bien — combos + reacciones — no spamear un botón (§8.2).
+- **Noqueo** — sin botón dedicado y, desde el 2026-07-22, **sin prompt**: al llenarse el Aturdimiento (o con vida muy baja) el enemigo queda **debilitado** y rematarlo es **seguir atacándolo**. La única ruta al noqueo es jugar bien — combos + reacciones — no spamear un botón (§8.2). 🟡 Ver **[TAMER.md](TAMER.md) §4** (incluye el riesgo abierto: que la ventana de KO **corte el combo**, o matarás por inercia al que querías capturar).
+- **Contextual** — queda **solo para interactuar con el mundo** (aplastar un hongo, agarrar y lanzar un objeto, activar algo del ambiente). Capturar, objetos, órdenes y swap se van al **menú del Tamer** → [TAMER.md](TAMER.md).
 - **Bloqueo / Recarga elemental** — la criatura **se convierte en su elemento puro**:
   - **Defiende** y **recarga energía elemental más rápido**.
   - **No puede atacar mientras bloquea** (stance comprometido: la decisión pesa). 🔒
   - **Contra:** en forma pura la debilidad elemental se **amplifica de 1.5x a 2x** (§7.1). Bloquear contra tu counter es un riesgo real.
   - Los detalles (duración, mitigación) varían ligeramente por criatura.
 
-**Mapeo de referencia (mando):** LS/RS/R3 mover·cámara·lock-on · A salto · X ataque básico · B Movilidad · Y contextual (finisher/Sludge/interactuar) · RB Flex · RT Signature · LT bloqueo (mantener) · LB órdenes (tap = rápida, mantener = rueda slow-mo) · D-pad ←/→ swap.
+- **Apuntado (mantener)** — tercer estado de cámara: la cámara pasa **al hombro** con retícula y el monstruo encara hacia ella; puedes usar básico y habilidades apuntando, **a cambio de movilidad reducida**. Es lo que permite apuntar a un **punto del mundo** (no solo a un enemigo) y lanzar la Movilidad en **cualquier dirección, incluida la vertical**. Ver [add.md §7](add.md).
+
+**Los tres estados de cámara, todos elegidos por el jugador** — y una sola regla: *el ataque va siempre hacia donde encara el cuerpo*; lo único que cambia es qué lo decide: **libre** → tu movimiento · **lock** (toggle) → el enemigo · **apuntado** (mantener) → la cámara.
+
+**Mapeo de referencia (mando):** LS/RS/R3 mover·cámara·lock-on · A salto · X ataque básico · B Movilidad · Y contextual (**interactuar con el mundo**) · RB Flex · RT Signature · **LT apuntado (mantener)** · **LB bloqueo (mantener)** · **Select/cruceta → menú del Tamer**.
+> *Las acciones **del Tamer** (capturar, objetos, órdenes, swap) dejan de ocupar botones sueltos y se agrupan en **un menú** → [TAMER.md](TAMER.md). Esa es la línea: el mando controla al **monstruo**; el menú es lo que hace **la persona**. En **ratón+teclado** no hay presión de botones: apuntar = clic derecho, lock = Q, bloqueo = Shift, menú = Tab.*
 
 ### 6.4 Stats y arquetipos
 Híbrido **stats + habilidad/acción**. Los stats principales (**Daño, Vida, Velocidad**) definen el **arquetipo** de la criatura, modulado por su **naturaleza**:
@@ -154,6 +160,8 @@ Híbrido **stats + habilidad/acción**. Los stats principales (**Daño, Vida, Ve
 
 ### 7.1 Los 6 elementos y las dos capas
 Seis elementos, repartidos en **dos triángulos de piedra-papel-tijera**. La flecha significa **"supera a"**: su golpe hace **1.5x** de daño — que sube a **2x si el defensor está en su forma elemental pura** (§6.3) — y el que recibe **resiste 0.5x** al que supera.
+
+> 🔒 **Quién lleva elemento y quién no.** El multiplicador **solo se aplica a lo que imbuye elemento**: las **3 habilidades del kit** y los **estallidos elementales**. Los **ataques básicos van neutros** (§6.3), así que siempre puedes hacer daño aunque el rival te supere: el elemento decide *cuánto premia jugar bien*, no *si puedes jugar*. Corolario para el terreno: un básico neutro **no dispara reacciones** ([ELEMENTAL-REACTIONS](ELEMENTAL-REACTIONS.md) §1 ②) — quien irradia elemento al suelo es la habilidad o el estallido.
 
 ```mermaid
 graph LR

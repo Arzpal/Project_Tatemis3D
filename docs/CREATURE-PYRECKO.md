@@ -9,7 +9,7 @@
 | 1 | Nombre + concepto | **Pyrecko** — *cañón de cristal camuflado y escurridizo*: siembra el campo de «combustible» a distancia (o invisible) y lo prende. |
 | 2 | Elemento | **Fuego** |
 | 3 | Arquetipo | **Zonificador** (rango, proyectiles, negación de área — el "tirador" del equipo; no confundir con Ejecutor = burst/asesino, GDD §6.4) |
-| 4 | Silueta y tamaño | 🟡 **Animal propuesto: gecko** *(2026-07-18 — el nombre ya lo encaja: **Ge**cko + **flame**; pendiente de confirmar)*. Cuadrúpedo; **~1/6 de la altura de un Tamer** (pequeño). Rasgos que le sirven al kit: piel **críptica** (su Camuflaje), **cola desprendible** como señuelo (lo "escurridizo"), **lengua** como entrega a distancia, hábitos nocturnos. |
+| 4 | Silueta y tamaño | ✅ **Animal: gecko.** Cuadrúpedo, rastrero. **Escala base (forma bebé, dictada 2026-07-22):** ~**50 cm** de largo (cabeza a cola), ~**20 cm** de alto → **1/6 de un Tamer** (1,75 m). El más bajo y pequeño del trío. *(Base de referencia, NO restricción de diseño; provisional, sube con la evolución.)* Rasgos que le sirven al kit: piel **críptica** (su Camuflaje), **cola desprendible** como señuelo (lo "escurridizo"), **lengua** como entrega a distancia, hábitos nocturnos. |
 | 5 | Vida / Daño / Velocidad | **15 / 55 / 30** (proporciones relativas, no valores finales) → vida baja · daño alto · velocidad media. Cañón de cristal. |
 | 6 | Peso percibido | Ligero. |
 | 7 | Locomoción | Neutral en estado normal; **rápida en sigilo**. |

@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 006e178d6109e75459de1315cda5db36, type: 3}
+  m_Name: Ability_Ottorock_Basico1
+  m_EditorClassIdentifier: Assembly-CSharp::Tatemis.AbilityData
+  id: ottorock_basico_1
+  displayName: Garra izquierda
+  slot: 1
+  element: 0
+  energyCost: 0
+  cooldown: 0
+  phases:
+  - name: Golpe
+    animTrigger: 
+    effects:
+    - rid: 1790544224151667639
+    - rid: 1790544224151667640
+    - rid: 1790544224151667641
+    - rid: 1790544224151667642
+    exit:
+      rid: 1790544224151667643
+    rooted: 0
+    iFrames: 0
+    superArmor: 0
+    interruptible: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 1790544224151667639
+      type: {class: DashMotion, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        distance: 0.9
+        time: 0.08
+        maxPitch: 35
+        easeOut: 0
+        continueForward: 0
+    - rid: 1790544224151667640
+      type: {class: MeleeHitbox, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        range: 2
+        radius: 1.4
+    - rid: 1790544224151667641
+      type: {class: DealDamage, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        amount: 14
+        staggerAmount: 14
+        when: 1
+    - rid: 1790544224151667642
+      type: {class: Knockback, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        speed: 9
+        duration: 0.08
+        flinch: 0.12
+        useMotionDirection: 0
+        lift: 0
+        verticalScale: 1
+        hang: 0.5
+        when: 1
+    - rid: 1790544224151667643
+      type: {class: AfterSeconds, ns: Tatemis, asm: Assembly-CSharp}
+      data:
+        seconds: 0.38

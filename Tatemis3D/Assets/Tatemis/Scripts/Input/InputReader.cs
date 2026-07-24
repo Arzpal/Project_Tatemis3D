@@ -19,7 +19,7 @@ namespace Tatemis
         const string PrefsKey = "tatemis.bindings";
 
         InputActionMap _map;
-        InputAction _move, _jump, _lockOn, _contextual, _block, _swap, _basic;
+        InputAction _move, _jump, _lockOn, _contextual, _block, _swap, _basic, _aim;
         readonly InputAction[] _abilities = new InputAction[AbilityCount];
 
         // --- API que consume CreatureController (se lee en el frame actual) ---
@@ -29,6 +29,8 @@ namespace Tatemis
         public bool BasicPressed => _basic.WasPressedThisFrame();
         public bool ContextualPressed => _contextual.WasPressedThisFrame();
         public bool BlockHeld => _block.IsPressed();
+        /// Estado de apuntado sostenido (cámara al hombro + retícula). Ver docs/add.md §7.
+        public bool AimHeld => _aim.IsPressed();
         public bool SwapPressed => _swap.WasPressedThisFrame();
         public bool AbilityPressed(int i) => (uint)i < AbilityCount && _abilities[i].WasPressedThisFrame();
 
@@ -52,7 +54,8 @@ namespace Tatemis
             _lockOn     = Button("LockOn",     "<Keyboard>/q",         "<Gamepad>/rightStickPress");   // R3
             _basic      = Button("Basic",      "<Mouse>/leftButton",   "<Gamepad>/buttonWest");        // X — ataque básico (sin coste)
             _contextual = Button("Contextual", "<Keyboard>/f",         "<Gamepad>/buttonNorth");       // Y — finisher/Sludge/interactuar
-            _block      = Button("Block",      "<Keyboard>/leftShift", "<Gamepad>/leftTrigger");       // LT (mantener)
+            _aim        = Button("Aim",        "<Mouse>/rightButton",  "<Gamepad>/leftTrigger");       // LT — apuntar (mantener)
+            _block      = Button("Block",      "<Keyboard>/leftShift", "<Gamepad>/leftShoulder");      // LB (movido de LT por el apuntado)
             _swap       = Button("Swap",       "<Keyboard>/tab",       "<Gamepad>/dpad/up");           // D-pad
 
             _abilities[0] = Button("Ability1", "<Keyboard>/1", "<Gamepad>/buttonEast");     // Movilidad (B)

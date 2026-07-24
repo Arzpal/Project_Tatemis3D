@@ -49,7 +49,7 @@
     <span class="tag">Unity · URP</span>
     <span class="tag">Data-driven</span>
     <span class="tag">Bespoke primero</span>
-    <span class="tag">2026-07-18</span>
+    <span class="tag">act. 2026-07-22</span>
   </div>
   <p class="sub" style="margin-top:1.4rem;font-size:.95rem">Especificación en código → <code>ARCHITECTURE.md</code> · Texto completo de este doc → <code>add.md</code></p>
 </header>
@@ -105,7 +105,7 @@
       <text class="ss" x="662" y="319" text-anchor="middle">y temporal (buff)</text>
       <line x1="380" y1="346" x2="380" y2="364" stroke="#7d7869" stroke-width="1.5" marker-end="url(#ar)"/>
 
-      <text class="sm" x="8" y="380">4 · EFECTOS — disparados por ANIM-EVENTS, no por el frame del input</text>
+      <text class="sm" x="8" y="380">4 · EFECTOS — disparados por el RELOJ DE LA FASE, no por el frame del input</text>
       <rect x="8" y="388" width="744" height="48" rx="7" fill="#1d2a24" stroke="#7FB574"/>
       <text class="st" x="26" y="409" font-weight="600">AbilityEffect[]</text>
       <text class="ss" x="26" y="426">daño · estado · mov. propio · desplazar ajeno · proyectil · hazard · marca · irradiar · buff · stance</text>
@@ -119,7 +119,7 @@
     </svg>
   </figure>
 
-  <div class="note"><strong>Solo dos piezas son intercambiables</strong>, y ambas son datos: el <code>LocomotionProfile</code> y el <code>Kit activo</code>. Todo lo demás es código fijo. Las dos costuras que hay que dejar abiertas desde el principio son <code>IBrain</code> (por donde entrarán IA y órdenes) y los <strong>anim-events</strong> (que ponen el game feel en manos del diseñador).</div>
+  <div class="note"><strong>Solo dos piezas son intercambiables</strong>, y ambas son datos: el <code>LocomotionProfile</code> y el <code>Kit activo</code>. Todo lo demás es código fijo. Las dos costuras que hay que dejar abiertas desde el principio son <code>IBrain</code> (por donde entrarán IA y órdenes) y los <strong>anim-events</strong> (que ponen el game feel en manos del diseñador). <em>De momento el disparo lo hace el <strong>reloj de la fase</strong>, que ES el mecanismo hasta que existan clips: el multi-hit ya se diseñó para que migrar sea cambiar quién dispara el golpe, no cómo.</em></div>
 </section>
 
 <section>
@@ -128,13 +128,13 @@
 
   <figure class="fig">
     <figcaption>El actuador entrega · el payload consecuencia · reportHit es el pegamento</figcaption>
-    <svg viewBox="0 0 760 300" role="img" aria-label="Un actuador crea el vehículo y reporta impactos; los payloads se ejecutan al recibir ese aviso.">
+    <svg viewBox="0 0 760 386" role="img" aria-label="Un actuador crea el vehículo y reporta impactos; los payloads se ejecutan al recibir ese aviso.">
       <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
 
       <rect x="8" y="16" width="300" height="104" rx="7" fill="#22232f" stroke="#9FC7D6"/>
       <text class="sm" x="26" y="38">ACTUADOR — entrega</text>
-      <text class="ss" x="26" y="60">MeleeHitbox · SpawnProjectile</text>
-      <text class="ss" x="26" y="78">ThrowHeld · SpawnHazard · PullField</text>
+      <text class="ss" x="26" y="60">MeleeHitbox · SweepHitbox · DashMotion</text>
+      <text class="ss" x="26" y="78">ElementalBurst · SpawnProjectile · SpawnHazard</text>
       <text class="ss" x="26" y="103" style="fill:#9FC7D6">crea el vehículo y avisa de cada impacto</text>
 
       <path d="M316 68 L436 68" stroke="#7d7869" stroke-width="1.5" marker-end="url(#ar2)"/>
@@ -143,45 +143,56 @@
       <rect x="452" y="16" width="300" height="104" rx="7" fill="#22232f" stroke="#7FB574"/>
       <text class="sm" x="470" y="38">PAYLOAD — consecuencia</text>
       <text class="ss" x="470" y="60">DealDamage · ApplyStatus · Knockback</text>
-      <text class="ss" x="470" y="78">RadiateElement · DropMark</text>
+      <text class="ss" x="470" y="78">CarryToFront · RadiateElement · DropMark</text>
       <text class="ss" x="470" y="103" style="fill:#7FB574">declara cuándo: OnCast u OnHit</text>
 
-      <text class="ss" x="380" y="150" text-anchor="middle" style="fill:var(--ink-2)">El payload no sabe quién lo entregó — el mismo DealDamage sirve para un puñetazo, un proyectil o una zona pisada.</text>
+      <rect x="8" y="132" width="744" height="52" rx="7" fill="#22232f" stroke="#A98FC4"/>
+      <text class="sm" x="26" y="154">PRESENTACIÓN — ni entrega ni causa: ENCUADRA  ·  añadida 2026-07-22</text>
+      <text class="ss" x="26" y="174">CameraShot — la habilidad pide cámara con valores absolutos; la cámara no sabe de habilidades</text>
 
-      <text class="sm" x="8" y="188">TRES TIEMPOS DE VIDA</text>
-      <rect x="8" y="198" width="240" height="84" rx="6" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
-      <text class="st" x="26" y="220" font-weight="600">Instantánea</text>
-      <text class="ss" x="26" y="240">resuelve dentro de la animación</text>
-      <text class="ss" x="26" y="262" style="fill:var(--ink-3)">MeleeHitbox · AreaBurst</text>
+      <text class="ss" x="380" y="208" text-anchor="middle" style="fill:var(--ink-2)">El payload no sabe quién lo entregó — el mismo DealDamage sirve para un puñetazo, un proyectil o una zona pisada.</text>
 
-      <rect x="260" y="198" width="240" height="84" rx="6" fill="#191a24" stroke="#EAC94B"/>
-      <text class="st" x="278" y="220" font-weight="600">En vuelo</text>
-      <text class="ss" x="278" y="240">resuelve al impactar, segundos después</text>
-      <text class="ss" x="278" y="262" style="fill:var(--ink-3)">proyectil · roca lanzada</text>
+      <rect x="8" y="222" width="744" height="52" rx="7" fill="#191a24" stroke="#EAC94B"/>
+      <text class="ss" x="26" y="244" style="fill:#EAC94B">⚠ Los payloads son de la FASE, no del actuador: dos actuadores que reporten en la misma fase</text>
+      <text class="ss" x="26" y="264" style="fill:#EAC94B">comparten payloads y el daño se cobra dos veces. Payload propio → fase propia.</text>
 
-      <rect x="512" y="198" width="240" height="84" rx="6" fill="#191a24" stroke="#EAC94B"/>
-      <text class="st" x="530" y="220" font-weight="600">Persistente</text>
-      <text class="ss" x="530" y="240">ciclo propio: al entrar o al permanecer</text>
-      <text class="ss" x="530" y="262" style="fill:var(--ink-3)">zonas · tornados · marcas</text>
+      <text class="sm" x="8" y="298">TRES TIEMPOS DE VIDA</text>
+      <rect x="8" y="308" width="240" height="72" rx="6" fill="#191a24" stroke="rgba(236,230,216,.16)"/>
+      <text class="st" x="26" y="330" font-weight="600">Instantánea</text>
+      <text class="ss" x="26" y="350">resuelve dentro de la animación</text>
+      <text class="ss" x="26" y="370" style="fill:var(--ink-3)">MeleeHitbox · ElementalBurst</text>
+
+      <rect x="260" y="308" width="240" height="72" rx="6" fill="#191a24" stroke="#EAC94B"/>
+      <text class="st" x="278" y="330" font-weight="600">En vuelo</text>
+      <text class="ss" x="278" y="350">resuelve al impactar, segundos después</text>
+      <text class="ss" x="278" y="370" style="fill:var(--ink-3)">proyectil · roca lanzada</text>
+
+      <rect x="512" y="308" width="240" height="72" rx="6" fill="#191a24" stroke="#EAC94B"/>
+      <text class="st" x="530" y="330" font-weight="600">Persistente</text>
+      <text class="ss" x="530" y="350">ciclo propio: al entrar o al permanecer</text>
+      <text class="ss" x="530" y="370" style="fill:var(--ink-3)">zonas · tornados · marcas</text>
     </svg>
   </figure>
+
+  <div class="note"><strong>Un ataque que DURA reparte golpes, no daño continuo.</strong> <code>SweepHitbox.hitInterval</code> emite un golpe cada X segundos mientras dura la fase (ref. el <em>Drill Rush</em> de Meta Knight): rozar la embestida cuesta uno, comerla entera cuesta todos. Cada golpe es un <code>HitInfo</code> normal, así que <strong>los payloads de siempre valen</strong> y no hacen falta efectos de "daño sostenido" — se probaron y sobraban. Regla que lo sostiene: <em>la detección se muestrea, las consecuencias se cronometran</em> — la cadencia va por reloj (nunca por frame) y cada golpe barre el tramo desde el anterior, o a bajo framerate un enemigo se cuela entre muestras.</div>
 
   <div class="note"><strong>Los dos últimos sobreviven a la habilidad que los creó.</strong> Por eso el actuador entrega al vehículo una <strong>copia del payload y un snapshot del contexto</strong>, nunca una referencia viva al lanzador. Dos casos reales lo obligan: Ottorock <em>lanza la roca y sale de Sujeción en el mismo gesto</em> —si el proyectil leyera su estado al impactar, la reacción sellada ya no existiría—, y si noquean a Pyrecko tras detonar, <em>sus zonas siguen ardiendo</em>.</div>
 </section>
 
 <section>
-  <div class="ch-head"><span class="ch-num">03</span><h2>Las 10 primitivas</h2></div>
-  <p>Las nueve habilidades de las tres criaturas se descomponen en diez primitivas. Esta lista <strong>es</strong> la librería de efectos — y que tres criaturas diseñadas a propósito para romper el sistema no pidan nada más es la mejor señal de que el catálogo no se disparará con las especies 4 y 5.</p>
+  <div class="ch-head"><span class="ch-num">03</span><h2>Las 11 primitivas</h2></div>
+  <p>Las nueve habilidades de las tres criaturas se descomponen en once primitivas. Esta lista <strong>es</strong> la librería de efectos — y que tres criaturas diseñadas a propósito para romper el sistema no pidan nada más es la mejor señal de que el catálogo no se disparará con las especies 4 y 5. <span style="color:var(--ink-3)">(La 11ª, el encuadre de cámara, la trajo la embestida de Ottorock en el playtest: no se previó en papel.)</span></p>
   <table>
     <tr><th>Primitiva</th><th>Tipo</th><th>Estado</th></tr>
-    <tr><td><strong>Daño</strong></td><td>payload</td><td style="color:var(--ok)">en scaffold</td></tr>
-    <tr><td><strong>Estado</strong> — quemadura, slow, stun, parálisis</td><td>payload</td><td style="color:var(--warn)">parcial (falta stacking)</td></tr>
-    <tr><td><strong>Movimiento propio</strong> — dash, impulso vertical</td><td>actuador sobre uno mismo</td><td style="color:var(--ok)">DashMotion</td></tr>
-    <tr><td><strong>Desplazar ajeno</strong> — knockback, pull, arrastre</td><td>payload + actuador</td><td style="color:var(--no)">ola Mantagale</td></tr>
+    <tr><td><strong>Daño</strong> — puntual y <strong>multi-hit</strong></td><td>payload + actuador</td><td style="color:var(--ok)">DealDamage · SweepHitbox</td></tr>
+    <tr><td><strong>Estado</strong> — quemadura, slow, vulnerable, aturdido</td><td>payload</td><td style="color:var(--ok)">StatusController (falta stacking)</td></tr>
+    <tr><td><strong>Movimiento propio</strong> — dash, impulso vertical, deslizamiento</td><td>actuador sobre uno mismo</td><td style="color:var(--ok)">DashMotion (maxPitch · easeOut)</td></tr>
+    <tr><td><strong>Desplazar ajeno</strong> — knockback 3D, correa, juggle</td><td>payload</td><td style="color:var(--ok)">Knockback · CarryToFront <span style="color:var(--warn)">(falta Pull)</span></td></tr>
     <tr><td><strong>Proyectil</strong> — recto, homing, objeto lanzado</td><td>actuador</td><td style="color:var(--no)">olas Pyrecko / Ottorock</td></tr>
     <tr><td><strong>Hazard</strong> — zona estática o móvil</td><td>actuador persistente</td><td style="color:var(--no)">ola Pyrecko</td></tr>
     <tr><td><strong>Marca de especie</strong></td><td>payload persistente</td><td style="color:var(--no)">ola Pyrecko</td></tr>
-    <tr><td><strong>Elemento irradiado</strong> / reacción sellada</td><td>payload</td><td style="color:var(--warn)">API vieja — ticket T1.0</td></tr>
+    <tr><td><strong>Elemento irradiado</strong> / reacción sellada</td><td>actuador + payload</td><td style="color:var(--warn)">ElementalBurst ✓ · terreno con API vieja → Fase 2</td></tr>
+    <tr><td><strong>Encuadre de cámara</strong> — la habilidad pide plano</td><td style="color:var(--mineral)">presentación</td><td style="color:var(--ok)">CameraShot</td></tr>
     <tr><td><strong>Buff temporal</strong> — incluido reescribir el básico</td><td>modificador propio</td><td style="color:var(--no)">ola Mantagale</td></tr>
     <tr><td><strong>Stance</strong> — override de kit y locomoción</td><td>sistema</td><td style="color:var(--no)">ola Ottorock</td></tr>
   </table>
@@ -211,11 +222,103 @@
 </section>
 
 <section>
-  <div class="ch-head"><span class="ch-num">05</span><h2>Reglas vigentes</h2></div>
+  <div class="ch-head"><span class="ch-num">05</span><h2>Cámara y apuntado — el modelo BotW/TOTK</h2></div>
+  <p>La idea que lo ordena todo: <strong>el lock no es un modo de puntería, es un modo de relación con un enemigo</strong>. Al activarlo no cambia <em>dónde apuntas</em>, cambia <strong>a qué están anclados tu cuerpo y tu cámara</strong>. Por eso se nota — y por eso una cámara al hombro, que solo cambia el encuadre, se sentía igual en ambos modos.</p>
+
+  <figure class="fig">
+    <figcaption>Vista cenital · azul = jugador · naranja = enemigo · los tres estados los elige el jugador</figcaption>
+    <svg viewBox="0 0 760 330" role="img" aria-label="Los tres estados de cámara: libre, el personaje encara su movimiento; lock, la cámara se alinea al eje jugador-enemigo y moverse de lado lo rodea; apuntado, cámara al hombro con retícula y el cuerpo encara la cámara.">
+      <defs><marker id="arC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d7869"/></marker></defs>
+
+      <text class="sm" x="8" y="16">1 · LIBRE</text>
+      <path d="M22 244 l22 -12 v24 z" fill="#7d7869"/>
+      <line x1="48" y1="232" x2="98" y2="208" stroke="#7d7869" stroke-width="1.2" stroke-dasharray="3 4"/>
+      <circle cx="112" cy="200" r="13" fill="#9FC7D6"/>
+      <line x1="123" y1="192" x2="196" y2="136" stroke="#9FC7D6" stroke-width="2" marker-end="url(#arC)"/>
+      <text class="st" x="60" y="104">encara su</text>
+      <text class="st" x="60" y="120">movimiento</text>
+      <text class="ss" x="14" y="286">la cámara vuelve</text>
+      <text class="ss" x="14" y="302">sola detrás al correr</text>
+
+      <line x1="250" y1="0" x2="250" y2="330" stroke="rgba(236,230,216,.16)"/>
+
+      <text class="sm" x="264" y="16">2 · LOCK</text>
+      <path d="M278 262 l22 -12 v24 z" fill="#7d7869"/>
+      <line x1="304" y1="250" x2="342" y2="226" stroke="#7d7869" stroke-width="1.2" stroke-dasharray="3 4"/>
+      <line x1="364" y1="208" x2="452" y2="148" stroke="#EAC94B" stroke-width="1.5"/>
+      <text class="sm" x="352" y="128">EJE JUGADOR→ENEMIGO</text>
+      <circle cx="352" cy="216" r="13" fill="#9FC7D6"/>
+      <circle cx="464" cy="140" r="13" fill="#DA6A3E"/>
+      <path d="M352 236 Q 366 282 424 292" fill="none" stroke="#9FC7D6" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arC)"/>
+      <text class="st" x="264" y="196">encara al</text>
+      <text class="st" x="264" y="212">enemigo</text>
+      <text class="ss" x="264" y="316">de lado → lo rodea</text>
+
+      <line x1="502" y1="0" x2="502" y2="330" stroke="rgba(236,230,216,.16)"/>
+
+      <text class="sm" x="516" y="16">3 · APUNTADO</text>
+      <path d="M534 250 l22 -12 v24 z" fill="#7d7869"/>
+      <text class="sm" x="516" y="288">HOMBRO (CERCA)</text>
+      <line x1="560" y1="238" x2="588" y2="224" stroke="#7d7869" stroke-width="1.2" stroke-dasharray="3 4"/>
+      <circle cx="600" cy="216" r="13" fill="#9FC7D6"/>
+      <line x1="611" y1="208" x2="690" y2="150" stroke="#9FC7D6" stroke-width="2"/>
+      <line x1="686" y1="130" x2="712" y2="130" stroke="#ECE6D8" stroke-width="1.6"/>
+      <line x1="699" y1="117" x2="699" y2="143" stroke="#ECE6D8" stroke-width="1.6"/>
+      <text class="st" x="656" y="104">retícula</text>
+      <text class="ss" x="516" y="196">encara la cámara</text>
+      <text class="ss" x="516" y="316">movilidad reducida</text>
+    </svg>
+  </figure>
+
+  <h3>Los tres estados</h3>
+  <p>Los tres <strong>los elige el jugador</strong>, y comparten un <strong>invariante</strong>: <em>el ataque va siempre hacia donde encara el cuerpo</em> — lo único que cambia es <strong>quién decide ese encarado</strong>.</p>
+
+  <table>
+    <tr><th>Estado</th><th>Entrada</th><th>El cuerpo encara…</th><th>Sirve para</th></tr>
+    <tr><td><strong>Libre</strong></td><td>por defecto</td><td>tu <strong>movimiento</strong></td><td>desplazarte y pelear físico, sin retícula</td></tr>
+    <tr><td><strong>Lock</strong></td><td>toggle</td><td>el <strong>enemigo</strong></td><td>comprometerte con un <strong>rival</strong> (strafe, rodearlo)</td></tr>
+    <tr><td><strong>Apuntado</strong></td><td>mantener</td><td>la <strong>cámara</strong></td><td>comprometerte con un <strong>punto del mundo</strong></td></tr>
+  </table>
+
+  <table>
+    <tr><th>Estado</th><th>Cámara</th><th>Personaje · detalle</th></tr>
+    <tr><td><strong>Libre</strong></td><td>Por detrás, amortiguada; órbita libre; <strong>vuelve sola detrás</strong> al correr (perezoso)</td><td><strong>Encara su movimiento</strong>: el stick <em>es</em> la mira. Al golpear <strong>se orienta y se abalanza</strong> hacia un enemigo cercano — así funciona sin retícula</td></tr>
+    <tr><td><strong>Lock</strong></td><td>Sobre el <strong>eje jugador→enemigo</strong>, con <strong>ambos en pantalla</strong>; se aleja y sube al separarse. Órbita limitada que vuelve al encuadre</td><td><strong>Encara siempre al enemigo</strong> → moverte de lado lo <strong>rodea</strong>. Adquiere el <strong>más relevante en pantalla</strong>, cambia con <strong>flick</strong>; sin enemigo <strong>recentra la cámara</strong>. Rompe: lejos · caído · sin línea de visión</td></tr>
+    <tr><td><strong>Apuntado</strong></td><td><strong>Al hombro</strong>, cerca, con <strong>retícula</strong> al centro y convergencia (lo que disparas cae en la mira)</td><td><strong>Encara la cámara</strong>; <strong>movilidad reducida</strong> como precio. Dentro puedes usar básico y cualquier habilidad</td></tr>
+  </table>
+
+  <h3>Por qué hacen falta los tres</h3>
+  <p>Que <strong>lock y apuntado</strong> coexistan no es duplicación: son <strong>dos compromisos distintos</strong> — uno con un <strong>rival</strong>, otro con un <strong>punto del mundo</strong>. En un juego cuyo eje es <em>habilidad + elemento + <strong>ambiente</strong></em>, el tablero importa tanto como el enemigo, así que hay que poder fijar cualquiera de los dos.</p>
+  <p>El tercero además lo pedía el roster: Zelda resuelve el apuntado fino con un <strong>modo dedicado</strong> (el arco), y nosotros llegamos a la misma necesidad por <strong>Pyrecko</strong> (proyectiles) y <strong>Mantagale</strong> (colocar el Ciclón) — pero lo <strong>generalizamos a un estado</strong> en vez de atarlo a una habilidad: si unas habilidades apuntaran y otras no, volvería la ambigüedad de <em>"¿este botón apunta?"</em>. <em>Descartada la cámara lenta al apuntar: difícil de sostener en online y ningún monstruo la aprovecha.</em></p>
+
+  <div class="note"><strong>🔑 Principio: la libertad genera ingenio.</strong> Apuntando, la <strong>Movilidad se lanza en la dirección de la mira, también en vertical</strong>. Las habilidades <strong>dejan de estar atadas al plano del suelo</strong> y las soluciones las inventa el jugador: que la forma de que un Ottorock alcance a una Mantagale sea <strong>impulsarse al aire apuntando hacia arriba</strong> es una jugada que nadie diseñó. Ese es el segundo USP de Tatemis.</div>
+
+  <div class="note"><strong>⚠️ El riesgo a vigilar.</strong> Que se viva en apuntado (como el ADS de los hero shooters) y los otros dos estados queden vestigiales. La lentitud tiene que <strong>morder</strong>, y el premio debe ser <em>solo precisión</em> — nunca más daño ni más alcance.</div>
+
+  <h3>Diferencias con lo que tenemos hoy</h3>
+  <table>
+    <tr><th>Rasgo</th><th>BotW/TOTK</th><th>Nosotros hoy</th></tr>
+    <tr><td>Encuadre de ambos · distancia adaptativa · órbita limitada · encarado por modo</td><td>✅</td><td><strong>✅ equivalente</strong></td></tr>
+    <tr><td>Adquisición del más relevante <strong>en pantalla</strong> (cono + centrado)</td><td>✅</td><td>✅</td></tr>
+    <tr><td><strong>Cambio de objetivo</strong> con flick lateral</td><td>✅</td><td>✅ stick derecho / ratón</td></tr>
+    <tr><td>Botón <strong>sin enemigo → recentra la cámara</strong></td><td>✅</td><td>✅</td></tr>
+    <tr><td>Ruptura: lejos · caído · <strong>sin línea de visión</strong></td><td>✅</td><td>✅</td></tr>
+    <tr><td>Trail-behind <strong>perezoso</strong> (entra en rampa)</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Suavizado de posición tipo <strong>muelle</strong></td><td>✅</td><td>✅ <code>SmoothDamp</code></td></tr>
+    <tr><td>Giro del cuerpo <strong>con aceleración</strong></td><td>✅</td><td>✅ <code>SmoothDampAngle</code></td></tr>
+    <tr><td>Activación del lock</td><td><strong>mantener</strong> ZL</td><td>❌ toggle (Q) — decisión pendiente</td></tr>
+    <tr><td>Oclusión</td><td>pull-in + <strong>fade</strong> de lo que tapa</td><td>⚠️ solo pull-in</td></tr>
+    <tr><td>Apuntado fino a distancia</td><td>modo dedicado del arco</td><td>✅ <strong>estado propio</strong>, más general</td></tr>
+    <tr><td>Varios enemigos</td><td>cómodo y ágil</td><td>🟡 ya probable (3 maniquíes) — validar</td></tr>
+  </table>
+</section>
+
+<section>
+  <div class="ch-head"><span class="ch-num">06</span><h2>Reglas vigentes</h2></div>
   <table>
     <tr><td><strong>1 · Bespoke primero, extraer después</strong></td><td>Nada se generaliza hasta tener ≥2 usos reales.</td></tr>
     <tr><td><strong>2 · Datos, no código</strong></td><td>Añadir criatura o reacción = editar assets. Si obliga a tocar C#, es un hueco del catálogo → anotarlo.</td></tr>
-    <tr><td><strong>3 · Anim-events</strong></td><td>Los efectos se disparan en eventos de animación, nunca en el frame del input.</td></tr>
+    <tr><td><strong>3 · Nunca en el frame del input</strong></td><td>Los efectos se disparan por el <strong>tiempo de la fase</strong>; cuando haya animaciones, ese reloj lo releva un anim-event sin tocar los efectos. <span style="color:var(--ink-3)">(Cerrado así el 22/07: en caja gris no hay clips que emitan eventos, así que el reloj no es un placeholder — es el mecanismo.)</span></td></tr>
     <tr><td><strong>4 · Payload desacoplado</strong></td><td>Todo lo que sobrevive a su habilidad viaja con copia y snapshot.</td></tr>
     <tr><td><strong>5 · Mandan los docs</strong></td><td>El scaffold arrastra deuda conocida → ticket T1.0.</td></tr>
     <tr><td><strong>6 · Diagrama nuevo → aquí</strong></td><td>Si hace falta explicar algo visualmente y no está en esta página, se añade a esta página.</td></tr>

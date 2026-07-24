@@ -23,6 +23,13 @@ namespace Tatemis
             return _energy.current >= a.energyCost;
         }
 
+        /// Segundos de cooldown que le quedan a una habilidad (0 = lista). Para el HUD de debug.
+        public float CooldownRemaining(AbilityData a)
+        {
+            if (a == null) return 0f;
+            return _readyAt.TryGetValue(a, out float t) ? Mathf.Max(0f, t - Time.time) : 0f;
+        }
+
         public bool TryStart(AbilityData a, AbilityCtx ctx)
         {
             if (!CanCast(a)) return false;
