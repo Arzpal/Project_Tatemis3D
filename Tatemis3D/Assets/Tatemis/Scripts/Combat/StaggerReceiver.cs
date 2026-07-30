@@ -54,6 +54,8 @@ namespace Tatemis
 
         public Element Element => species != null ? species.element : Element.Naturaleza;
         public Transform Transform => transform;
+        public bool IsCreature => true;
+        public bool TakesDamage => true;
 
         // Colores del estado caído (caja gris): la gracia se distingue del "ya puedes rematar".
         static readonly Color ColGrace = new Color(0.95f, 0.95f, 1f);      // inmune: casi blanco

@@ -1,6 +1,6 @@
 # Tatemis3D — Anatomía de un tatemis jugable (referencia: Ottorock-Libre)
 
-> **TL;DR:** Cómo se **siente y funciona** un tatemis controlado por el jugador, consolidado en un solo sitio a partir de la primera especie jugable de verdad (**Ottorock, modo Libre**). No sustituye a los docs de cada sistema: es el **mapa de qué encaja con qué**, con los números reales del gate y punteros al detalle. Todo lo aquí descrito ya está implementado y jugado (2026-07-22).
+> **TL;DR:** Cómo se **siente y funciona** un tatemis controlado por el jugador, consolidado en un solo sitio a partir de la primera especie jugable de verdad (**Ottorock, modo Libre**). No sustituye a los docs de cada sistema: es el **mapa de qué encaja con qué**, con los números reales del gate y punteros al detalle. Todo lo aquí descrito ya está implementado y jugado (2026-07-22); lo que entró el **2026-07-29** con la reformulación del modelo elemental va marcado con 🟡 cuando **aún no** lo está.
 > **Mapa:** §1 movimiento · §2 cámara · §3 habilidades · §4 elemento · §5 feedback visual · §6 feedback físico y combos aéreos · §7 aturdimiento y noqueo · §8 tabla de referencia de Ottorock-Libre · §9 principios transversales
 
 > **Regla de lectura:** un tatemis = **datos, no código** ([ARCHITECTURE](ARCHITECTURE.md)). Casi todo lo de abajo son campos de un `ScriptableObject` que el diseñador ajusta. Cuando algo necesita C# nuevo, es un hueco del catálogo → [ABILITY-EXTRACTION §4](ABILITY-EXTRACTION.md).
@@ -44,6 +44,12 @@
 | **Payload** | la consecuencia (`OnCast`/`OnHit`) | `DealDamage` · `Knockback` · `CarryToFront` · `ApplyStatus` |
 | **Presentación** | ni entrega ni causa: encuadra | `CameraShot` |
 
+🔒 **Anatomía universal del ataque** ✅ *(2026-07-29 — dictada en [ELEMENTAL-REACTIONS §0.6](ELEMENTAL-REACTIONS.md), su sitio final es [ABILITY-SYSTEM](ABILITY-SYSTEM.md))*. Todo ataque —básico o habilidad— tiene **tres tramos**, y de ahí sale qué se puede parar y qué no:
+
+**arranque** *(interrumpible: este tramo **es** el "te corté a media animación")* → **el golpe** *(comprometido: a partir de aquí entra sí o sí)* → **recuperación** *(cancelable: cortar la cola con otra habilidad para encadenar más seguido)*.
+
+La embestida de Ottorock ya tiene esa forma exacta (carga *rooted* → embestida → deslizamiento) y `AbilityPhase` ya trae `interruptible`/`superArmor`. 🟡 **Lo que falta es cancelar:** `AbilityCaster` no deja cortar una habilidad con otra — y de ese cancel cuelgan tanto el combo apretado que alimenta la captura (§7) como el contrajuego de Rayo, que muerde **solo en el arranque**.
+
 🔒 **Reglas que se pagan si se olvidan:**
 - **Los payloads son de la FASE, no del actuador** → dos actuadores que reporten en la misma fase duplican el `DealDamage`. Un actuador con payload propio va en **su propia fase**.
 - **Un ataque que dura reparte GOLPES, no daño continuo** (`SweepHitbox.hitInterval`, ref. Smash) — cada golpe es un `HitInfo` normal, así valen los payloads de siempre. [ABILITY-SYSTEM §4.1](ABILITY-SYSTEM.md).
@@ -57,6 +63,14 @@
 - **Excepción:** el **último eslabón** de la cadena puede **estallar en el elemento de la especie** (Ottorock: 4 garras neutras + remate que estalla en Mineral).
 - **`ElementalBurst`** siempre usa el elemento de la **especie**, no el del golpe → un básico neutro puede rematar estallando en Mineral sin contradecir la regla.
 - Multiplicador: débil **1.5x** · resiste **0.5x** · neutral **1x** (el 2x solo existe contra forma elemental pura). `Vulnerable` lo multiplica aparte (×1.35).
+
+🔑 **Un elemento puro solo hace daño** ✅ *(2026-07-29)*. Los efectos ambientales **nacen únicamente de la mezcla con el terreno**, nunca del elemento suelto. Consecuencia para la anatomía: **tu estallido tiene dos trabajos** — pegar, y **sembrar tu elemento en el suelo** para que ahí pase algo. Las cinco salidas (nada · amplificación · reacción tuya · reacción del terreno sin bando · combinación) → [GDD §8.1](GDD.md) y [ELEMENTAL-REACTIONS §0](ELEMENTAL-REACTIONS.md).
+
+🔑 **Lo que cada elemento aporta a la mezcla es UN verbo** ✅ *(2026-07-29, [ER §0.1](ELEMENTAL-REACTIONS.md))* — **Fuego propaga · Agua arrastra · Naturaleza entrelaza · Mineral pesa · Rayo paraliza · Aire nubeliza** — y **manda el verbo del que domina**; el dominado solo pone **de qué está hecha** la mezcla. Para el código importa porque es lo que impide que los seis se contaminen: si el estallido de Mineral ralentiza por sí solo, el jugador lee «el elemento puro ralentiza», que es justo lo que esta sección deroga (ver el 🟡 del §8).
+
+- **El estallido no depende de conectar** ✅ *(2026-07-29)*: si sembrar el elemento es la mitad de su trabajo, fallar el golpe no puede dejarte sin ella — en Ottorock, **el 5º básico y el Mordisco estallan siempre**. 🟡 *Hoy están autorados como `ElementalBurst.Timing.OnHit` (`Editor/OttorockContent.cs`): pendiente de pasarlos a un disparo que no dependa del impacto.*
+- **El estallido nace POR DELANTE del cuerpo**, no a los pies (`ElementalBurst.forwardOffset`; Ottorock: 1–1.2 u). Razón: las mezclas **sin bando** —las combinaciones, y las reacciones que despierta el terreno cuando te supera— **también te alcanzan a ti**, y el melee pelea justo dentro de ese radio. Lo que te salva es **el delay** (golpeas y sales) más ese offset; comerse más ambiente es el peaje del cuerpo a cuerpo.
+- **El efecto se pega al cuerpo:** dentro de la zona dura, al salir decrece. Techo de **2 efectos a la vez** con objetivo de **0–1**: **todo tiene que ser esquivable**, tú incluido.
 
 ## 5. Golpear — feedback visual — [código: `Combat/HitFeedback.cs`]
 
@@ -87,10 +101,12 @@ Colores de efectividad, una sola tabla (`HitFlash.ColorFor`): **cálido = 1.5x �
 - **Guardarraíl:** presupuesto acumulable (`maxHang ≈ 3 s`) que mide **tiempo suspendido**, no golpes, y **se recarga al tocar suelo**. Impide el juggle infinito, el fallo clásico del género.
 - **Cola al terminar** (`hangTailAfterAbility ≈ 0.45 s`): al dejar de encadenar caes aunque quedara hang — el hang largo es para cubrir habilidades, no para flotar cuando ya paraste.
 - **La embestida abre la ventana aérea; el resto solo sostiene** (`lift = 0` en mordisco y remate). Si cada golpe elevara, el combo subiría solo hasta el techo.
+- **El ambiente juega en esta misma capa** ✅ *(2026-07-29)*: el **géiser** (Agua sobre terreno de Fuego) **eleva**, así que abre la ventana aérea sin que ninguna habilidad tenga que hacerlo — es lo que permite que un melee alcance a un volador; y el verbo **Peso** de Mineral (**energía geo**) **ancla al suelo y acorta la suspensión**. El juggle no es solo tuyo: el tablero lo alarga o lo corta.
 
 ## 7. Aturdimiento y noqueo — [detalle: TAMER §4](TAMER.md) · [VITALITY-DEATH](VITALITY-DEATH.md)
 
-- **Aturdimiento tipo postura** (`StaggerReceiver`, ref. Sekiro): proporcional a la vida, sube con **combo**, decae si dejas de golpear. Al llenarse abre la ventana de KO.
+- **Aturdimiento tipo postura** (`StaggerReceiver`, ref. Sekiro): la **barra** es proporcional a la **vida máxima** (`staggerRatio`) y **lo que suma cada golpe es proporcional a su daño**, multiplicado por el **combo**. **Decae si dejas de golpear.** Al llenarse abre la ventana de KO.
+- **El CC no llena la barra: la MANTIENE** ✅ *(2026-07-29)* — mientras el enemigo está controlado **no puede reducir lo que ya lleva acumulado**, así que atraparlo o arrastrarlo es lo que tapa el hueco entre golpe y golpe. Corolario, y es lo que hace sistémico al ambiente: el CC que **te comen a ti** (los ticks de Rayo, la cristalización) **no te quita vida, te quita la captura** ([GDD §8.2](GDD.md)).
 - **Noqueo total** (aturdimiento + vida 0) → **`Downed`** con **gracia invulnerable de 3–5 s**: el margen para decidir, sin el cual el combo en curso remataría por inercia.
 - **Sin prompt ni botón:** pasada la gracia, **atacar remata** (muerte por elección); el **menú del Tamer** captura. Si no decides, se retira/huye.
 - **Vitalidad** (barra externa, propios): drena **poco al ser noqueado** y **mucho si le pegan caído**; a 0, muerte permanente pero siempre evitable. 🟡 sin ratificar.
@@ -105,9 +121,11 @@ Colores de efectividad, una sola tabla (`HitFlash.ColorFor`): **cálido = 1.5x �
 |---|---|---|---|---|
 | **Cadena básicos 1–4** | gratis | 14/14/18/20 | Neutro | step-in 0.9–1.2 > empuje (0.72) → cierra distancia; `hang` 0.5 sostiene |
 | **5º · Garra sísmica** | gratis | 26 + estallido 16 | Neutro + **estallido Mineral** | remate lento (0.62 s); no eleva |
-| **Movilidad · Embestida Garra** | 12 / 2.5 s | 8×~4 (multi-hit) + estallido 14 | Neutro + **estallido Mineral** | 3 fases (carga *rooted* → embestida → deslizamiento); **abre la ventana aérea**; cámara propia; slow 2 s del estallido |
+| **Movilidad · Embestida Garra** | 12 / 2.5 s | 8×~4 (multi-hit) + estallido 14 | Neutro + **estallido Mineral** | 3 fases (carga *rooted* → embestida → deslizamiento); **abre la ventana aérea**; cámara propia; slow 2 s del estallido 🟡 |
 | **Flex · Mordisco Ferroso** | 20 / 3 s | 50 + estallido 15 | Especie (Mineral) | golpe fuerte; sostiene, no eleva |
-| **Signature** | — | — | — | Cambio de estado Libre↔Sujeción, **post-gate** (null) |
+| **Signature** | — | — | — | Cambio de estado Libre↔Sujeción, **post-gate** (null) — y **antes que Pyrecko** ✅ *(2026-07-29, [GDD §9.0](GDD.md))* |
+
+> 🟡 **Abierto — decide Arzpal (2026-07-29):** el **slow de 2 s** del estallido de la Embestida es un payload del **kit** (`ApplyStatus{Ralentizado}` en la fase del estallido), así que por la regla *«el verbo gobierna las reacciones, el arquetipo gobierna el kit»* ([ARCHETYPES](ARCHETYPES.md)) es **legal**. Lo que no está resuelto es la **lectura**: cuelga del estallido de Mineral y hace exactamente el **verbo Peso**, así que el jugador lo leerá como *«el elemento puro ralentiza»* — justo lo que §4 deroga. Salidas: **① dejarlo** como excepción de kit, asumiendo la lectura · **② moverlo** fuera del estallido (que lo aplique el arrollamiento) · **③ quitarlo** y que el slow venga solo de la mezcla. Mismo caso, más leve, para cualquier estado que cuelgue de un `ElementalBurst`.
 
 **Locomoción Libre:** andares `Paso corto 0.1 · Caminar 0.5 · Deslizamiento 0.75`, `maxSpeedMultiplier 1`, `blockMaxInput 0.25`.
 

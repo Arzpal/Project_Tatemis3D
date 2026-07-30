@@ -138,6 +138,7 @@ Escena y contenido se generan por código: menú **`Tatemis ▸ Sandbox ▸ Cons
 4. **Toggle vs mantener** para el lock: Arzpal lo dictó **toggle** (2026-07-18); BotW usa *mantener*. Queda como la última divergencia consciente con la referencia.
 5. **Afinar parámetros midiendo metraje real** (§3.2): lo actual son valores razonados, no medidos.
 6. **Riesgo a vigilar:** que se viva en el estado de apuntado y libre/lock queden vestigiales → la palanca es `aimMoveMultiplier` (que la lentitud muerda).
+7. **Lo que el ambiente le pide a esta capa** *(nuevo 2026-07-29, nada implementado)*: tras la reformulación elemental, **dos efectos atacan la vista y el apuntado** ([ELEMENTAL-REACTIONS §4](ELEMENTAL-REACTIONS.md)) — la combinación **Niebla** (Aire + Agua) **rompe la ADQUISICIÓN de lock-on a través de ella** *(no el guiado de lo ya fijado: se corta fijar, no mantener)*, y la reacción **Tormenta de arena** (Aire › Mineral) **tapa la visión**. Lo primero sale casi gratis porque `TargetingSystem` ya separa **fijar** de **mantener** (§2.2); lo segundo es un efecto de pantalla, no de cámara. *(Ojo al renombre: el romper-lock-on era antes del "golpe de vapor" y ahora vive en la Niebla.)*
 
 ---
 

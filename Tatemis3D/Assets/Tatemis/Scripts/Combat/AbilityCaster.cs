@@ -33,11 +33,26 @@ namespace Tatemis
         public bool TryStart(AbilityData a, AbilityCtx ctx)
         {
             if (!CanCast(a)) return false;
+
+            // INTERFERIDO (verbo de Rayo): el tick corta el **arranque** de un ataque, nunca un golpe
+            // ya comprometido (anatomía de §0.6). Aquí es exactamente el arranque, así que este es su
+            // sitio. Se cobra la energía igual: el intento se ha gastado — es lo que hace que no
+            // puedas encadenar, y por eso Rayo no te quita vida, te quita la captura.
+            if (_status == null) _status = GetComponent<StatusController>();
+            if (_status != null && _status.ConsumeInterrupt())
+            {
+                _energy.TrySpend(a.energyCost * 0.5f);
+                Debug.Log($"[Rayo] Interferencia corta el arranque de {a.displayName}.");
+                return false;
+            }
+
             if (!_energy.TrySpend(a.energyCost)) return false;
             _readyAt[a] = Time.time + a.cooldown;
             _active = new ActiveAbility(a, ctx);
             return true;
         }
+
+        StatusController _status;
 
         // El CreatureController y los carriers alimentan estado a la habilidad activa.
         public void SetButtonHeld(bool held) { if (_active != null) _active.Ctx.buttonHeld = held; }

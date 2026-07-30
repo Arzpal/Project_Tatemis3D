@@ -28,6 +28,7 @@ namespace Tatemis.EditorTools
             CleanGenerated();
             var ottorock = OttorockContent.Generate();
             var dummySpecies = OttorockContent.DummySpecies(Element.Rayo, "ManiquiRayo");
+            var reactionTable = ReactionTableContent.Generate();
             var typeChart = AssetDatabase.LoadAssetAtPath<TypeChart>($"{ExamplesDir}/TypeChart.asset");
             if (ottorock == null || typeChart == null)
             {
@@ -43,7 +44,8 @@ namespace Tatemis.EditorTools
             light.shadows = LightShadows.Soft;
             lightGo.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
-            // 4) Suelo grey-box (50x50) — neutro (el gate es sin reacciones, regla R5).
+            // 4) Suelo grey-box (50x50) — neutro (el gate es sin reacciones, regla R5); el terreno
+            // elemental vive en el perímetro (5b), sin tocar el centro donde pelea el gate.
             var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ground.name = "Suelo";
             ground.transform.localScale = new Vector3(5f, 1f, 5f);
@@ -58,6 +60,29 @@ namespace Tatemis.EditorTools
             MakeWall("Pared O", new Vector3(-24f, 1.5f, 0f), new Vector3(1f, 3f, 50f), wallMat);
             MakeWall("Pilar 1", new Vector3(6f, 1.5f, 3f), new Vector3(1.5f, 3f, 1.5f), pillarMat);
             MakeWall("Pilar 2", new Vector3(-5f, 1.5f, -4f), new Vector3(1.5f, 3f, 1.5f), pillarMat);
+
+            // 5b) Laboratorio elemental (Fase 2, T0.2b): parches de terreno en el perímetro — el
+            // centro sigue neutro para que el gate (melee puro, R5) se pruebe igual que siempre.
+            // Con Ottorock (Mineral): Rayo = SU dominancia (descarga a tierra) · Aire = la respuesta
+            // del terreno en su contra (esquirlas sin bando) · Agua/Fuego/Naturaleza = combinaciones
+            // · la veta (Mineral) = mismo elemento, nada — cada regla tiene su rincón. El resto de
+            // casillas se disparan con el spray (F2/G).
+            // Parches de 12×12 (esquinas) y 8×12 (laterales): con celda de 1.75 salen ~7-9 hexágonos
+            // por parche, que ya se leen como REJILLA. A 8×8 salía uno suelto, que no comunica nada.
+            MakePatch("Charco (Agua)", new Vector3(-16f, 0f, 16f), new Vector2(12f, 12f),
+                      Element.Agua, new Color(0.25f, 0.45f, 0.85f));
+            MakePatch("Roca volcánica (Fuego)", new Vector3(16f, 0f, 16f), new Vector2(12f, 12f),
+                      Element.Fuego, new Color(0.75f, 0.25f, 0.12f));
+            MakePatch("Matorral (Naturaleza)", new Vector3(-16f, 0f, -16f), new Vector2(12f, 12f),
+                      Element.Naturaleza, new Color(0.3f, 0.6f, 0.25f));
+            MakePatch("Veta de menas (Mineral)", new Vector3(16f, 0f, -16f), new Vector2(12f, 12f),
+                      Element.Mineral, new Color(0.55f, 0.6f, 0.7f));
+            MakePatch("Piedra electrificada (Rayo)", new Vector3(19f, 0f, 0f), new Vector2(8f, 12f),
+                      Element.Rayo, new Color(0.85f, 0.8f, 0.3f));
+            MakePatch("Corrientes de aire (Aire)", new Vector3(-19f, 0f, 0f), new Vector2(8f, 12f),
+                      Element.Aire, new Color(0.6f, 0.85f, 0.9f));
+            // El nodo va DENTRO del borde del charco: su descarga (Rayo) cae sobre Agua → ★.
+            MakeCrystalNode(new Vector3(-13.5f, 0.8f, 13.5f));
 
             // 6) Jugador — cápsula con CharacterController (sin la CapsuleCollider del primitivo).
             var player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
@@ -78,18 +103,27 @@ namespace Tatemis.EditorTools
             var color = player.AddComponent<ActionColor>();      // cambia de color según la acción
             color.target = player.GetComponent<Renderer>();
             color.baseColor = new Color(0.25f, 0.5f, 0.9f);
+            player.AddComponent<ElementalSpray>();               // debug: F2 cicla elemento · G dispara
             MakeNose(player.transform, new Color(0.95f, 0.95f, 0.95f));   // indicador de "cara" (claro para que resalte)
 
             // 7) Maniquíes golpeables — elemento Rayo (el Mineral de Ottorock lo supera → 1.5x visible).
             // Varios y separados, para probar la adquisición en pantalla y el cambio de objetivo.
-            MakeDummy("Maniqui A", new Vector3(0f, 1f, 6f), dummySpecies, player.transform);
-            MakeDummy("Maniqui B", new Vector3(7f, 1f, 9f), dummySpecies, player.transform);
-            MakeDummy("Maniqui C", new Vector3(-7.5f, 1f, 7f), dummySpecies, player.transform);
+            MakeDummy("Maniqui A (neutro)", new Vector3(0f, 1f, 6f), dummySpecies, player.transform);
+            MakeDummy("Maniqui B (neutro)", new Vector3(7f, 1f, 9f), dummySpecies, player.transform);
+            // ⚠️ Tres maniquíes MÁS, plantados sobre parches. Sin ellos, el payload de las reacciones
+            // (daño y aturdimiento) no se aplica hoy a NADIE: el centro es neutro por R5, los
+            // maniquíes no tienen IA que los lleve a un parche, y empujarlos hasta allí a golpes son
+            // 20+ básicos. Con estos tres, los puntos ①②③ del checklist se prueban de pie.
+            MakeDummy("Maniqui Rayo (dominancia)", new Vector3(18f, 1f, 0f), dummySpecies, player.transform);
+            MakeDummy("Maniqui Charco (★)", new Vector3(-15f, 1f, 15f), dummySpecies, player.transform);
+            MakeDummy("Maniqui Aire (provocada)", new Vector3(-19f, 1f, 3f), dummySpecies, player.transform);
 
-            // 8) Sistemas: cablear el TypeChart global + HUD de debug.
+            // 8) Sistemas: cablear el TypeChart global + el sistema de reacciones + HUD de debug.
             var systems = new GameObject("Systems");
             var bootstrap = systems.AddComponent<CombatBootstrap>();
             SetPrivate(bootstrap, "typeChart", typeChart);
+            var reactions = systems.AddComponent<ReactionSystem>();
+            SetPrivate(reactions, "table", reactionTable);
             var hud = systems.AddComponent<DebugHUD>();
             SetPrivate(hud, "energy", player.GetComponent<ElementalEnergy>());
             SetPrivate(hud, "targeting", targeting);
@@ -122,7 +156,11 @@ namespace Tatemis.EditorTools
             Debug.Log("[Sandbox] Escena construida (Ottorock) en " + ScenePath +
                       ". Pulsa Play. Controles: WASD strafe · ratón apunta (el cuerpo mira a la mira) · Q lock-on (asistencia) · clic izq golpe de garra · " +
                       "1 Embestida Garra · 2 Mordisco Ferroso · 3 (Signature: post-gate, sin efecto) · " +
-                      "Shift bloqueo · Espacio salto · Esc libera el ratón.");
+                      "Shift bloqueo · Espacio salto · F2/G spray elemental (cicla/dispara) · Esc libera el ratón. " +
+                      "Laboratorio elemental en el perímetro, con un maniquí plantado en cada prueba: piedra electrificada " +
+                      "(descarga a tierra), charco + nodo de cristal (★ agua electrificada) y corrientes de aire " +
+                      "(esquirlas SIN bando: ahí el estallido te EMPUJA también a ti). ⚠️ El jugador aún no recibe DAÑO " +
+                      "(TakesDamage = false): por eso no verás número sobre él — está pendiente de ratificar VITALITY-DEATH.");
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath));
         }
 
@@ -152,6 +190,44 @@ namespace Tatemis.EditorTools
             w.transform.position = pos;
             w.transform.localScale = scale;
             w.GetComponent<Renderer>().sharedMaterial = mat;
+        }
+
+        /// Parche de terreno elemental (ER §8): en caja gris, un quad etiquetado + la rejilla
+        /// hexagonal leve de ARENA.md. La raíz va SIN escala (los hexágonos no se deforman); el
+        /// collider vive en el cube visual y `GetComponentInParent` encuentra la etiqueta igual.
+        static void MakePatch(string name, Vector3 pos, Vector2 size, Element element, Color color)
+        {
+            var patch = new GameObject(name);
+            patch.transform.position = pos;
+            patch.AddComponent<ElementalSurface>().element = element;
+
+            var grid = patch.AddComponent<HexGridOverlay>();
+            grid.area = size;
+            // Solo el TONO sale del parche; el alpha lo pone la rejilla (leve, ARENA §1) — pisarlo
+            // con el 1 que devuelve Lerp la dibujaría sólida.
+            var line = Color.Lerp(color, Color.white, 0.55f);
+            grid.lineColor = new Color(line.r, line.g, line.b, grid.lineColor.a);
+
+            var visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            visual.name = "Suelo elemental";
+            visual.transform.SetParent(patch.transform, false);
+            visual.transform.localPosition = new Vector3(0f, 0.02f, 0f);
+            visual.transform.localScale = new Vector3(size.x, 0.04f, size.y);
+            visual.GetComponent<Renderer>().sharedMaterial = Mat(color);
+        }
+
+        /// Nodo de cristal cargado (ER §8): golpearlo suelta Rayo donde está plantado — junto al
+        /// charco produce la ★ agua electrificada, la única del slice sin criaturas de Rayo/Agua.
+        static void MakeCrystalNode(Vector3 pos)
+        {
+            var node = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            node.name = "Nodo de cristal (Rayo)";
+            node.transform.position = pos;
+            node.transform.rotation = Quaternion.Euler(18f, 35f, 12f);   // un cubo torcido lee "cristal" en caja gris
+            node.transform.localScale = new Vector3(0.55f, 1.3f, 0.55f);
+            node.GetComponent<Renderer>().sharedMaterial = Mat(new Color(0.55f, 0.9f, 1f));
+            node.AddComponent<CrystalNode>().charge = Element.Rayo;
+            node.AddComponent<HitFlash>();                               // que golpearlo SE VEA
         }
 
         /// Maniquí golpeable: CharacterController (recibe knockback y sigue siendo detectable),

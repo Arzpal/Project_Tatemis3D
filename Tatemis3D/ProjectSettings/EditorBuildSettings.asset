@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Tatemis/Scenes/Sandbox.unity
-    guid: 348653be8423bc7469bca7500d3222b3
+    path: Assets/Tatemis/Scenes/Mundo.unity
+    guid: a53b8f98f8bf8964084884ae69c5ee01
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

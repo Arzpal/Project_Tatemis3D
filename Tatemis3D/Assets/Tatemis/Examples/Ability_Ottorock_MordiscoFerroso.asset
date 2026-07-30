@@ -22,13 +22,13 @@ MonoBehaviour:
   - name: Mordisco
     animTrigger: 
     effects:
-    - rid: 1790544224151667644
-    - rid: 1790544224151667645
-    - rid: 1790544224151667646
-    - rid: 1790544224151667647
-    - rid: 1790544224151667648
+    - rid: 1790544370519507144
+    - rid: 1790544370519507145
+    - rid: 1790544370519507146
+    - rid: 1790544370519507147
+    - rid: 1790544370519507148
     exit:
-      rid: 1790544224151667649
+      rid: 1790544370519507149
     rooted: 0
     iFrames: 0
     superArmor: 0
@@ -36,7 +36,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 1790544224151667644
+    - rid: 1790544370519507144
       type: {class: DashMotion, ns: Tatemis, asm: Assembly-CSharp}
       data:
         distance: 1.5
@@ -44,18 +44,18 @@ MonoBehaviour:
         maxPitch: 35
         easeOut: 0
         continueForward: 0
-    - rid: 1790544224151667645
+    - rid: 1790544370519507145
       type: {class: MeleeHitbox, ns: Tatemis, asm: Assembly-CSharp}
       data:
         range: 2.3
         radius: 1.5
-    - rid: 1790544224151667646
+    - rid: 1790544370519507146
       type: {class: DealDamage, ns: Tatemis, asm: Assembly-CSharp}
       data:
         amount: 50
         staggerAmount: 35
         when: 1
-    - rid: 1790544224151667647
+    - rid: 1790544370519507147
       type: {class: Knockback, ns: Tatemis, asm: Assembly-CSharp}
       data:
         speed: 12
@@ -66,17 +66,18 @@ MonoBehaviour:
         verticalScale: 1
         hang: 0.55
         when: 1
-    - rid: 1790544224151667648
+    - rid: 1790544370519507148
       type: {class: ElementalBurst, ns: Tatemis, asm: Assembly-CSharp}
       data:
         radius: 2.2
         damage: 15
         staggerAmount: 15
         forwardOffset: 1
-        when: 1
+        when: 0
         reportHits: 0
         hitstop: 0
-    - rid: 1790544224151667649
+        impactStrength: 0
+    - rid: 1790544370519507149
       type: {class: AfterSeconds, ns: Tatemis, asm: Assembly-CSharp}
       data:
         seconds: 0.5

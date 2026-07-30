@@ -20,7 +20,7 @@ MonoBehaviour:
   - formName: Libre
     modelPrefab: {fileID: 0}
     stats:
-      maxHealth: 4000
+      maxHealth: 3500
       damage: 14
       moveSpeed: 6
     locomotion: {fileID: 11400000, guid: 054f6156e404dea4fa4b4a658058b65c, type: 2}

@@ -48,8 +48,12 @@ namespace Tatemis.EditorTools
                         new Knockback { speed = 16f, duration = 0.14f, flinch = 0.2f,
                                         lift = 0f, hang = 0.55f, when = ApplyWhen.OnHit },
                         // El estallido SÍ lleva elemento (siempre el de la especie) → aquí sí luce el 1.5x.
+                        // ✅ **OnCast, no OnHit** (dictado 2026-07-29): estalla SIEMPRE, conecte o no,
+                        // para poder **sembrar su elemento** en una celda aunque falles el golpe. Nace
+                        // por delante del cuerpo (`forwardOffset`), que es lo que evita que la mezcla
+                        // le salpique a bocajarro — las combinaciones no tienen bando (ER §0.7).
                         new ElementalBurst { radius = 2.8f, damage = 16f, staggerAmount = 16f,
-                                             forwardOffset = 1.2f, when = ElementalBurst.Timing.OnHit },
+                                             forwardOffset = 1.2f, when = ElementalBurst.Timing.OnCast },
                     }
                 }, AbilityElement.Neutro));
 
@@ -138,8 +142,10 @@ namespace Tatemis.EditorTools
                         // si cada golpe empujara un poco hacia arriba, el combo iría subiendo solo.
                         new Knockback { speed = 12f, duration = 0.12f, flinch = 0.18f,
                                         lift = 0f, hang = 0.55f, when = ApplyWhen.OnHit },
+                        // ✅ **OnCast, no OnHit** (dictado 2026-07-29): estalla SIEMPRE — es su forma de
+                        // sembrar Mineral en una celda a voluntad, aunque el mordisco no conecte.
                         new ElementalBurst { radius = 2.2f, damage = 15f, staggerAmount = 15f,
-                                             forwardOffset = 1f, when = ElementalBurst.Timing.OnHit },
+                                             forwardOffset = 1f, when = ElementalBurst.Timing.OnCast },
                     }
                 });
 
@@ -175,7 +181,7 @@ namespace Tatemis.EditorTools
             ottorock.forms = new List<EvolutionForm> {
                 new EvolutionForm {
                     formName = "Libre",
-                    stats = new BaseStats { maxHealth = 4000f, damage = 14f, moveSpeed = 6f },   // Vida 8/10 × 500 HP/punto (CREATURES §4)
+                    stats = new BaseStats { maxHealth = 3500f, damage = 14f, moveSpeed = 6f },   // Vida 7/10 × 500 HP/punto (reajuste 2026-07-26, CREATURES §4)
                     locomotion = locLibre,   // moveSpeed = velocidad a stick a fondo; los andares no la tocan
                     movilidad = embestida, flex = mordisco, basicChain = basicos,   // signature = null (post-gate)
                     block = new BlockParams { energyRegenMultiplier = 2.5f, weaknessDamageMultiplier = 2f },
@@ -195,7 +201,7 @@ namespace Tatemis.EditorTools
             EnsureDir();
             var s = CreateOrLoad<CreatureSpeciesData>($"{Dir}/Species_{name}.asset");
             s.id = name.ToLower(); s.displayName = name; s.element = element;
-            s.archetype = Archetype.Guardian;
+            s.archetype = Archetype.Coloso;
             s.forms = new List<EvolutionForm>();
             EditorUtility.SetDirty(s);
             AssetDatabase.SaveAssets();

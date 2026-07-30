@@ -25,4 +25,4 @@ El **proyecto Unity vive en la subcarpeta `Tatemis3D/`** (se abre ESA carpeta en
 - Responder siempre en **español**.
 
 ## Equipo y ritmo
-3 personas, **part-time (nights & weekends)**, con programación + diseño **muy sólidos** pero **sin artista 3D/animador dedicado** (placeholders + un concept artist en paralelo). Estrategia acordada: **prototipo de *feel* en caja gris (Nivel A) primero**, antes del vertical slice. Ver [ROADMAP](docs/ROADMAP.md).
+**Arzpal en solitario por ahora (2026-07-27)** — los 2 colaboradores quedaron en pausa; part-time (nights & weekends), programación + diseño **muy sólidos** pero **sin artista 3D/animador dedicado** (placeholders). Estrategia acordada: **prototipo de *feel* en caja gris (Nivel A) primero**, antes del vertical slice. Ver [ROADMAP](docs/ROADMAP.md).

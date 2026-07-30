@@ -73,11 +73,13 @@ Las 9 habilidades de las 3 criaturas se descomponen en **10 primitivas**. Esta l
 | 5 | Proyectil (recto, homing, objeto lanzado) | actuador | ❌ olas Pyrecko/Ottorock |
 | 6 | Hazard (zona estática o móvil) | actuador persistente | ❌ ola Pyrecko |
 | 7 | Marca de especie | payload persistente | ❌ ola Pyrecko |
-| 8 | Elemento irradiado → reacción / reacción sellada | payload | ⚠️ existe con la API vieja (T1.0) |
+| 8 | Elemento irradiado → reacción / reacción sellada | payload | ✅ `RadiateElement` (2026-07-29) · ⚠️ la **tabla** es anterior al rediseño → reautorar |
 | 9 | Buff temporal (incl. reescribir el básico) | modificador propio | ❌ ola Mantagale |
 | 10 | Stance (override de kit y locomoción) | sistema | ❌ ola Ottorock |
 
 > **Señal buena:** tres criaturas diseñadas *a propósito* para romper el sistema no piden nada fuera de esta lista. El catálogo no se va a disparar con las especies 4 y 5.
+
+> ⚠️ **Lo que el rediseño elemental del 2026-07-29 le añade a la primitiva 8:** las mezclas ya **no necesitan suelo** — dos entregas elementales que se cruzan **en el aire** resuelven ahí mismo y sin bando ([ELEMENTAL-REACTIONS §0.2b](ELEMENTAL-REACTIONS.md)). O sea que `ReactionSystem.Impact(pos, …)` **deja de ser la única puerta**: hace falta un camino **entrega ↔ entrega**, que es el mismo `hazard↔hazard` que la ola 4 tenía apuntado para Mantagale (§6) — solo que ahora lo pide el **sistema base**, no una criatura. Es la costura que conviene no cerrar al reautorar la tabla.
 
 ---
 

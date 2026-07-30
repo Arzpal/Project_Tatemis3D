@@ -325,6 +325,7 @@ namespace Tatemis
             foreach (var col in Physics.OverlapSphere(transform.position, assistRange))
             {
                 if (!col.TryGetComponent(out ICombatant c)) continue;
+                if (!c.IsCreature) continue;                  // el auto-encarado no gira hacia una roca
                 if (c.Transform.root == transform.root) continue;
                 if (c is StaggerReceiver s && s.Defeated) continue;
 
@@ -374,6 +375,9 @@ namespace Tatemis
             }
 
             float grav = (data?.Form?.locomotion != null) ? data.Form.locomotion.gravity : gravity;
+            // PESADO (verbo de Mineral): la zona "imanta hacia abajo". No impide despegar — hace que
+            // despegar VALGA MENOS, porque cae más rápido y la suspensión del juggle dura menos.
+            if (_status != null) grav *= _status.GravityMultiplier;
 
             // El hang se corta al dejar de encadenar. Mientras hay una habilidad en curso el reloj de
             // la cola no avanza, así que las fases largas (la embestida son ~0.7 s) quedan cubiertas;
@@ -393,7 +397,10 @@ namespace Tatemis
             else
                 _velocity.y += grav * Time.deltaTime;
 
-            _cc.Move(_velocity * Time.deltaTime);
+            // ARRASTRADO (verbo de Agua): la corriente te lleva mientras estés dentro, y al salir la
+            // carga del estado decae — eso *es* la inercia que te sigue empujando un momento.
+            Vector3 drag = _status != null ? _status.DragVelocity : Vector3.zero;
+            _cc.Move((_velocity + drag) * Time.deltaTime);
         }
 
         /// Lo usan efectos de movilidad (p.ej. Dash). `easeOut` = arranca rápido y **frena solo**
@@ -435,10 +442,28 @@ namespace Tatemis
 
         // ---------------- ICombatant ----------------
 
+        public bool IsCreature => true;
+
+        /// 🟡 Hoy **false**: la criatura activa aún no tiene vida propia en combate — depende de
+        /// ratificar [VITALITY-DEATH.md]. Mientras siga en false, el feedback NO pinta números sobre
+        /// el jugador (ver `ICombatant.TakesDamage`): lo que sí le llega de una reacción es el
+        /// empuje, que es lo que hace legible la respuesta del terreno sin bando (ER R4/R6).
+        public bool TakesDamage => false;
+
         public void TakeHit(float damage, float stagger)
         {
             GrantHang(hangOnHitTaken);   // que te peguen en el aire tampoco te desploma de golpe
             // TODO: vida/hitstun de la criatura activa si se decide que recibe daño en combate.
+        }
+
+        /// Empuje EXTERNO (una reacción del terreno, un golpe enemigo). Va por `RequestDash` a
+        /// propósito: es el único punto por el que este componente desplaza el cuerpo, así que el
+        /// empuje respeta colisiones y no pelea con la locomoción. ⚠️ No usar `HitReactor` aquí —
+        /// aplica su propia gravedad al mismo CharacterController y se duplicaría la caída.
+        public void ApplyExternalPush(Vector3 velocity, float duration)
+        {
+            if (duration <= 0f || velocity.sqrMagnitude < 0.0001f) return;
+            RequestDash(velocity * duration, duration);
         }
 
         /// Lo llama el resolutor de daño cuando ESTE caster conecta un golpe.

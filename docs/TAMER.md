@@ -38,6 +38,8 @@ Cuando el enemigo queda **debilitado** (aturdimiento lleno o vida a 0) se anunci
 
 Encaja con lo ya decidido en [VITALITY-DEATH §1](VITALITY-DEATH.md): *la muerte de un salvaje es una elección del jugador, rematar a un noqueado*. Y el noqueo **ya es automático** en el código (`StaggerReceiver` abre la ventana solo), así que el `TryKnockout()` manual y su enganche al botón contextual **sobran** — retirar al implementar.
 
+> 🟡 **Abierta desde el 2026-07-29:** *"mata quien decide seguir pegando"* asume que todo golpe tiene un autor que lo eligió. Pero tras la reformulación elemental hay zonas que **duran y no tienen bando** ([ELEMENTAL-REACTIONS §0.7](ELEMENTAL-REACTIONS.md)), así que un noqueado puede recibir pulsos de algo puesto **antes** del KO — y entonces el remate deja de ser una decisión. Sin resolver; el planteamiento completo y las salidas posibles están en [VITALITY-DEATH §3](VITALITY-DEATH.md). **Decide Arzpal.**
+
 ### 4.1 · La ventana de gracia 🔒 *(dictado el 2026-07-22)*
 
 **Al quedar noqueado por completo** (aturdimiento lleno **+ vida 0**), el enemigo pasa **3–5 s invulnerable**. Ese margen es la pieza que hace que el finisher-sin-botón funcione:
@@ -55,7 +57,7 @@ Encaja con lo ya decidido en [VITALITY-DEATH §1](VITALITY-DEATH.md): *la muerte
 
 > ✅ **Resueltas el 2026-07-22:** ① *cortar el combo* → **ventana de gracia** (§4.1) · ② *el menú como refugio* → **modelo Monster Hunter** (§2).
 
-1. **Qué anuncia el "debilitado"** — postura + señal visual clara. Sin lectura, el jugador no sabe cuándo puede elegir. Es lo que más urge de lo que queda: el margen de gracia no sirve de nada si no se ve.
+1. ✅ **Qué anuncia el "debilitado"** *(dictado por Arzpal 2026-07-27)*: **VFX sobre el monstruo + efectos de UI + un mensaje breve y/o un enfoque de cámara al monstruo por un instante**. *(El enfoque puede reutilizar la tech de encuadre por habilidad de [CAMERA-TARGETING §7](CAMERA-TARGETING.md); los detalles concretos de cada pieza se afinan al implementar T1.7/Fase 3.)* Con esto, el doc queda **completo de dictado** — solo falta la ratificación de PB/DS.
 2. **El swap de emergencia** ([VITALITY-DEATH §4](VITALITY-DEATH.md), *sin cooldown al noqueo*) probablemente necesite un atajo directo además del menú: abrir un menú para reaccionar a una emergencia es una contradicción. ⏸️ **Aplazado a propósito** — se decide al integrar la mecánica, no antes.
 3. **El menú en PvP** — se mantiene el modelo de §2 y punto. 🔮 De hecho **podría no existir en PvP**: contra otro jugador tiene mucho menos sentido que contra IA (no hay captura, y objetos/órdenes son discutibles). Decisión aplazada al multijugador, que ya es post-slice.
 4. **Botón concreto** del menú en mando y teclado.

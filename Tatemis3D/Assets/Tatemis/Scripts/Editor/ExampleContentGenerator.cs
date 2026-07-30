@@ -51,7 +51,7 @@ namespace Tatemis.EditorTools
             };
             EditorUtility.SetDirty(embestida);
 
-            // Ráfaga — mancha el terreno + ralentiza (1 fase).
+            // Ráfaga — irradia su elemento al terreno + ralentiza (1 fase).
             var rafaga = CreateOrLoad<AbilityData>($"{Dir}/Ability_Rafaga.asset");
             rafaga.id = "rafaga"; rafaga.displayName = "Ráfaga"; rafaga.slot = AbilitySlot.Flex;
             rafaga.energyCost = 35f; rafaga.cooldown = 5f;
@@ -60,7 +60,7 @@ namespace Tatemis.EditorTools
                     name = "Ráfaga",
                     exit = new AfterSeconds { seconds = 0.3f },
                     effects = new List<AbilityEffect> {
-                        new StainTerrain { radius = 3.5f },
+                        new RadiateElement { radius = 3.5f, impactStrength = 18f },
                         new ApplyStatus { type = StatusType.Ralentizado, duration = 3f, when = ApplyWhen.OnCast }
                     }
                 }

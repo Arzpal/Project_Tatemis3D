@@ -1,0 +1,84 @@
+# Tatemis3D — Cantera de ideas de criaturas
+
+> **TL;DR:** Volcadero de ideas de monstruos + su asignación en la **matriz tipo × arquetipo** (6×5 = **30 celdas**; meta de roster: una especie por celda). Cada idea vive con su **celda tentativa** (elemento × arquetipo), su gancho y sus abiertas; al madurar se le hace ficha `CREATURE-*.md` y entra a [CREATURES.md](CREATURES.md). Se diseña por **cuadre conceptual**, NO por hueco libre: el balance se resuelve solo al llenarse la matriz. Regla dura: **nunca dos especies en la misma celda** (mismo elemento Y mismo arquetipo); compartir solo el elemento o solo el arquetipo es válido.
+> **Elementos y su verbo ✅ *(2026-07-29, [ER §0.1](ELEMENTAL-REACTIONS.md))*:** Naturaleza *entrelazar* · Agua *corriente* · Fuego *propagar* · Mineral *peso* · Rayo *paralizar* · Aire *nubelizar*. ⚠️ **El verbo gobierna las REACCIONES, el arquetipo gobierna el KIT** ([ARCHETYPES §1](ARCHETYPES.md)): una idea **no** se descarta por no "sonar" a su verbo — pero al graduarla hay que comprobar **que no lo contradiga**, porque el verbo es lo que el jugador ve cada vez que esa criatura toca el tablero. **Arquetipos (eje que firman):** Coloso(Vida) · Luchador(Daño) · Ejecutor(Velocidad) · Zonificador(Alcance) · Controlador(Control) ([CREATURES §2/§4](CREATURES.md)).
+> **Mapa:** §1 la matriz (mapa de celdas) · §2 ideas activas (por celda) · §3 notas de diferenciación · §4 puntero a la brújula de arquetipos ([ARCHETYPES.md](ARCHETYPES.md))
+
+## 1. La matriz (mapa de celdas)
+
+🔴 = dictada (tiene ficha `CREATURE-*.md`) · 🟡 = idea en cantera (detalle en §2) · vacío = por diseñar.
+
+> **Slice ✅ = 6 especies, una por elemento** *(2026-07-26)*: Pyrecko (Fuego) · Ottorock (Mineral) · Mantagale (Aire) · Hurón (Naturaleza) · la de **Agua** (olas) · **+ elegir el Rayo** entre Halcón / Collie / Armadillo. ⚠️ Con la cantera actual el **Coloso queda fuera del slice** (Topo y Ave chocan en elemento con Ottorock y Mantagale): ¿aceptarlo, o idear un **Coloso de Agua o de Rayo** (celdas libres) que ocupe esa plaza? → cola de [TASKS](TASKS.md).
+
+| Elem \ Arquetipo | Coloso | Luchador | Ejecutor | Zonificador | Controlador |
+|---|---|---|---|---|---|
+| **Fuego** | | | | 🔴 Pyrecko | |
+| **Agua** | | | | | 🟡 Castor de olas |
+| **Naturaleza** | | | 🟡 Hurón | | |
+| **Mineral** | 🟡 Topo/Tejón | 🔴 Ottorock | | | |
+| **Rayo** | | 🟡 Armadillo | 🟡 Halcón | | 🟡 Collie |
+| **Aire** | 🟡 Ave | | | | 🔴 Mantagale |
+
+## 2. Ideas activas (por celda)
+
+> Formato: **celda · concepto · gancho (Signature) · [hex si lo hay] · abiertas/guardas.** Kits y hexágonos afinados en el panel de diseño del **2026-07-26**; aquí queda el resumen. Al graduar → ficha con los 18 campos ([CREATURES §2](CREATURES.md)).
+
+### 🦅 Halcón — `Rayo × Ejecutor`
+- **Concepto:** funde el picado del halcón con la caída del rayo; eres el relámpago que baja del cielo a rematar.
+- **Gancho ✅ (2026-07-26):** carga **como una nube de tormenta** — **golpea en tierra para recargar energía → se eleva rápido → cae en picado como un trueno** (burst + aturdimiento). Ni vuelo libre ni planeo: la elevación está **gateada por la energía ganada golpeando** — el "sale" del Ejecutor hay que ganárselo pegando.
+- **Abiertas:** telegraph del picado como salvaje · ¿marca "blanco marcado" que potencia el siguiente picado?
+- ⚠️ **Consecuencia del modelo elemental *(2026-07-29, derivada de la tabla — no es diseño nuevo)*:** picar sobre **terreno de Mineral** despierta **Energía geo** (Mineral › Rayo → respuesta del terreno, **sin bando**), que es literalmente **la reacción anti-aérea del juego**: más gravedad y suspensión corta. Es su peor casilla del tablero y **conviene que lo sea a propósito**. Al revés, picar sobre **terreno de Rayo** ya no es "no pasa nada": es **amplificación** (su burst suena dos veces, [ER §0.2](ELEMENTAL-REACTIONS.md)).
+
+### 🦡 Hurón "cazador ágil" — `Naturaleza × Ejecutor` *(elemento cerrado 2026-07-26)*
+- **Concepto:** cazador ágil y escurridizo; serpentea, embosca y desaparece (hit-and-run). Ligero, rapidísimo, frágil.
+- **Gancho ✅ (2026-07-26):** el buceo es un **estado** (no un dodge puntual): serpentea **somero** por tierra blanda y emerge en burst. **Counterplay sistémico: se interrumpe golpeando el suelo con una reacción elemental** — cualquiera puede "minar" el suelo donde nada, incluso el elemento débil provocando la **respuesta del terreno** ([ELEMENTAL-REACTIONS](ELEMENTAL-REACTIONS.md)).
+- **Abiertas:** cadena de golpes al emerger · ¿la reacción que lo interrumpe lo daña o solo lo expulsa? · diferenciación con el Topo → §3.
+- 🟡 **Precisión pendiente *(2026-07-29, las cinco salidas de [ER §0.2](ELEMENTAL-REACTIONS.md))*:** "minar el suelo" ya **no vale en todas partes**. Sobre **suelo neutro no hay reacción** (R5) → ahí el buceo es **inmune**, y sobre el **mismo elemento** solo hay **amplificación**, que no trae efecto. **¿Qué salidas lo interrumpen: solo las que producen efecto, o cualquier estallido que le caiga encima?** Si es lo primero, su counterplay depende de la composición de la arena ([ARENA §1](ARENA.md), 5/2/3) y hay biomas donde casi no existe.
+
+### 🐕 Border Collie — `Rayo × Controlador` *(concepto TRON ✅ 2026-07-26)*
+- **Concepto:** pastor rapidísimo que confina corriendo, como las **motos de TRON**: al correr deja tras de sí una **estela electrificada** que **solo él puede cruzar**.
+- **Gancho:** la jaula se dibuja corriendo (**control por movimiento**; la estela es **kit / marca de especie**, no una reacción elemental — *un elemento puro solo hace daño*, [ER §0.2](ELEMENTAL-REACTIONS.md) 2026-07-29) y es **asimétrica** — el enemigo no la cruza; él sí → **encierra, entra, golpea y sale cuando quiere**. Controlador con **sabor de Ejecutor**: el eje que firma es Control; el entra-y-sale es su vía personal de castigo (autosuficiencia).
+- **Estela ✅ (2026-07-26):** muro de **daño/repulsión** (no colisión sólida) · dura **3–4 s** sueltos, y **más si cierra el circuito en jaula** — recompensa por completar la cerca.
+- **Abiertas:** ¿cuánto más dura la jaula cerrada? · legibilidad del "solo él pasa" (color/altura de la estela).
+- 🟡 **Fricción con el verbo de Rayo *(detectada 2026-07-29 — decide Arzpal)*:** el verbo de Rayo es **paralizar**, y [ER §0.1](ELEMENTAL-REACTIONS.md) dice explícitamente que **«no impide moverse, impide encadenar»**. El Collie hace lo contrario: su electricidad **confina el movimiento**. Es **legal** (el verbo gobierna las reacciones, el arquetipo el kit — [ARCHETYPES §1](ARCHETYPES.md)) y ayuda que la estela ya sea **daño/repulsión** y no CC eléctrico. **La pregunta es de lectura, no de reglas:** ¿se deja así, o la estela adopta el verbo (ticks que cortan el **arranque** de quien la cruza, [ER §0.6](ELEMENTAL-REACTIONS.md)) para que el Rayo signifique lo mismo en todo el roster?
+- **Guarda (resuelta 2026-07-26):** la **asimetría** de la estela es la solución a la guarda del pentágono — ya no puede fabricar un 1v1 limpio para el Luchador: la puerta es solo suya. Sigue la línea dura vs Armadillo: la estela del Collie **bloquea el paso**; las superficies cargadas del Armadillo **no cierran nada**. Y no confundir su encierro con la zona acotada de la arena.
+
+### 🪩 Armadillo bola — `Rayo × Luchador`
+- **Concepto:** una bala de billar viva; se hace bola, acelera y **rebota** entre las paredes y el enemigo. Daño **sostenido de contacto**, no burst.
+- **Gancho:** motor de **momentum** (velocidad → voltaje → daño); Signature *"Sobrecarga por Momentum"* — al tope, el siguiente rebote de pared **detona un arco** y reinicia el bucle. Marca de especie = **superficies cargadas** (cablea la geometría de la arena). Flex dual (impacto concentrado / onda-anillo).
+- 🟡 **¿Su marca es elemental o inerte? *(2026-07-29)*** Las marcas de especie dictadas hasta hoy son **inertes en lo elemental** (el combustible de Pyrecko, los tornados de Mantagale — [ER §1③ y §5](ELEMENTAL-REACTIONS.md)): existen fuera de las **tres fuentes de efecto** ([ER §0.8](ELEMENTAL-REACTIONS.md)). Si las superficies cargadas siguen esa doctrina, **cablear el suelo no dispara reacciones**; si no la siguen, el Armadillo sería la primera especie que siembra su elemento por geometría. Decide Arzpal.
+- **Hex:** Vida 5 · **Daño 9** · Vel 8 · Alcance 3 · Control 5 · Sinergia 7 (Σ=37).
+- **Guardas:** línea dura vs Collie (**daña sin encerrar**, su marca no es valla) · vigilar deriva a Ejecutor (frenarse debe castigar, ancla el "sostenido") · legibilidad obligatoria del momentum (brillo/sonido ascendente) · depende de arenas con paredes rebotables.
+
+### 🪨🦅 Ave que eleva y deja caer — `Aire × Coloso`
+- **Concepto:** "yunque con alas" — rapaz-tanque que agarra, **eleva aguantando el castigo** y deja caer al enemigo para daño de impacto. El aguante **activo** es lo que habilita el remate.
+- **Gancho:** Signature *"Yunque del Cielo"* — agarra → ascenso con **barra de sujeción interrumpible** (la presa forcejea, sus aliados te pegan mientras subes) → suelta = **impacto de mayor fuerza del roster** + derribo. **Eliges tu reacción eligiendo dónde sueltas** al enemigo (irradia Aire → sobre terreno Mineral = **tormenta de arena**, la reacción Aire › Mineral — *renombrada y reformulada el 2026-07-29; antes "tormenta de esquirlas"*: nube que **tapa la visión** y araña porque es roca pulverizada, y que **no ralentiza**, porque ralentizar es el verbo de Mineral y ahí Mineral no manda). Flex = coraza activa que mitiga *y* carga el slam.
+- **Hex ✅ (rev. 2026-07-26):** **Vida 9** · Daño 7 · Vel 3 · Alcance 3 · Control 7 · Sinergia 8 (Σ=37) — bajó de Vida 10 **para que haya variedad** (el 10 queda del Topo en solitario); el punto liberado fue a Velocidad (un volador con Vel 2 era una estatua).
+- **Guardas:** **tope** al escalado altura→daño (anti-degenerado) · barra de sujeción interrumpible **obligatoria** (anti-CC injusto) · Control a 7 (lejos del 9 de Mantagale) · **débil sobre terreno de Rayo**: su Aire provoca la **respuesta del terreno** — **descarga de tormenta sin bando** *(renombrada 2026-07-29)*, cuyos ticks muerden el **arranque** de los ataques ([ER §0.6](ELEMENTAL-REACTIONS.md)), y su Signature **empieza** con un agarre; soltar ahí al enemigo también la expone a ella · enmarcarla como gárgola-yunque de ascenso corto, no volador libre.
+- ⚠️ **La tormenta de arena también la ciega a ella *(2026-07-29, derivado de [ER §0.7](ELEMENTAL-REACTIONS.md))*:** la reacción es **suya** (Aire manda sobre Mineral) y el **estallido** la respeta (R6), pero **R6 protege del estallido, no de la ZONA** — la nube que queda **no distingue bandos**, y ella acaba de soltar justo ahí. Rima con Ottorock, que se come esa misma tormenta cuando agarra sobre corrientes de aire: es **la penalización de firma del eje Aire ↔ Mineral**, y hay que diseñar el "suelta y aléjate" contando con ella.
+
+### ⛏️ Topo/Tejón perforador — `Mineral × Coloso`
+- **Concepto:** perforador de roca **imparable** y atrincherado; juggernaut lentísimo que gana por aguante + embestida.
+- **Gancho:** pasiva *"Imparable"* (armadura anti-CC creciente); Signature *"Barreno"* — carga en línea con super-armor que **estampa** al rival contra un muro; Flex *"Levantar Losa"* (muro-escudo o lanzar escombro); movilidad *"Zambullida"* (inmersión **pesada** que mitiga y avanza como un arado).
+- **Hex:** **Vida 10** · Vel 2 · Control 7 · Sinergia 8 (Daño/Alcance el resto, Σ=37).
+- **Guardas:** telegrafiar las ventanas **interrumpibles** del super-armor · riesgo de kiteo (Vel 2 vs Alcance de Pyrecko / Vel de Mantagale): el gap-close debe bastar · diferenciación con el Hurón → §3.
+
+### 🌊🦫 Castor de olas — `Agua × Controlador` *(entra al slice como la especie de Agua)*
+- **Concepto:** controla el combate **con el mar**: levanta olas que rompen y **empujan**, y resacas que **jalan**. Ejemplo canónico del **principio de Controladores**: su CC nace de **fenómenos de su elemento convertidos en kit**, no del cuerpo *(reformulado 2026-07-29: la frase «controlar con el elemento puro» de [CREATURES §2](CREATURES.md) quedó **derogada** por [ER §0.2](ELEMENTAL-REACTIONS.md) — un elemento puro solo hace daño; los efectos nacen de la mezcla. Ver [ARCHETYPES §1](ARCHETYPES.md))*.
+- **Gancho:** la ola como **frente que barre** a ras de suelo — rompe → empuja; al retirarse → **resaca** que arrastra en una **dirección** (flujo laminar, no hacia un punto). Tempo de **sets/marea**: el control llega en oleadas periódicas que el rival puede aprender. Regla de sistema: la ola viaja **inerte** y su Agua se resuelve **al romper** (misma doctrina que los tornados de Mantagale) → **elige su reacción eligiendo dónde rompe** (3ª de la familia: Ottorock *dónde agarra* · Ave *dónde suelta*). ✅ *Encaja con el verbo de Agua* — **corriente**: arrastra, y al salir la inercia sigue ([ER §0.1](ELEMENTAL-REACTIONS.md)); la resaca **es ese verbo hecho kit**.
+- 🟡 **A vigilar *(2026-07-29)*:** la combinación Rayo + Agua se llama **Corriente** y se vende como **«el único arrastre»** del sistema ([ER §4](ELEMENTAL-REACTIONS.md)). El castor arrastra también, desde el kit. No es ilegal (capas distintas), pero **hay que decidir cómo se distinguen en nombre y lectura** el arrastre de la resaca y el de la zona, o el jugador leerá dos cosas iguales.
+- **Animal ✅ (2026-07-27): castor** — el **coletazo de alarma** (real) es el generador de olas con "instrumento" visible: la cola-pala golpea y levanta el frente; batida hacia sí = la **resaca**. Anfibio pleno: camina normal en tierra (resuelta la preocupación de locomoción que descartó a la orca).
+- **Semilla guardada 💾 (2026-07-27):** el **«hovercraft líquido»** — un animal marino que se desliza en tierra sobre una **capa de agua propia** que él mismo genera (siempre lleva su agua encima) — queda **reservado para otra especie futura de Agua**. No hace falta que Agua = marino, pero cuando toque un marino, esta es su locomoción.
+- **Abiertas:** ¿genera su propia agua (como Pyrecko su fuego) y el terreno de río la **agranda**? · ¿empuje y resaca son dos tiempos de la misma ola o habilidades separadas? · silueta/tamaño (¿una orca es demasiado grande para el roster?) · diferenciación vs Mantagale → §3.
+
+## 3. Notas de diferenciación (evitar clones)
+
+- **Hurón ↔ Topo** *(mismo gesto "cavar" —«verbo» queda reservado al elemento desde [ER §0.1](ELEMENTAL-REACTIONS.md)—, todo lo demás opuesto — profundidad dictada 2026-07-26):* (1) **Profundidad** — el Hurón bucea **somero** (estado interrumpible con una reacción elemental en el suelo); el Topo **excava más profundo** y **emerge con trozos de tierra por delante, estampando al enemigo como una excavadora**. *(Matiz propuesto, coherente con el Coloso imparable: la reacción superficial interrumpe al Hurón pero NO al Topo — la profundidad ES el counterplay diferencial.)* (2) Medio distinto — tierra blanda (Naturaleza) vs roca (Mineral). (3) Presentación opuesta — ligero/silencioso vs pesado/atronador. Y arquetipos casi antónimos: **Ejecutor glass vs Coloso muro**.
+- **Rayo ×3 (Halcón / Collie / Armadillo):** legal (3 arquetipos distintos). ⚠️ **Corregido 2026-07-29:** ya **no se pueden separar por «nicho de reacción»** — con **un verbo por elemento** los tres comparten verbo (*paralizar*) y **exactamente las mismas reacciones** (Mineral › Rayo, Rayo › Aire y las tres combinaciones de Rayo). Toda la diferenciación tiene que vivir **en el kit**: Halcón = vertical/aéreo/burst · Collie = confina sin daño · Armadillo = daña por el suelo sin encerrar. Lo que sí les puede separar de forma natural es **cómo se colocan para provocarlas** (el Halcón las dispara desde arriba y se come la anti-aérea de Mineral; el Armadillo, a ras de suelo y en movimiento continuo).
+- **Ave ↔ Mantagale** *(ambas aéreas):* tanque-agarrador **comprometido** (Coloso) vs controlador aéreo **frágil** de zona (Controlador). Feel opuesto; comparten tech de vuelo (sinergia de desarrollo).
+- **"Elige tu reacción" (Ave vs Ottorock vs Olas):** Ottorock elige eligiendo **dónde agarra el terreno** (combinación sellada portátil); el Ave, **dónde suelta al enemigo**; las olas, **dónde rompen**. Misma familia de idea, agencia distinta en cada una.
+- **Olas ↔ Mantagale** *(ambos Controladores que desplazan con su elemento):* **frente** lineal que barre a ras de suelo y muere al romper vs **hazards-punto** persistentes que viajan y detonan por colisión · resaca = arrastre **direccional** (flujo) vs ciclón = atracción **centrípeta** a un punto · tempo por **oleadas/marea** vs **colocación** de tablero.
+
+## 4. Brújula de arquetipos → [ARCHETYPES.md](ARCHETYPES.md)
+
+> Movida a su propio doc el 2026-07-26 al superar esta cantera el tope de ~12 KB (regla 3 de [INDEX](INDEX.md)). Ahí viven: la brújula de los 5 (cómo gana · cómo se le gana · pregunta generadora), el **pentágono de counters 2-2** y la validación con LoL.

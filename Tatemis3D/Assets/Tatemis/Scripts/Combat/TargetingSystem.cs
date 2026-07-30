@@ -101,9 +101,15 @@ namespace Tatemis
             if (_blindTime >= sightGrace) Current = null;
         }
 
+        /// Cegado (verbo del Aire): mientras dure, no se fija objetivo nuevo.
+        bool _blinded;
+        StatusController _status;
+
         void Scan()
         {
             _cands.Clear();
+            if (_status == null) _status = GetComponent<StatusController>();
+            _blinded = _status != null && _status.Blinded;
             Vector3 origin = transform.position + Vector3.up * 0.5f;
             Vector3 fwd = CameraForward();
             float half = acquisitionCone * 0.5f;
@@ -111,6 +117,7 @@ namespace Tatemis
             foreach (var col in Physics.OverlapSphere(transform.position, range, targetMask))
             {
                 if (!col.TryGetComponent(out ICombatant c)) continue;
+                if (!c.IsCreature) continue;                               // no fijarse a un nodo de cristal
                 if (c.Transform.root == transform.root) continue;          // no fijarse a sí mismo
                 if (c is StaggerReceiver s && s.Defeated) continue;
 
@@ -121,6 +128,10 @@ namespace Tatemis
                 float signed = Vector3.SignedAngle(fwd, to / dist, Vector3.up);
                 if (Mathf.Abs(signed) > half) continue;                    // fuera de pantalla
                 if (requireLineOfSight && !HasLineOfSight(c)) continue;
+                // NIEBLA (Aire + Agua): a través de ella no se puede FIJAR. Mantener el objetivo que ya
+                // tenías sí — mismo criterio que la línea de visión, que hace falta para fijar y no para
+                // conservar. Y si estás CEGADO, no fijas nada en absoluto.
+                if (_blinded || ReactionEffect.TargetingBlocked(origin, c.Transform.position)) continue;
 
                 _cands.Add(new Cand { c = c, signed = signed, dist = dist });
             }

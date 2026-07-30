@@ -33,6 +33,13 @@ namespace Tatemis
             // Conectar te sostiene un instante en el aire: es lo que deja rematar arriba en vez de
             // desplomarte a media cadena.
             if (c.caster != null) c.caster.NotifyHitLanded();
+
+            // MINI EXPLOSIONES (Rayo + Fuego): dentro de esa zona, todo golpe suena dos veces — un eco
+            // que repite un % del daño. Es la única combinación que AMPLIFICA, y por eso es una de las
+            // dos que quieres pisar. El eco es NEUTRO y no irradia al terreno (R1: no se encadena).
+            float echo = ReactionEffect.EchoPercentAt(point);
+            if (echo > 0f && dealt > 0f)
+                Echo.Spawn(point, 1.6f, null, dealt * echo, 0.35f, null);
         }
     }
 
@@ -56,8 +63,9 @@ namespace Tatemis
     /// **Estallido elemental.** Revienta en un radio con el elemento de la ESPECIE, pase lo que pase
     /// con el elemento del golpe: así un básico neutro puede rematar la cadena estallando en su
     /// elemento (Ottorock), y el mordisco/la embestida detonan al conectar y al aterrizar.
-    /// TODO(Fase 2): al reescribir el sistema elemental, este es el punto donde el estallido irradia
-    /// su elemento al TERRENO donde cae y dispara la reacción (ELEMENTAL-REACTIONS §1 ②, R1).
+    /// Desde Fase 2 el estallido además IRRADIA ese elemento al terreno donde revienta y dispara la
+    /// reacción (ELEMENTAL-REACTIONS §1 ②, R1) — Ottorock estalla sobre un parche de Rayo y ve la
+    /// descarga a tierra sin efecto extra en el asset.
     [System.Serializable]
     public class ElementalBurst : AbilityEffect
     {
@@ -74,6 +82,10 @@ namespace Tatemis
         public bool reportHits = false;
         [Tooltip("Segundos de hitstop del estallido EN SÍ, aparte del de su daño. Un estallido es un evento gordo aunque quite poca vida. 0 = solo el normal")]
         public float hitstop = 0f;
+        [Tooltip("Fuerza del impacto para R2 (cuánto DURA la reacción del terreno). Es el peso de la " +
+                 "habilidad entera, no el pellizco del estallido: autorar el daño TOTAL comprometido. " +
+                 "0 = usa `damage`, que deja a R2 sin recorrido porque todos los estallidos pegan parecido")]
+        public float impactStrength = 0f;
 
         // El estado va en el blackboard del contexto, NO en un campo: la instancia del efecto vive
         // dentro del AbilityData (un asset) y la comparten todas las activaciones.
@@ -127,7 +139,13 @@ namespace Tatemis
                     c.reportHit?.Invoke(new HitInfo { target = t, point = point, normal = Vector3.up });
             }
 
-            // TODO(Fase 2): CombatServices.Reactions.Irradiate(center, radius, element) contra el terreno.
+            // El estallido irradia su elemento al terreno del punto donde revienta (R1), con la
+            // fuerza de la habilidad entera (R2: la habilidad pesada en el sitio correcto dura más).
+            // `damage` viaja aparte porque es lo que REPITE la amplificación si el suelo es de tu
+            // mismo elemento (ER §0.2): la explosión vuelve a sonar igual de fuerte.
+            CombatServices.Reactions?.Impact(center, radius, element,
+                                             impactStrength > 0f ? impactStrength : damage,
+                                             c.caster, damage);
         }
     }
 
@@ -397,14 +415,42 @@ namespace Tatemis
         }
     }
 
+    /// Irradia el elemento del GOLPE al terreno (ELEMENTAL-REACTIONS §1 ②): el payload que conecta
+    /// una habilidad con el tablero. Un golpe neutro no irradia nada (GDD §7). Para estallar en el
+    /// elemento de la ESPECIE aunque el golpe sea neutro, eso es ElementalBurst — que ya irradia solo.
     [System.Serializable]
-    public class StainTerrain : AbilityEffect
+    public class RadiateElement : AbilityEffect
     {
         public float radius = 3f;
+        [Tooltip("Fuerza del impacto (R2): escala la duración de la reacción. Referencia ≈ el daño del golpe")]
+        public float impactStrength = 15f;
+        [Tooltip("OnCast = en el punto de mira al empezar la fase · OnHit = donde conecte el carrier (una vez por fase)")]
+        public ApplyWhen when = ApplyWhen.OnCast;
+
+        // Una irradiación por fase en OnHit: un multi-hit reportaría N impactos seguidos y cada uno
+        // cancelaría (R3) y recrearía la reacción del anterior — puro parpadeo. Estado en el
+        // blackboard, no en un campo: la instancia vive en el asset y se comparte.
+        [System.NonSerialized] string _firedKey;
+        string FiredKey => _firedKey ??= "radiate.fired." + GetHashCode();
+
         public override void OnEnter(AbilityCtx c)
         {
-            if (c.element.HasValue)   // un golpe neutro no tiñe nada
-                CombatServices.Reactions?.Stain(c.aimPoint, radius, c.element.Value);
+            c.bb[FiredKey] = false;
+            if (when == ApplyWhen.OnCast) Radiate(c, c.aimPoint);
+        }
+
+        public override void OnHit(AbilityCtx c, HitInfo hit)
+        {
+            if (when != ApplyWhen.OnHit) return;
+            if (c.bb.TryGetValue(FiredKey, out var o) && o is bool fired && fired) return;
+            Radiate(c, hit.point);
+        }
+
+        void Radiate(AbilityCtx c, Vector3 pos)
+        {
+            if (!c.element.HasValue) return;
+            c.bb[FiredKey] = true;
+            CombatServices.Reactions?.Impact(pos, radius, c.element.Value, impactStrength, c.caster);
         }
     }
 

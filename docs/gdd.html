@@ -243,7 +243,7 @@
             <li>6 tipos elementales + reacciones ambientales (3–4 demostrables).</li>
             <li>Captura completa: aturdimiento → debilitado → Tótem.</li>
             <li>Equipo de 3 · liberar para reclutar.</li>
-            <li>3–5 especies "héroe" (una por arquetipo) + 1 cadena de evolución completa.</li>
+            <li>6 especies "héroe" (una por elemento) + 1 cadena de evolución completa.</li>
             <li>1 mazmorra corta con jefe narrativo · starter de regalo.</li>
           </ul>
         </div>
@@ -251,7 +251,7 @@
           <div class="panel-h"><span class="dotm"></span>Futuro · documentado</div>
           <ul class="checklist">
             <li>PvP y cualquier netcode.</li>
-            <li>Roster completo (10–20 especies) — solo diseño en papel.</li>
+            <li>Roster completo (matriz tipo × arquetipo: 30 especies) — solo diseño en papel.</li>
             <li>Mini-misiones de evolución de todas las especies.</li>
             <li>Combate propio del Tamer y complicidad Tamer–criatura.</li>
             <li>Postgame, almacenamiento ampliado, crianza.</li>
@@ -309,16 +309,16 @@
       <div class="note"><b>Rematar es seguir atacando.</b> No hay botón de noqueo: al caer, el enemigo queda <b>debilitado con unos segundos invulnerables</b> para que decidas — seguir pegando lo mata, el menú del Tamer lo captura. Ese margen es lo que convierte matar en una elección y no en la inercia de tu combo.</div>
 
       <h3>Arquetipos</h3>
-      <p>Los stats principales (Daño · Vida · Velocidad) definen el arquetipo, modulado por la naturaleza de cada criatura.</p>
+      <p>Cinco arquetipos; cada uno firma un eje del hexágono de stats, y sus counters cierran en pentágono: cada arquetipo gana a 2 y pierde ante 2.</p>
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>Arquetipo</th><th>Rol en combate de acción</th></tr></thead>
           <tbody>
-            <tr><td class="arch">Guardián</td><td>Aguanta daño, protege, controla espacio (CC / taunt)</td></tr>
-            <tr><td class="arch">Luchador</td><td>DPS cuerpo a cuerpo sostenido, supervivencia media</td></tr>
-            <tr><td class="arch">Ejecutor</td><td>Burst + movilidad, alto riesgo (glass cannon)</td></tr>
-            <tr><td class="arch">Zonificador</td><td>Rango, proyectiles, negación de área</td></tr>
-            <tr><td class="arch">Controlador</td><td>CC, debuffs, manipulación de terreno, soporte</td></tr>
+            <tr><td class="arch">Coloso</td><td>Aguanta todos los golpes que hagan falta para efectuar lo suyo — su vida es el coste de su efecto (no es un protector)</td></tr>
+            <tr><td class="arch">Luchador</td><td>Dueño del 1v1 limpio: siguiendo su juego, gana siempre. DPS sostenido de contacto</td></tr>
+            <tr><td class="arch">Ejecutor</td><td>Entra, revienta, sale — burst + movilidad, alto riesgo (glass cannon)</td></tr>
+            <tr><td class="arch">Zonificador</td><td>La guerra de la distancia: castigo sostenido a rango; sus zonas compran la distancia o la huida</td></tr>
+            <tr><td class="arch">Controlador</td><td>Desestabiliza con CC de su elemento puro (mover, inmovilizar, suprimir) — y castiga él mismo</td></tr>
           </tbody>
         </table>
       </div>
@@ -377,7 +377,7 @@
       <div class="ch-head"><span class="ch-num">07</span><h2>Ambiente y captura</h2></div>
       <p class="sub">El USP vive aquí: el ambiente es un arma, y la captura recompensa jugar bien — no repetir botones.</p>
       <div class="cards cols-2">
-        <div class="card"><span class="pn">Sistema A</span><h4>Reacciones elementales</h4><p><b>El terreno tiene su elemento y no cambia nunca</b>: es el tablero, no un lienzo que se mancha. Las habilidades <b>irradian su elemento al impactar</b>, y la reacción es un <b>efecto temporal</b> sobre ese terreno fijo. Siempre se resuelve contra el suelo — nunca contra otro efecto activo —, así la matriz se queda en 6×6 en vez de explotar.</p></div>
+        <div class="card"><span class="pn">Sistema A</span><h4>Reacciones elementales</h4><p><b>El terreno tiene su elemento y no cambia nunca</b>: es el tablero, no un lienzo que se mancha. Las habilidades <b>irradian su elemento al impactar</b>, y la reacción es un <b>efecto temporal</b> que se dispersa: el mundo nunca queda pintado. De ahí sale la regla que ordena el sistema entero — <b>un elemento puro solo hace daño</b>, y los efectos nacen <b>únicamente de la mezcla</b>: contra el terreno, o contra otro elemento que se cruce en el aire. Cada elemento aporta <b>un verbo</b> (el fuego propaga, el agua arrastra, el mineral pesa, el rayo corta el arranque…) y manda el verbo del que domina, así que apuntar <em>dónde</em> golpeas decide qué te llevas.</p></div>
         <div class="card"><span class="pn">Sistema B</span><h4>Física y clima</h4><p>Independiente de la tabla de tipos: polvo al golpear el suelo, esquirlas con la nieve, tornados con el viento. Puede nevar sin que exista un "tipo Hielo".</p></div>
       </div>
 
@@ -396,7 +396,7 @@
     <!-- 08 -->
     <section class="chapter reveal" id="criaturas">
       <div class="ch-head"><span class="ch-num">08</span><h2>Criaturas y evolución</h2></div>
-      <p class="sub">Pocas, pero profundas. En el slice, 3–5 especies "héroe"; el resto, diseño en papel.</p>
+      <p class="sub">Pocas, pero profundas. En el slice, 6 especies "héroe" (una por elemento); el resto, diseño en papel.</p>
 
       <h3>El trío del slice</h3>
       <p>Tres especies diseñadas a fondo. Cada una usa el <strong>mismo tablero elemental</strong> de una forma opuesta — ese contraste es el que demuestra que el framework aguanta criaturas radicalmente distintas.</p>
@@ -404,7 +404,7 @@
         <div class="card">
           <span class="pn" style="color:var(--fuego)">Fuego · Zonificador · gecko</span>
           <h4>Pyrecko</h4>
-          <p>Cañón de cristal camuflado. Siembra el campo de <strong>combustible invisible</strong> —a tiros o dejando rastro en sigilo— y luego lo <strong>prende todo de golpe</strong>. Frágil a propósito: su defensa son las zonas ardiendo. <em>Acumular y detonar.</em></p>
+          <p>Cañón de cristal camuflado. Siembra el campo de <strong>combustible invisible</strong> —a tiros o dejando rastro en sigilo— y luego lo <strong>enciende</strong>: cada marca queda armada como una <strong>mina</strong> que estalla en fuego al mínimo roce y despierta ahí la reacción del terreno donde cayó. No desgasta: amenaza. Frágil a propósito, su defensa es el campo minado. <em>Acumular y detonar.</em></p>
         </div>
         <div class="card">
           <span class="pn" style="color:var(--mineral)">Mineral · Luchador · nutria</span>
@@ -414,13 +414,13 @@
         <div class="card">
           <span class="pn" style="color:var(--aire)">Aire · Controlador · mantarraya aérea</span>
           <h4>Mantagale</h4>
-          <p>Vuela siempre, y <strong>sube cada vez que provoca una reacción</strong>: la recompensa de jugar bien es volverse inalcanzable. Siembra tornados y con su ciclón <strong>arrastra al enemigo por el mapa</strong> hasta hacerlo estallar contra el terreno. <em>Improvisar.</em></p>
+          <p>Vuela siempre, escoltado por <strong>peces espíritu</strong>: cada mezcla elemental que provoca hace nacer uno, que viaja hasta él y lo eleva un poco más —hasta cinco—. La recompensa de jugar bien es volverse inalcanzable… mientras duren, porque los peces <strong>se pueden derribar</strong>. Siembra tornados y con su ciclón <strong>arrastra al enemigo por el mapa</strong> hasta hacerlo estallar contra el terreno. <em>Improvisar.</em></p>
         </div>
       </div>
-      <p><span class="arch">Triángulo estratégico</span> — y no sale de la tabla de tipos, sale de sus kits: <strong>Pyrecko › Mantagale › Ottorock › Pyrecko</strong>. Pyrecko no necesita acercarse; Mantagale mantiene a raya al lento; Ottorock aguanta la distancia y llega al melee.</p>
+      <p><span class="arch">Triángulo estratégico</span> — y no sale de la tabla de tipos, sale de sus kits: <strong>Pyrecko › Mantagale › Ottorock › Pyrecko</strong>. Pyrecko no necesita acercarse —y sus disparos le derriban los peces al volador—; Mantagale mantiene a raya al lento; Ottorock aguanta la distancia y llega al melee.</p>
 
       <div class="kv">
-        <dt>Roster final</dt><dd>10–20 especies · 2–4 formas cada una (incluida la base "bebé")</dd>
+        <dt>Roster final</dt><dd>30 especies (matriz 6 elementos × 5 arquetipos) · 2–4 formas cada una (incluida la base "bebé")</dd>
         <dt>Rareza</dt><dd>sutil: las de stats más altos tienen fase inicial más difícil y más formas evolutivas (estilo pseudolegendario)</dd>
       </div>
       <h3>Evolución progresiva = sus "niveles"</h3>
@@ -454,10 +454,10 @@
       <div class="kv">
         <dt>Estilo</dt><dd>estilizado / cell-shaded, tono cálido HTTYD-Zelda</dd>
         <dt>Motor</dt><dd>Unity + URP con toon shader (Shader Graph), post-procesado ligero</dd>
-        <dt>Cámara / Input</dt><dd>Cinemachine + lock-on · Input System (mando + teclado/ratón)</dd>
+        <dt>Cámara / Input</dt><dd>Rig de cámara propio (libre / lock-on / apuntado) · Input System (mando + teclado/ratón)</dd>
       </div>
       <h3>Arquitectura propuesta · data-driven</h3>
-      <p>Datos como ScriptableObjects (<span class="kicker">ElementData · CreatureSpeciesData · AbilityData · EvolutionQuestData</span>) para iterar diseño sin tocar código. Tabla de tipos como asset central; combate por máquina de estados con sistema de habilidades desacoplado, gestor de energía elemental y de aturdimiento; capa de "manchado" de terreno + tabla de reacciones.</p>
+      <p>Datos como ScriptableObjects (<span class="kicker">ElementData · CreatureSpeciesData · AbilityData · EvolutionQuestData</span>) para iterar diseño sin tocar código. Tabla de tipos como asset central; combate por máquina de estados con sistema de habilidades desacoplado, gestor de energía elemental y de aturdimiento; superficies elementales fijas + tabla de reacciones (con respuestas del terreno).</p>
     </section>
 
     <!-- 12 -->
@@ -471,7 +471,7 @@
             <tr><td class="arch">Combate core</td><td>Control, swap, lock-on, kit de 3 + básico/salto/bloqueo/apuntado, energía</td><td>Programación</td></tr>
             <tr><td class="arch">Elementos + reacciones</td><td>Tabla de 2 triángulos + 3–4 reacciones ambientales</td><td>Prog + Diseño</td></tr>
             <tr><td class="arch">Captura</td><td>Aturdimiento → debilitado + gracia → decisión → Tótem</td><td>Programación</td></tr>
-            <tr><td class="arch">Criaturas</td><td>3–5 especies con kit + 1 cadena de evolución completa</td><td>Diseño + Prog</td></tr>
+            <tr><td class="arch">Criaturas</td><td>6 especies con kit + 1 cadena de evolución completa</td><td>Diseño + Prog</td></tr>
             <tr><td class="arch">Bioma</td><td>1 bioma semiabierto con elemento base y clima</td><td>Diseño</td></tr>
             <tr><td class="arch">Mazmorra / jefe</td><td>1 mazmorra corta + 1 jefe narrativo</td><td>Diseño + Prog</td></tr>
             <tr><td class="arch">Arte</td><td>Look cell-shaded · 3–5 criaturas + entorno</td><td>Arte / Diseño</td></tr>

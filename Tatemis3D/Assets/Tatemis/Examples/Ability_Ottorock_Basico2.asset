@@ -22,12 +22,12 @@ MonoBehaviour:
   - name: Golpe
     animTrigger: 
     effects:
-    - rid: 1790544224151667618
-    - rid: 1790544224151667619
-    - rid: 1790544224151667620
-    - rid: 1790544224151667621
+    - rid: 1790544370519507123
+    - rid: 1790544370519507124
+    - rid: 1790544370519507125
+    - rid: 1790544370519507126
     exit:
-      rid: 1790544224151667622
+      rid: 1790544370519507127
     rooted: 0
     iFrames: 0
     superArmor: 0
@@ -35,7 +35,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 1790544224151667618
+    - rid: 1790544370519507123
       type: {class: DashMotion, ns: Tatemis, asm: Assembly-CSharp}
       data:
         distance: 0.9
@@ -43,18 +43,18 @@ MonoBehaviour:
         maxPitch: 35
         easeOut: 0
         continueForward: 0
-    - rid: 1790544224151667619
+    - rid: 1790544370519507124
       type: {class: MeleeHitbox, ns: Tatemis, asm: Assembly-CSharp}
       data:
         range: 2
         radius: 1.4
-    - rid: 1790544224151667620
+    - rid: 1790544370519507125
       type: {class: DealDamage, ns: Tatemis, asm: Assembly-CSharp}
       data:
         amount: 14
         staggerAmount: 14
         when: 1
-    - rid: 1790544224151667621
+    - rid: 1790544370519507126
       type: {class: Knockback, ns: Tatemis, asm: Assembly-CSharp}
       data:
         speed: 9
@@ -65,7 +65,7 @@ MonoBehaviour:
         verticalScale: 1
         hang: 0.5
         when: 1
-    - rid: 1790544224151667622
+    - rid: 1790544370519507127
       type: {class: AfterSeconds, ns: Tatemis, asm: Assembly-CSharp}
       data:
         seconds: 0.36

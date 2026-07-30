@@ -128,7 +128,7 @@ Más las **acciones universales** (todas las criaturas):
 - **Salto.**
 - **Noqueo** — sin botón dedicado y, desde el 2026-07-22, **sin prompt**: al llenarse el Aturdimiento (o con vida muy baja) el enemigo queda **debilitado** y rematarlo es **seguir atacándolo**. La única ruta al noqueo es jugar bien — combos + reacciones — no spamear un botón (§8.2). 🟡 Ver **[TAMER.md](TAMER.md) §4** (incluye el riesgo abierto: que la ventana de KO **corte el combo**, o matarás por inercia al que querías capturar).
 - **Contextual** — queda **solo para interactuar con el mundo** (aplastar un hongo, agarrar y lanzar un objeto, activar algo del ambiente). Capturar, objetos, órdenes y swap se van al **menú del Tamer** → [TAMER.md](TAMER.md).
-- **Bloqueo / Recarga elemental** — la criatura **se convierte en su elemento puro**:
+- **Bloqueo / Recarga elemental** — la criatura **adopta su forma elemental pura** *(✏️ 2026-07-29: decía «se convierte en su elemento puro»; **«elemento puro» queda reservado** al término 🔑 de §8.1 — el elemento suelto que solo hace daño)*:
   - **Defiende** y **recarga energía elemental más rápido**.
   - **No puede atacar mientras bloquea** (stance comprometido: la decisión pesa). 🔒
   - **Contra:** en forma pura la debilidad elemental se **amplifica de 1.5x a 2x** (§7.1). Bloquear contra tu counter es un riesgo real.
@@ -146,11 +146,13 @@ Híbrido **stats + habilidad/acción**. Los stats principales (**Daño, Vida, Ve
 
 | Arquetipo | Rol en combate de acción |
 |---|---|
-| **Guardián** | Aguanta daño, protege, controla espacio (CC/taunt) |
-| **Luchador** | DPS cuerpo a cuerpo sostenido, superviviencia media |
-| **Ejecutor** | Burst + movilidad, alto riesgo (glass cannon) |
-| **Zonificador** | Rango, proyectiles, negación de área |
-| **Controlador** | CC, debuffs, manipulación de terreno, soporte |
+| **Coloso** *(antes "Guardián")* | Aguanta todos los golpes que hagan falta para **efectuar lo suyo** — su vida es el coste de su efecto. No es un protector |
+| **Luchador** | Dueño del **1v1 limpio**: siguiendo su juego, gana siempre. DPS sostenido de contacto |
+| **Ejecutor** | **Entra, revienta, sale**: burst + movilidad, alto riesgo (glass cannon) |
+| **Zonificador** | La guerra de la **distancia**: castigo sostenido a rango; sus zonas le compran la distancia o la huida |
+| **Controlador** | **Desestabiliza** (mover, inmovilizar, suprimir) con **fenómenos de su elemento convertidos en kit** — marcas de especie con lógica propia (los tornados de Mantagale) — y castiga él mismo. ⚠️ *No con reacciones: **un elemento puro solo hace daño** (§8.1) ✅ 2026-07-29 — el **verbo** gobierna las reacciones, el **arquetipo** gobierna el kit ([ARCHETYPES](ARCHETYPES.md))* |
+
+> Descripciones operativas (cómo gana · cómo se le gana · pregunta generadora) + pentágono de counters → [ARCHETYPES.md](ARCHETYPES.md).
 
 > *Nota: el antiguo "staller" se reformuló como **Controlador**, que encaja mejor en tiempo real que un rol de dilatar-y-escapar (concepto de PvP por turnos).*
 
@@ -189,6 +191,8 @@ graph LR
 | Agua › Fuego | lo apaga | Rayo › Aire | la tormenta domina los cielos; el rayo rompe el aire |
 | Fuego › Naturaleza | la quema | Aire › Mineral | el viento erosiona la piedra |
 
+> 🔑 **El elemento es dos cosas a la vez** ✅ *(2026-07-29)*: un **multiplicador** (esta sección) y un **verbo** que solo aparece **al mezclarse con el terreno** (§8.1). Suelto, **un elemento solo hace daño** — y esa es una opción perfectamente válida: es la segura e inmediata, y el ×1.5 contra quien superas ya es su recompensa. Los seis verbos —**Fuego propaga · Agua arrastra · Naturaleza entrelaza · Mineral pesa · Rayo paraliza · Aire nubeliza**— ocupan **ejes distintos y no se solapan**: son la identidad de cada elemento sobre el tablero.
+
 > **Identidad de "Mineral" = roca / piedra / cristal** (NO metal refinado). Esto resuelve la contradicción eléctrica (la roca es aislante → hace tierra al rayo; el metal conductor sería lo contrario). El **Acero puro conductor se reserva como elemento de secuela**, y ESE sí será **débil al Rayo**, en contraste con el Mineral/roca que lo resiste.
 
 ### 7.2 Mapeo con el lore (Tomos)
@@ -196,24 +200,35 @@ graph LR
 - **Reservados para secuelas 🔮:** Hielo, Sangre y **Acero** (metal puro conductor, débil al Rayo — contraparte del Mineral/roca). **Sangre** queda fuera del piedra-papel-tijera a propósito: es asimétrico (drena/sacrifica), reservado como **elemento especial de antagonista/jefe**.
 
 ### 7.3 Elemento secundario (opcional)
-La mayoría de criaturas son **mono-elemento**. Algunas, en su **forma evolutiva final**, adquieren un **elemento secundario** que **NO altera debilidades/resistencias** — solo les permite usar ese elemento en alguna habilidad (utilidad/sabor). **No es obligatorio:** muchas criaturas **nunca lo desbloquean** y se quedan en su elemento puro.
+La mayoría de criaturas son **mono-elemento**. Algunas, en su **forma evolutiva final**, adquieren un **elemento secundario** que **NO altera debilidades/resistencias** — solo les permite usar ese elemento en alguna habilidad (utilidad/sabor). **No es obligatorio:** muchas criaturas **nunca lo desbloquean** y se quedan con **un solo elemento** *(✏️ 2026-07-29: decía «en su elemento puro» — término reservado, §8.1)*.
 
 ---
 
 ## 8. Ambiente, reacciones y captura 🔒 (USP)
 
 ### 8.1 Dos sistemas ambientales complementarios
-1. **Reacciones elementales (el "círculo continuo").** El terreno tiene **su elemento y no cambia nunca** (río → Agua · lava → Fuego · matorral → Naturaleza · veta de roca → Mineral · zona cargada/fulguritas → Rayo): es el tablero. Las habilidades **irradian su elemento al impactar** y, si difiere del terreno, producen **una** de tres salidas — **dominancia** (entra el que supera: AoE ruidosa) · **combinación** (triángulos distintos: efecto suave) · **anulación** (entra el superado: no pasa nada). La reacción es un **efecto temporal** de duración **proporcional al impacto**; al terminar se dispersa y el terreno vuelve a ser lo que era. **Tabla completa, reglas y excepciones por especie → [ELEMENTAL-REACTIONS.md](ELEMENTAL-REACTIONS.md).**
-   - *Ejemplos:* charco de Agua + Rayo → agua electrificada, parálisis *(combinación)* · lava/Fuego + Agua → vapor, cortina que rompe el lock-on *(dominancia)* · veta de Mineral + Fuego → roca al rojo, quema al pisar *(combinación; antes "metal al rojo" — renombrado por la identidad Mineral = roca, no metal, §7.1)*.
+1. **Reacciones elementales (el "círculo continuo").** El terreno tiene **su elemento y no cambia nunca** (roca volcánica → Fuego · río → Agua · **pasto / hierba alta** → Naturaleza · **zona de menas** → Mineral · piedra electrificada → Rayo · corrientes de aire → Aire) *(✏️ 2026-07-29: nombres sincronizados con [ER §1](ELEMENTAL-REACTIONS.md); decían «matorral» y «veta de roca»)*: es el tablero, y su papel es ser **un tercer jugador**. **Los 6 elementos tienen terreno propio a propósito** — sin terreno de Aire, la pareja Rayo › Aire sería inalcanzable. Las habilidades **irradian su elemento al impactar**, y de ahí salen **cinco salidas** ✅ *(reformulación 2026-07-29)*:
+   - **Suelo neutro** → nada: solo el golpe.
+   - **Tu mismo elemento** → **amplificación**: tu explosión **se repite** tras un instante.
+   - **Un elemento al que superas** → **reacción tuya**: estalla con daño de tu elemento y **a ti no te alcanza**.
+   - **Un elemento que te supera** → **reacción del terreno**: la misma explosión, pero es **suya y sin bando** — también te alcanza a ti.
+   - **Cruzando triángulos** → **combinación**: no manda nadie, así que el daño es **neutro**, tampoco tiene bando, y en vez de estallar **transforma la zona** un rato.
+
+   🔑 **Un elemento puro solo hace daño.** El fuego suelto no incendia y el rayo suelto no paraliza: **los efectos ambientales nacen únicamente de la mezcla**, como en el mundo real. Lo que cada elemento aporta a esa mezcla es **un verbo** — **Fuego propaga · Agua arrastra · Naturaleza entrelaza · Mineral pesa · Rayo paraliza · Aire nubeliza** — y **manda el verbo del que domina**; el otro solo pone de qué está hecha la mezcla.
+   🔑 **Todo tarda un instante en aparecer**, y ahí está la decisión: el golpe directo es **seguro e inmediato**; apuntar al suelo pega **más y añade efecto**, pero le das al rival ese instante para salirse (y a ti, si lo provocas bajo tus pies). El efecto **se queda pegado a quien alcanza** — dentro de la zona dura, fuera decrece — y al final se dispersa: el terreno vuelve a ser lo que era.
+   📐 **Cuánto debe pesar:** el reparto del daño de un duelo completo es **30% básicos / 40% habilidades / 30% terreno**. El ambiente no es decoración ni un extra: pesa lo mismo que tus básicos, y *un combo bueno es encadenar apuntando a zonas elementales*.
+   *Ejemplos:* charco de Agua + Rayo → **corriente**, una cinta que arrastra a lo que pise *(combinación)* · roca volcánica/Fuego + Agua → **géiser** que **eleva** y abre el juego aéreo *(manda el Agua)* · veta de Mineral + Fuego → **colada**, la única zona que **avanza** *(combinación)*.
+   **Las 15 parejas (6 reacciones + 9 combinaciones), reglas y excepciones por especie → [ELEMENTAL-REACTIONS.md](ELEMENTAL-REACTIONS.md).**
 2. **Interacciones físicas / climáticas.** *Independientes de la tabla de tipos.* Golpear el suelo → nube de polvo; nieve → esquirlas de hielo; vientos fuertes → mini-tornado; corrientes de agua, etc. **Puede nevar o haber viento sin que exista un "tipo Hielo/Viento"** — el clima es física que las habilidades explotan. Esto mantiene la tabla simple **y** el ambiente riquísimo.
 
 ### 8.2 Captura (armonía como elección)
 El protagonista busca **armonía**: el flujo central **subyuga, no mata** — pero matar **es posible** como elección deliberada (seguir golpeando a un noqueado), y los tatemis propios pueden **morir** por heridas graves. Sistema de vitalidad/muerte/derrota: 🟡 [VITALITY-DEATH.md](VITALITY-DEATH.md).
 
-- El enemigo tiene **Vida** + una **barra de Aturdimiento visible**.
-- El daño la llena, pero **los combos y las reacciones ambientales la llenan mucho más rápido** → la captura **recompensa el USP** (habilidad + ambiente), no el spam.
+- El enemigo tiene **Vida** + una **barra de Aturdimiento visible**, y el tamaño de esa barra es **proporcional a su vida máxima** (los tanques aguantan más aturdimiento).
+- **El aturdimiento que suma cada golpe es proporcional a su daño**, multiplicado por el **combo**: la llena pegar fuerte y seguido. Por eso las reacciones ambientales pesan tanto en la captura — hacen **daño de verdad** (§8.1, el 30% del total), no un bonus aparte.
+- **Decae si dejas de golpear**, y ahí es donde entra el control: **el CC no llena la barra, la MANTIENE** ✅ *(2026-07-29)* — mientras el enemigo está controlado **no puede reducir lo que ya lleva acumulado**. Atrapar, arrastrar o amarrar es lo que impide que se vacíe entre golpe y golpe. Y al revés: **el CC que te comes tú te quita la captura más que la vida**, porque te rompe la cadena. → La captura **recompensa el USP** (habilidad + ambiente), no el spam.
 - Puedes intentar capturar en cualquier momento, pero las probabilidades altas están al **noquear**.
-- Al llenar el Aturdimiento (o con vida muy baja) → **prompt de Noqueo** → finisher → **fin del combate**.
+- Al llenar el Aturdimiento (o con vida muy baja) el enemigo queda **debilitado**, **sin prompt ni botón** (§6.3): hay un **margen invulnerable** para decidir, y pasado ese margen seguir atacándolo es rematarlo.
 - Se abre una **breve ventana de captura**: lanzas el **Sludge**; hay una baja probabilidad de que la criatura **se resista**. Si se resiste o la ventana termina, **huye y desaparece**.
 
 ### 8.3 Sludge vs Card
@@ -236,13 +251,13 @@ Tres especies diseñadas a fondo, **deliberadamente complejas** para descubrir l
 | **[Mantagale](CREATURE-MANTAGALE.md)** | mantarraya aérea | Aire · Controlador | **improvisar** | **lleva al enemigo al terreno** (lo arrastra por el mapa) |
 
 - **Triángulo estratégico** (nace de los kits, no de la tabla elemental): Pyrecko › Mantagale › Ottorock › Pyrecko.
-- **Gate del prototipo:** Ottorock en modo Libre. Pyrecko entra en Fase 4; Mantagale es post-prototipo (informa la arquitectura de vuelo desde ya).
-- Cubren 3 de los 5 arquetipos; **Guardián y Ejecutor** quedan para las especies 4–5.
+- **Gate del prototipo:** Ottorock en modo Libre. **Ottorock completo —con Sujeción— entra en el slice, y va antes que Pyrecko y Mantagale** ✅ *(2026-07-29)*: su combinación sellada portátil es lo que demuestra el ambiente **sin depender de otra especie**. Pyrecko entra en Fase 4; Mantagale es post-prototipo (informa la arquitectura de vuelo desde ya).
+- Cubren 3 de los 5 arquetipos; **Coloso y Ejecutor** quedan para las especies 4–5.
 
 ### 9.1 Roster
 > Fichas de diseño por especie → [CREATURES.md](CREATURES.md).
 
-- **Juego final:** 10–20 especies. **Slice:** 3–5 especies "héroe" (idealmente una por arquetipo); el resto, diseño en papel.
+- **Juego final ✅ (2026-07-26):** la **matriz tipo × arquetipo completa = 6×5 = 30 especies** (una por celda; mapa e ideas en [CREATURE-IDEAS.md](CREATURE-IDEAS.md)). **Slice ✅ (2026-07-26): 6 especies — una por elemento** (la primera de Agua entra al slice: la de olas, animal por decidir). Componer el sexteto → cola de [TASKS](TASKS.md): elegir el Rayo (Halcón/Collie/Armadillo) y decidir qué pasa con el **Coloso**, que con la cantera actual quedaría fuera. El resto, diseño en papel.
 - Cada especie: **2–4 formas** (contando la forma base "bebé").
 - **Rareza sutil:** las criaturas con stats finales más altos tienen una **fase inicial más difícil** y **más formas evolutivas** (estilo pseudolegendario).
 
@@ -270,7 +285,7 @@ Tres especies diseñadas a fondo, **deliberadamente complejas** para descubrir l
 
 ## 11. Mundo y estructura 🔒/🟡
 
-- **Estructura:** **semiabierto**, por **biomas** ligados a elementos (cada bioma con su elemento base y su clima).
+- **Estructura:** **semiabierto de tamaño mediano-pequeño**, por **biomas** ligados a elementos (cada bioma con su elemento base y su clima). La **arena de combate y su rejilla elemental** (overlay hexagonal leve + zona enmarcada) están dictadas → [ARENA.md](ARENA.md) *(2026-07-26)*. **Composición objetivo de celdas: 5 elementales / 2 neutras / 3 de efecto ambiental**, sesgada por el bioma ✅ *(2026-07-29)* — es lo que **recompensa la versatilidad del equipo** (especializarse en un grupo de elementos, cubrir un triángulo entero o variar) y convierte la mezcla de la arena en una **palanca de balance de primer orden**, no en decoración.
 - **Ancient Spots:** mazmorras / puntos de interés con **jefes de contexto narrativo**. *(Diseño de detalle aparcado 🟡 — el slice incluye una mazmorra corta con un jefe.)*
 - **Economía:** el **Polvo (Pulvis)** + agua = **Sludge** (recurso de captura). *(Economía extendida 🟡.)*
 
@@ -306,7 +321,8 @@ Tres especies diseñadas a fondo, **deliberadamente complejas** para descubrir l
 
 ## 16. Riesgos y decisiones abiertas
 
-- 🟡 **Legibilidad de las reacciones ambientales** en pleno combate 3D — necesita playtest temprano (feedback visual claro).
+- 🟡 **Legibilidad de las reacciones ambientales** en pleno combate 3D — necesita playtest temprano (feedback visual claro). Regla dura desde el 2026-07-29: *si un efecto no se ve en el cuerpo del afectado, no existe*.
+- 🟡 **Saturación de efectos ambientales:** con la mitad de la arena elemental y efectos que **se pegan al cuerpo**, el estado por defecto podría pasar a ser *«siempre bajo algún efecto»* — y entonces dejan de leerse como acontecimientos. Techo dictado: **máximo 2 a la vez, objetivo 0–1, y todo esquivable** ([ELEMENTAL-REACTIONS §0.9](ELEMENTAL-REACTIONS.md)). A vigilar en el primer playtest con arena elemental.
 - 🟡 **Balance de los 6 elementos** con triángulos separados: validar si el neutral entre triángulos se siente plano; añadir cruces si hace falta.
 - 🟡 **Coste de las mini-misiones de evolución** — mantener 1 cadena completa en el slice; el resto en papel para no reventar el alcance.
 - 🟡 **Nombres finales** de elementos (Naturaleza/Mineral) y del juego (Tatemis3D es placeholder).
