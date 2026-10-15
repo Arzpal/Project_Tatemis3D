@@ -22,13 +22,13 @@ MonoBehaviour:
   - name: Mordisco
     animTrigger: 
     effects:
-    - rid: 1790544370519507144
-    - rid: 1790544370519507145
-    - rid: 1790544370519507146
-    - rid: 1790544370519507147
-    - rid: 1790544370519507148
+    - rid: 1174776521949184204
+    - rid: 1174776521949184205
+    - rid: 1174776521949184206
+    - rid: 1174776521949184207
+    - rid: 1174776521949184208
     exit:
-      rid: 1790544370519507149
+      rid: 1174776521949184209
     rooted: 0
     iFrames: 0
     superArmor: 0
@@ -36,7 +36,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 1790544370519507144
+    - rid: 1174776521949184204
       type: {class: DashMotion, ns: Tatemis, asm: Assembly-CSharp}
       data:
         distance: 1.5
@@ -44,18 +44,18 @@ MonoBehaviour:
         maxPitch: 35
         easeOut: 0
         continueForward: 0
-    - rid: 1790544370519507145
+    - rid: 1174776521949184205
       type: {class: MeleeHitbox, ns: Tatemis, asm: Assembly-CSharp}
       data:
         range: 2.3
         radius: 1.5
-    - rid: 1790544370519507146
+    - rid: 1174776521949184206
       type: {class: DealDamage, ns: Tatemis, asm: Assembly-CSharp}
       data:
         amount: 50
         staggerAmount: 35
         when: 1
-    - rid: 1790544370519507147
+    - rid: 1174776521949184207
       type: {class: Knockback, ns: Tatemis, asm: Assembly-CSharp}
       data:
         speed: 12
@@ -66,7 +66,7 @@ MonoBehaviour:
         verticalScale: 1
         hang: 0.55
         when: 1
-    - rid: 1790544370519507148
+    - rid: 1174776521949184208
       type: {class: ElementalBurst, ns: Tatemis, asm: Assembly-CSharp}
       data:
         radius: 2.2
@@ -77,7 +77,7 @@ MonoBehaviour:
         reportHits: 0
         hitstop: 0
         impactStrength: 0
-    - rid: 1790544370519507149
+    - rid: 1174776521949184209
       type: {class: AfterSeconds, ns: Tatemis, asm: Assembly-CSharp}
       data:
         seconds: 0.5

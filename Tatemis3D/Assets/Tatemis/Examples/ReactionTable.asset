@@ -19,6 +19,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 0
     dominantElement: 0
+    subproduct: 0
     burstDamage: 45
     burstStagger: 0
     burstKnockback: 0
@@ -50,6 +51,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 1
     dominantElement: 0
+    subproduct: 0
     burstDamage: 45
     burstStagger: 0
     burstKnockback: 0
@@ -81,6 +83,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 0
     dominantElement: 1
+    subproduct: 5
     burstDamage: 45
     burstStagger: 0
     burstKnockback: 0
@@ -112,6 +115,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 1
     dominantElement: 1
+    subproduct: 5
     burstDamage: 45
     burstStagger: 0
     burstKnockback: 0
@@ -143,6 +147,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 0
     dominantElement: 2
+    subproduct: 3
     burstDamage: 27.000002
     burstStagger: 0
     burstKnockback: 0
@@ -174,6 +179,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 1
     dominantElement: 2
+    subproduct: 3
     burstDamage: 27.000002
     burstStagger: 0
     burstKnockback: 0
@@ -205,6 +211,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 0
     dominantElement: 3
+    subproduct: 2
     burstDamage: 49.5
     burstStagger: 0
     burstKnockback: 0
@@ -236,6 +243,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 1
     dominantElement: 3
+    subproduct: 2
     burstDamage: 49.5
     burstStagger: 0
     burstKnockback: 0
@@ -267,6 +275,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 0
     dominantElement: 4
+    subproduct: 1
     burstDamage: 45
     burstStagger: 0
     burstKnockback: 0
@@ -298,6 +307,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 1
     dominantElement: 4
+    subproduct: 1
     burstDamage: 45
     burstStagger: 0
     burstKnockback: 0
@@ -329,6 +339,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 0
     dominantElement: 5
+    subproduct: 4
     burstDamage: 38.25
     burstStagger: 0
     burstKnockback: 6
@@ -360,6 +371,7 @@ MonoBehaviour:
     style: 0
     friendlyFire: 1
     dominantElement: 5
+    subproduct: 4
     burstDamage: 38.25
     burstStagger: 0
     burstKnockback: 6
@@ -391,6 +403,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 1
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -422,6 +435,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 3
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -453,6 +467,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 2
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -484,6 +499,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 3
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -515,6 +531,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 0
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -546,6 +563,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 3
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -577,6 +595,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 1
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -608,6 +627,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 4
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -639,6 +659,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 2
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -670,6 +691,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 4
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -701,6 +723,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 0
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -732,6 +755,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 4
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -763,6 +787,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 1
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -794,6 +819,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 5
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -825,6 +851,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 2
+    subproduct: 0
     burstDamage: 60
     burstStagger: 0
     burstKnockback: 0
@@ -856,6 +883,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 5
+    subproduct: 0
     burstDamage: 60
     burstStagger: 0
     burstKnockback: 0
@@ -887,6 +915,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 0
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0
@@ -918,6 +947,7 @@ MonoBehaviour:
     style: 1
     friendlyFire: 0
     dominantElement: 5
+    subproduct: 0
     burstDamage: 0
     burstStagger: 0
     burstKnockback: 0

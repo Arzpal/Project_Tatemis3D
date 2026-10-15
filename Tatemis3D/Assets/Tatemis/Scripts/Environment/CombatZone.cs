@@ -38,6 +38,19 @@ namespace Tatemis
         [Range(0.7f, 1f)] public float cellInset = 0.93f;
         public float cellHeight = 0.07f;
 
+        [Header("Saturación (ER §0.10)")]
+        [Tooltip("Cuánto se tiñe la celda hacia el elemento que la está cargando cuando el medidor está " +
+                 "lleno. ⚠️ **Esto no es pulido**: si el hexágono no se ve llenarse, el jugador no " +
+                 "percibe carga — percibe que golpear el suelo dejó de hacer nada, y el sistema entero " +
+                 "se vuelve invisible")]
+        [Range(0f, 1f)] public float chargeTint = 0.8f;
+        [Tooltip("Latido de una mancha CEBADA (ciclos por segundo). Tiene que verse desde lejos: es lo " +
+                 "que hace que la detonación pueda permitirse ser enorme sin ser injusta")]
+        public float primedPulseHz = 3.2f;
+        [Tooltip("Cuánto se aclara una celda TRANSFORMADA. El jugador tiene que poder distinguir la " +
+                 "ceniza que hizo él del suelo que ya estaba (ER §6)")]
+        [Range(0f, 0.5f)] public float transformedLift = 0.16f;
+
         public Vector3 Center { get; private set; }
         /// Radio aproximado en unidades (para quien necesite una cifra: cámara, IA, HUD).
         public float Radius { get; private set; }
@@ -46,6 +59,14 @@ namespace Tatemis
         readonly List<GameObject> _spawned = new List<GameObject>();
         readonly HashSet<HexCoord> _cells = new HashSet<HexCoord>();
         readonly List<Material> _mats = new List<Material>();
+
+        /// Una celda del tablero y su color de reposo. El estado (saturación, cebado, transformada) se
+        /// pinta encima con un `MaterialPropertyBlock`, así que **una sola instancia de material** basta
+        /// para todo el tablero por muchos estados distintos que haya a la vez.
+        readonly Dictionary<HexCoord, Renderer> _cellRenderers = new Dictionary<HexCoord, Renderer>();
+        readonly Dictionary<HexCoord, Color> _restColor = new Dictionary<HexCoord, Color>();
+        MaterialPropertyBlock _mpb;
+        ElementalGrid _boundGrid;
         static Mesh _hexMesh;
 
         /// Abre la zona alrededor de un grupo de combatientes: el centro es la **celda** que contiene
@@ -57,6 +78,8 @@ namespace Tatemis
 
             var grid = CombatServices.Grid;
             if (grid == null) { Debug.LogWarning("[Arena] No hay ElementalGrid: la zona no puede alinearse a celdas."); return; }
+            _boundGrid = grid;
+            grid.CellsChanged += OnGridChanged;   // el terreno ya no es fijo: hay que repintar (§0.10)
 
             Vector3 c = Vector3.zero;
             for (int i = 0; i < combatants.Count; i++) c += combatants[i].position;
@@ -79,6 +102,12 @@ namespace Tatemis
             _cells.Clear();
             foreach (var h in HexCoord.Within(centerCell, used)) _cells.Add(h);
 
+            // 🔑 El cerco corta las MANCHAS, no solo los cuerpos ✅ (playtest 2026-07-31). Sin esto, una
+            // mancha que cruza el muro reventaba entera —incluida la mitad de fuera, a la que el jugador
+            // no puede llegar— y una mancha partida en dos por el muro seguía siendo **una sola batería**,
+            // así que cargar un lado llenaba el otro por un puente que no existe.
+            grid.SetCombatZone(_cells);
+
             // Cara a cara de un hexágono = radius·√3; `used` anillos llegan a esa distancia × anillos.
             Radius = grid.cellRadius * Mathf.Sqrt(3f) * (used + 0.5f);
             transform.position = Center;
@@ -88,24 +117,35 @@ namespace Tatemis
             BuildFence(grid);
 
             int elementales = 0, ambientales = 0;
+            var manchas = new HashSet<int>();
             foreach (var h in _cells)
             {
-                var cell = grid.CellAt(h.ToWorld(grid.cellRadius));
-                if (cell.element.HasValue) elementales++;
-                else if (cell.ambient) ambientales++;
+                var cell = grid.CellAt(h);
+                if (cell.ambient) ambientales++;             // ahora es un MODIFICADOR, no una clase
+                if (!cell.element.HasValue) continue;
+                elementales++;
+                if (cell.patch != 0) manchas.Add(cell.patch);
             }
             Debug.Log($"[Arena] Zona abierta: {_cells.Count} celdas ({used} anillos, ~{Radius * 2f:0} u de punta a punta) " +
-                      $"— {elementales} elementales, {ambientales} ambientales, " +
-                      $"{_cells.Count - elementales - ambientales} neutras.");
+                      $"— {elementales} elementales en {manchas.Count} manchas (= {manchas.Count} baterías), " +
+                      $"{_cells.Count - elementales} neutras, {ambientales} con marca ambiental.");
         }
 
         public void Close()
         {
+            if (_boundGrid != null)
+            {
+                _boundGrid.CellsChanged -= OnGridChanged;
+                _boundGrid.ClearCombatZone();   // fuera de combate el mundo vuelve a conectar entero
+                _boundGrid = null;
+            }
             for (int i = 0; i < _spawned.Count; i++) if (_spawned[i] != null) Destroy(_spawned[i]);
             for (int i = 0; i < _mats.Count; i++) if (_mats[i] != null) Destroy(_mats[i]);
             _spawned.Clear();
             _mats.Clear();
             _cells.Clear();
+            _cellRenderers.Clear();
+            _restColor.Clear();
             IsOpen = false;
         }
 
@@ -126,33 +166,103 @@ namespace Tatemis
         /// entre ellas (`cellInset`) es lo que las mantiene reconocibles como celdas.
         void BuildCells(ElementalGrid grid)
         {
-            var byColor = new Dictionary<Color, Material>();
+            _cellRenderers.Clear();
+            _restColor.Clear();
+
+            // UN material para todo el tablero. El color de cada celda va por `MaterialPropertyBlock`,
+            // porque desde §0.10 el color ya no es fijo: cambia cada frame con la saturación.
+            var shared = Unlit(Color.white);
+            _mats.Add(shared);
+
             foreach (var h in _cells)
             {
                 Vector3 p = h.ToWorld(grid.cellRadius);
-                var cell = grid.CellAt(p);
-                // El color lo pide la rejilla, no una tabla estática: las celdas sin elemento se tiñen
-                // del BIOMA, así que hace falta saber a cuál pertenecen.
-                var col = grid.ColorOfCell(cell);
-                col.a = cellAlpha;
-
-                if (!byColor.TryGetValue(col, out var mat))
-                {
-                    mat = Unlit(col);
-                    byColor[col] = mat;
-                    _mats.Add(mat);
-                }
 
                 var go = new GameObject("Celda");
                 go.transform.SetParent(transform, true);
                 go.transform.position = new Vector3(p.x, cellHeight, p.z);
                 go.AddComponent<MeshFilter>().sharedMesh = HexMesh();
                 var mr = go.AddComponent<MeshRenderer>();
-                mr.sharedMaterial = mat;
+                mr.sharedMaterial = shared;
                 mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 mr.receiveShadows = false;
                 go.transform.localScale = Vector3.one * (grid.cellRadius * cellInset);
                 _spawned.Add(go);
+
+                _cellRenderers[h] = mr;
+            }
+            RefreshRestColors(grid);
+        }
+
+        /// El color de reposo: el que dicta la rejilla. Se recalcula al abrir la zona y **cada vez que
+        /// el terreno se transforma o revierte** — si no, el jugador vería ceniza donde ya volvió a
+        /// haber pasto.
+        void RefreshRestColors(ElementalGrid grid)
+        {
+            foreach (var h in _cells)
+            {
+                // El color lo pide la rejilla, no una tabla estática: las celdas sin elemento se tiñen
+                // del BIOMA, así que hace falta saber a cuál pertenecen.
+                var col = grid.ColorOfCell(grid.CellAt(h));
+                col.a = cellAlpha;
+                _restColor[h] = col;
+            }
+        }
+
+        void OnGridChanged(IReadOnlyList<HexCoord> touched)
+        {
+            if (_boundGrid != null) RefreshRestColors(_boundGrid);
+        }
+
+        /// **El tablero habla.** Cada celda muestra tres cosas a la vez, y las tres hacen falta:
+        ///  ① **cuánta saturación lleva su mancha** — se tiñe hacia el elemento que la está cargando,
+        ///     así que ves *quién* la está cargando y *cuánto le falta*;
+        ///  ② **si está CEBADA** — late fuerte, y ese latido es lo que hace justa una explosión enorme;
+        ///  ③ **si está transformada** — aclarada, para distinguir la ceniza que hiciste tú del suelo
+        ///     que ya estaba.
+        void Update()
+        {
+            if (!IsOpen || _cellRenderers.Count == 0) return;
+            var grid = _boundGrid;
+            if (grid == null) return;
+
+            var sat = CombatServices.Reactions != null ? CombatServices.Reactions.Saturation : null;
+            if (_mpb == null) _mpb = new MaterialPropertyBlock();
+
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * primedPulseHz * Mathf.PI * 2f);
+
+            foreach (var kv in _cellRenderers)
+            {
+                if (kv.Value == null) continue;
+                var col = _restColor.TryGetValue(kv.Key, out var rest) ? rest : Color.gray;
+
+                if (sat != null)
+                {
+                    var owner = sat.OwnerAt(kv.Key);
+                    if (owner.HasValue)
+                    {
+                        float fill = sat.Fill01(kv.Key);
+                        var charge = ElementalGrid.ColorOf(owner);
+                        col = Color.Lerp(col, charge, fill * chargeTint);
+                        col.a = Mathf.Lerp(cellAlpha, 1f, fill * 0.6f);
+
+                        if (sat.IsPrimed(kv.Key))
+                        {
+                            col = Color.Lerp(col, Color.white, 0.25f + 0.45f * pulse);
+                            col.a = Mathf.Lerp(0.7f, 1f, pulse);
+                        }
+                    }
+                }
+
+                if (grid.IsTransformed(kv.Key))
+                {
+                    col = Color.Lerp(col, Color.white, transformedLift);
+                    col.a = Mathf.Max(col.a, cellAlpha + 0.1f);
+                }
+
+                _mpb.SetColor("_BaseColor", col);
+                _mpb.SetColor("_Color", col);
+                kv.Value.SetPropertyBlock(_mpb);
             }
         }
 
@@ -202,7 +312,9 @@ namespace Tatemis
         }
 
         /// Hexágono relleno de radio 1 (se escala al usarlo), plano en XZ y mirando hacia arriba.
-        static Mesh HexMesh()
+        /// Público porque lo comparte `SaturationVisual`: tienen que encajar **exactamente** con las
+        /// celdas del tablero o la carga se vería desalineada del hexágono que la contiene.
+        public static Mesh HexMesh()
         {
             if (_hexMesh != null) return _hexMesh;
             var verts = new Vector3[7];

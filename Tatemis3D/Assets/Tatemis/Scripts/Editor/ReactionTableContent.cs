@@ -56,8 +56,14 @@ namespace Tatemis.EditorTools
             // Atrapa: no te mueves, pero sí atacas y bloqueas. Solo suelo (quien vuela se libra).
             // Es la mejor herramienta de SETUP del sistema: lo único que fija a alguien dentro de la
             // zona de otro. Sin zona residual — es un evento, no un sitio.
+            // SUBPRODUCTO: Naturaleza — las raíces se beben el charco y se quedan. Es el ÚNICO caso en
+            // que el subproducto coincide con el elemento del predador, y por eso en la dirección
+            // "entra Agua sobre pasto" la mancha no cambia… pero **el anillo sí**: ahí su función es
+            // EXPANDIR la mancha. Que la única reacción llamada *crecimiento* sea la única que hace
+            // crecer terreno no es casualidad. Lectura preciosa: una criatura de Agua peleando sobre
+            // hierba **riega el prado del rival**, justo en la pareja donde ella pierde.
             Fila(e, presa: Element.Agua, predador: Element.Naturaleza, "Crecimiento explosivo",
-                 x => { x.burstDamage = R;
+                 x => { x.burstDamage = R; x.subproduct = Element.Naturaleza;
                         x.burstStatus = StatusType.Enraizado; x.burstStatusSeconds = 1.3f;
                         x.debugColor = new Color(0.35f, 0.95f, 0.35f); });
 
@@ -65,15 +71,19 @@ namespace Tatemis.EditorTools
             // ELEVA: es la reacción que abre el juego aéreo, y lo que permite que un melee de Agua o de
             // Fuego alcance a un volador. El blanco puro es su firma exclusiva (§6: hay que poder
             // distinguirla de la niebla).
+            // SUBPRODUCTO: Aire — el vapor.
             Fila(e, presa: Element.Fuego, predador: Element.Agua, "Géiser",
-                 x => { x.burstDamage = R; x.burstLift = 13f;
+                 x => { x.burstDamage = R; x.burstLift = 13f; x.subproduct = Element.Aire;
                         x.debugColor = new Color(0.95f, 0.98f, 1f); });
 
             // Fuego › Naturaleza — arde. Verbo: PROPAGAR.
             // Se extiende poco a poco y SOLO por terreno de Naturaleza: el propio parche define hasta
             // dónde llega, sin ningún tope inventado. Fogonazo menor porque su aporte está en el tiempo.
+            // SUBPRODUCTO: Mineral — la ceniza. Es el ejemplo canónico de que el tablero genera
+            // parejas nuevas a mitad de combate: un incendio en un bioma de Naturaleza deja Mineral
+            // donde no lo había, y con él parejas que la arena no ofrecía al empezar.
             Fila(e, presa: Element.Naturaleza, predador: Element.Fuego, "Incendio",
-                 x => { x.burstDamage = R * 0.6f;
+                 x => { x.burstDamage = R * 0.6f; x.subproduct = Element.Mineral;
                         x.baseDuration = 5f; x.zoneStatus = StatusType.Quemadura;
                         x.statusSeconds = 2.5f; x.statusTickDamage = 7f;
                         x.propagates = true; x.propagateThrough = Element.Naturaleza;
@@ -83,16 +93,18 @@ namespace Tatemis.EditorTools
             // Zona de MÁS GRAVEDAD que imanta hacia abajo: ralentiza y arranca del aire lo que vuele.
             // Es la reacción ANTI-AÉREA del juego. Violeta y no amarillo, porque nace sobre la piedra
             // electrificada y el amarillo se fundía con ella (§6).
+            // SUBPRODUCTO: Fuego — la roca se sobrecalienta con la carga que acaba de absorber.
             Fila(e, presa: Element.Rayo, predador: Element.Mineral, "Energía geo",
-                 x => { x.burstDamage = R * 1.1f;
+                 x => { x.burstDamage = R * 1.1f; x.subproduct = Element.Fuego;
                         x.baseDuration = 4f; x.zoneStatus = StatusType.Pesado; x.statusSeconds = 2f;
                         x.debugColor = new Color(0.60f, 0.30f, 0.95f); });
 
             // Rayo › Aire — la tormenta domina el cielo abierto. Verbo: PARALIZAR.
             // CORTA EL COMBO: ticks por reloj que muerden el arranque de tus ataques. No te quita vida,
             // te quita la captura — sin cadena, el aturdimiento decae. Ya no es gemela de la anterior.
+            // SUBPRODUCTO: Agua — la lluvia que viene después de la tormenta.
             Fila(e, presa: Element.Aire, predador: Element.Rayo, "Descarga de tormenta",
-                 x => { x.burstDamage = R;
+                 x => { x.burstDamage = R; x.subproduct = Element.Agua;
                         x.baseDuration = 4f; x.zoneStatus = StatusType.Interferido; x.statusSeconds = 2.5f;
                         x.debugColor = new Color(0.75f, 0.55f, 1f); });
 
@@ -101,8 +113,11 @@ namespace Tatemis.EditorTools
             // pulverizada (materia de Mineral). **NO ralentiza** — ralentizar es el verbo de Mineral y
             // aquí Mineral no manda (§0.1, la regla que impide que los verbos se contaminen).
             // Es la que se come Ottorock: sobre corrientes de aire sus propios ataques le dejan ciego.
+            // SUBPRODUCTO: Rayo — la arena en suspensión **se carga de estática**. No es una excusa:
+            // las tormentas de polvo generan campos eléctricos fuertes por fricción entre partículas.
+            // Mismo método que produjo los verbos de §0.1 — sacar la mecánica del fenómeno real.
             Fila(e, presa: Element.Mineral, predador: Element.Aire, "Tormenta de arena",
-                 x => { x.burstDamage = R * 0.85f; x.burstKnockback = 6f;
+                 x => { x.burstDamage = R * 0.85f; x.burstKnockback = 6f; x.subproduct = Element.Rayo;
                         x.baseDuration = 5f; x.zoneStatus = StatusType.Cegado; x.statusSeconds = 2f;
                         x.zoneTickDamage = 4f; x.radiusScale = 1.4f;
                         x.debugColor = new Color(0.78f, 0.72f, 0.60f); });

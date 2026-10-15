@@ -10,7 +10,10 @@ namespace Tatemis
     /// ⚠️ La rejilla es un **overlay de lectura, no geometría**: el mundo es continuo y se camina
     /// libremente. Esto solo sirve para responder *"¿qué elemento hay bajo este punto?"*, que es lo
     /// que necesita el sistema de reacciones (ELEMENTAL-REACTIONS R1).
-    public readonly struct HexCoord
+    /// ⚠️ Implementa `IEquatable` a propósito: desde [ER §0.10] esto es **clave de diccionario en
+    /// bucles por frame** (saturación por mancha, repintado del tablero). Sin `IEquatable`, cada
+    /// comparación pasa por `Equals(object)` y **boxea la struct**, generando basura cada frame.
+    public readonly struct HexCoord : System.IEquatable<HexCoord>
     {
         public readonly int q, r;
 
@@ -89,8 +92,11 @@ namespace Tatemis
                     yield return new HexCoord(center.q + dq, center.r + dr);
         }
 
+        public bool Equals(HexCoord o) => o.q == q && o.r == r;
         public override bool Equals(object o) => o is HexCoord h && h.q == q && h.r == r;
         public override int GetHashCode() => q * 73856093 ^ r * 19349663;
+        public static bool operator ==(HexCoord a, HexCoord b) => a.q == b.q && a.r == b.r;
+        public static bool operator !=(HexCoord a, HexCoord b) => a.q != b.q || a.r != b.r;
         public override string ToString() => $"({q},{r})";
     }
 }

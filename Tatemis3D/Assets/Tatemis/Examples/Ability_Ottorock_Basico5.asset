@@ -22,13 +22,13 @@ MonoBehaviour:
   - name: Remate
     animTrigger: 
     effects:
-    - rid: 1790544370519507128
-    - rid: 1790544370519507129
-    - rid: 1790544370519507130
-    - rid: 1790544370519507131
-    - rid: 1790544370519507132
+    - rid: 1174776521949184188
+    - rid: 1174776521949184189
+    - rid: 1174776521949184190
+    - rid: 1174776521949184191
+    - rid: 1174776521949184192
     exit:
-      rid: 1790544370519507133
+      rid: 1174776521949184193
     rooted: 0
     iFrames: 0
     superArmor: 0
@@ -36,7 +36,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 1790544370519507128
+    - rid: 1174776521949184188
       type: {class: DashMotion, ns: Tatemis, asm: Assembly-CSharp}
       data:
         distance: 1.3
@@ -44,18 +44,18 @@ MonoBehaviour:
         maxPitch: 35
         easeOut: 0
         continueForward: 0
-    - rid: 1790544370519507129
+    - rid: 1174776521949184189
       type: {class: MeleeHitbox, ns: Tatemis, asm: Assembly-CSharp}
       data:
         range: 2.2
         radius: 1.6
-    - rid: 1790544370519507130
+    - rid: 1174776521949184190
       type: {class: DealDamage, ns: Tatemis, asm: Assembly-CSharp}
       data:
         amount: 26
         staggerAmount: 30
         when: 1
-    - rid: 1790544370519507131
+    - rid: 1174776521949184191
       type: {class: Knockback, ns: Tatemis, asm: Assembly-CSharp}
       data:
         speed: 16
@@ -66,7 +66,7 @@ MonoBehaviour:
         verticalScale: 1
         hang: 0.55
         when: 1
-    - rid: 1790544370519507132
+    - rid: 1174776521949184192
       type: {class: ElementalBurst, ns: Tatemis, asm: Assembly-CSharp}
       data:
         radius: 2.8
@@ -77,7 +77,7 @@ MonoBehaviour:
         reportHits: 0
         hitstop: 0
         impactStrength: 0
-    - rid: 1790544370519507133
+    - rid: 1174776521949184193
       type: {class: AfterSeconds, ns: Tatemis, asm: Assembly-CSharp}
       data:
         seconds: 0.62

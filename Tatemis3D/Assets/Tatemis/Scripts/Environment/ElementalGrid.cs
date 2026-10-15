@@ -43,18 +43,27 @@ namespace Tatemis
                  "entre vecinas y exóticas — pero SIEMPRE hay al menos una de cada")]
         [Range(0.4f, 1f)] public float ownPatchShare = 0.7f;
 
-        /// Qué hay en una celda. `element == null` = neutra: ahí no reacciona nada (R5).
+        /// Qué hay en una celda. `element == null` = neutra: ahí no reacciona nada **en el momento del
+        /// golpe** (R5), pero **se carga a 2y y se vuelve elemental** (ER §0.10).
         public struct Cell
         {
             public Element? element;
-            /// Celda de **efecto ambiental** (polvo, ceniza, niebla…). Es el 2º sistema ambiental del
-            /// GDD §8.1, **aún sin dictar**. ⚠️ Su contenido **dependerá del bioma**: la ambiental de
-            /// la Caldera no es la misma que la de la Laguna (dictado 2026-07-30).
+            /// Marca de **efecto ambiental** (polvo, ceniza, niebla…), el 2º sistema ambiental del
+            /// GDD §8.1, **aún sin dictar**. ✏️ *2026-07-31: dejó de ser una CLASE de celda y pasó a ser
+            /// un **modificador** que puede ir encima de cualquiera, elemental o neutra* — así el clima
+            /// no compite por espacio de tablero con el elemento y el tablero se lee con **dos**
+            /// categorías en vez de tres. ⚠️ Su contenido **dependerá del bioma**.
             public bool ambient;
             /// A qué bioma pertenece. **El bioma es una identidad visual que tiñe TODAS sus celdas**,
             /// no solo las elementales: el suelo neutro de la Caldera es ceniza y el de la Laguna es
             /// arena mojada. Mecánicamente son lo mismo; visualmente, no. -1 = fuera de todo bioma.
             public int biome;
+            /// 🔑 **A qué MANCHA pertenece** ([ER §0.10](../../../../docs/ELEMENTAL-REACTIONS.md)).
+            /// La mancha —las celdas conectadas del mismo elemento— **es la batería**: la saturación se
+            /// acumula por mancha entera, no por celda, y **la explosión es la mancha**. `0` = ninguna
+            /// (celda neutra). Los ids empiezan en 1 a propósito: `default(Cell)` da 0 y así una celda
+            /// desconocida nunca finge pertenecer a la mancha de otro.
+            public int patch;
         }
 
         [Header("Rejilla (ARENA §1)")]
@@ -63,20 +72,86 @@ namespace Tatemis
                  "leían en pantalla. La celda es ahora del tamaño de una jugada, no de un paso")]
         public float cellRadius = 3.5f;
 
-        [Header("Composición 5/2/3 (ER §0.5)")]
+        [Header("Composición 5/5 (ER §0.5) ✏️ era 5/2/3 hasta el 2026-07-31")]
+        [Tooltip("Fracción de celdas con elemento. El resto son NEUTRAS — que ya no son terreno muerto: " +
+                 "se cargan a 2y y se vuelven elementales (ER §0.10)")]
         [Range(0f, 1f)] public float elementalShare = 0.5f;
-        [Range(0f, 1f)] public float neutralShare = 0.2f;
-        // El resto (0.3) son celdas de efecto ambiental.
+        [Tooltip("Fracción de celdas que además llevan la marca AMBIENTAL. Es un MODIFICADOR encima de " +
+                 "cualquier celda, elemental o neutra — ya no una tercera clase que compita por espacio")]
+        [Range(0f, 1f)] public float ambientShare = 0.3f;
+
+        [Header("Reversión (ER §0.10)")]
+        [Tooltip("Lo que tarda una celda transformada en volver a su estado horneado. **Se REFRESCA** " +
+                 "mientras se pelee encima —tanto al detonar como al SOLO cargar—: el suelo que se " +
+                 "disputa se queda cambiado, el que se abandona se cura. Es lo que impide que la arena " +
+                 "se agote a mitad de combate")]
+        public float revertSeconds = 22f;
+        [Tooltip("Multiplicador del tiempo de reversión para las celdas que NACIERON neutras ✅ (playtest " +
+                 "2026-07-31). Fabricarte tablero es un proceso de DOS pasos —convertir la neutra y " +
+                 "luego cargarla— así que si durara lo mismo que el terreno natural se te desharía a " +
+                 "medio camino y el plan B no sería viable nunca")]
+        public float neutralRevertMultiplier = 2f;
 
         public List<Biome> biomes = new List<Biome>();
 
+        /// Una mancha puesta **a mano**, en coordenadas de celda. Es lo que convierte el laboratorio en
+        /// un banco de medida: *«esta mancha tiene exactamente 4 celdas»* no se puede decir con el
+        /// horneado por biomas, que produce amebas de tamaño impredecible — buenísimo para el mundo y
+        /// **inservible para medir**.
+        [System.Serializable]
+        public class AuthoredPatch
+        {
+            public string label = "Banco";
+            public Element element = Element.Naturaleza;
+            [Tooltip("Celdas en axial (x = q, y = r). Deben ser contiguas o saldrán varias manchas")]
+            public List<Vector2Int> cells = new List<Vector2Int>();
+        }
+
+        [Header("Modo autorado (laboratorio) — si hay manchas aquí, se IGNORAN los biomas")]
+        public List<AuthoredPatch> authored = new List<AuthoredPatch>();
+        [Tooltip("Medio ancho, en celdas, del suelo neutro que se genera alrededor de los bancos")]
+        public int authoredSpan = 26;
+
         readonly Dictionary<HexCoord, Cell> _cells = new Dictionary<HexCoord, Cell>();
+        /// El estado **horneado**: a esto vuelve una celda transformada. El mundo cambia, pero nunca
+        /// queda pintado (ER §6).
+        readonly Dictionary<HexCoord, Cell> _origin = new Dictionary<HexCoord, Cell>();
+        /// Manchas vivas: id → sus celdas. Es el índice que convierte "la mancha es la batería" en una
+        /// consulta O(1) desde el sistema de saturación.
+        readonly Dictionary<int, List<HexCoord>> _patches = new Dictionary<int, List<HexCoord>>();
+        /// Cuándo vuelve cada celda transformada a su estado horneado.
+        readonly Dictionary<HexCoord, float> _revertAt = new Dictionary<HexCoord, float>();
+        readonly List<HexCoord> _revertScratch = new List<HexCoord>();
         bool _baked;
+        int _nextPatchId = 1;   // 0 queda reservado para "sin mancha"
+
+        /// Avisa de que el tablero cambió (transformación o reversión) para que el overlay se repinte.
+        /// Sin esto el jugador no ve que el suelo bajo sus pies dejó de ser lo que era.
+        public event System.Action<IReadOnlyList<HexCoord>> CellsChanged;
 
         void Awake()
         {
             CombatServices.Grid = this;
             Bake();
+        }
+
+        /// La reversión corre aquí y no en el sistema de reacciones a propósito: **es una propiedad del
+        /// terreno**, no de las reacciones, y tiene que seguir ocurriendo aunque no haya combate.
+        void Update()
+        {
+            if (_revertAt.Count == 0) return;
+            _revertScratch.Clear();
+            foreach (var kv in _revertAt) if (Time.time >= kv.Value) _revertScratch.Add(kv.Key);
+            if (_revertScratch.Count == 0) return;
+
+            for (int i = 0; i < _revertScratch.Count; i++)
+            {
+                var c = _revertScratch[i];
+                _revertAt.Remove(c);
+                if (_origin.TryGetValue(c, out var baked)) _cells[c] = baked;
+            }
+            RebuildPatchesAround(_revertScratch);
+            CellsChanged?.Invoke(_revertScratch);
         }
 
         /// Hornea las celdas de todos los biomas. Determinista (`HexCoord.Hash01`): el mismo mundo
@@ -91,14 +166,24 @@ namespace Tatemis
         public void Bake()
         {
             _cells.Clear();
+            _origin.Clear();
+            _patches.Clear();
+            _revertAt.Clear();
+            _nextPatchId = 1;
+            // ⚠️ Se reinicia porque es la SEMILLA del ruido de siembra: sin esto, un segundo `Bake()`
+            // (rebuild en el editor, o el horneado perezoso de `CellAt`) generaría un mundo distinto y
+            // se rompería la promesa de "el mismo mundo se ve igual en cada Play".
+            _patchIndex = 0;
+
+            if (authored.Count > 0) { BakeAuthored(); RebuildAllPatches(); Snapshot(); return; }
 
             for (int bi = 0; bi < biomes.Count; bi++)
             {
                 var b = biomes[bi];
                 if (b == null) continue;
 
-                // Cuántas manchas caben: las que hagan falta para que la mitad del bioma (la cuota
-                // elemental del 5/2/3) quede cubierta, con el tamaño medio de mancha elegido.
+                // Cuántas manchas caben: las que hagan falta para cubrir la cuota elemental del bioma
+                // (la mitad, ER §0.5) con el tamaño medio de mancha elegido.
                 float cellArea = 1.5f * Mathf.Sqrt(3f) * cellRadius * cellRadius;
                 int cellsInBiome = Mathf.Max(1, Mathf.RoundToInt(Mathf.PI * b.radius * b.radius / cellArea));
                 float avgPatch = (patchCells.x + patchCells.y) * 0.5f;
@@ -109,10 +194,90 @@ namespace Tatemis
             }
 
             FillGaps();
+            RebuildAllPatches();
+            Snapshot();
+        }
+
+        /// A esto vuelve cada celda cuando expira su reversión.
+        void Snapshot()
+        {
+            foreach (var kv in _cells) _origin[kv.Key] = kv.Value;
             _baked = true;
         }
 
+        /// **Terreno puesto a mano** (laboratorio): un suelo neutro y encima las manchas autoradas, sin
+        /// biomas ni azar. Sin marca ambiental a propósito: en un banco de medida es ruido.
+        void BakeAuthored()
+        {
+            int span = Mathf.Max(1, authoredSpan);
+            for (int q = -span; q <= span; q++)
+                for (int r = -span; r <= span; r++)
+                    _cells[new HexCoord(q, r)] = new Cell { element = null, biome = -1 };
+
+            for (int i = 0; i < authored.Count; i++)
+            {
+                var a = authored[i];
+                if (a == null) continue;
+                for (int c = 0; c < a.cells.Count; c++)
+                    _cells[new HexCoord(a.cells[c].x, a.cells[c].y)] =
+                        new Cell { element = a.element, biome = -1 };
+            }
+        }
+
         int _patchIndex;
+
+        /// Manchas = **componentes conexas del mismo elemento**. Se calcula al final del horneado y no
+        /// durante el crecimiento a propósito: dos manchas sembradas por separado que acaban pegadas
+        /// **son una sola mancha** para el jugador, y por tanto **una sola batería**. Dejar que los ids
+        /// vinieran del bucle de siembra habría partido en dos una mancha que se ve como una.
+        void RebuildAllPatches(bool resetIds = true)
+        {
+            _patches.Clear();
+            // ⚠️ Los ids solo se reinician al hornear. En un recálculo en caliente (abrir o cerrar la
+            // zona de combate) **tienen que seguir subiendo**: si volvieran a empezar en 1, una batería
+            // huérfana con id 1 se pegaría a una mancha nueva que no tiene nada que ver con ella.
+            if (resetIds) _nextPatchId = 1;
+
+            var keys = new List<HexCoord>(_cells.Keys);
+            for (int i = 0; i < keys.Count; i++)
+            {
+                var cell = _cells[keys[i]];
+                cell.patch = 0;
+                _cells[keys[i]] = cell;
+            }
+            for (int i = 0; i < keys.Count; i++) FloodPatch(keys[i]);
+        }
+
+        /// Pinta una mancha entera desde una celda sin asignar. Devuelve el id, o 0 si no aplica.
+        int FloodPatch(HexCoord start)
+        {
+            if (!_cells.TryGetValue(start, out var seed) || !seed.element.HasValue || seed.patch != 0)
+                return 0;
+
+            int id = _nextPatchId++;
+            var cells = new List<HexCoord>();
+            var stack = new Stack<HexCoord>();
+            stack.Push(start);
+
+            while (stack.Count > 0)
+            {
+                var c = stack.Pop();
+                if (!_cells.TryGetValue(c, out var cell)) continue;
+                if (cell.patch != 0 || cell.element != seed.element) continue;
+
+                cell.patch = id;
+                _cells[c] = cell;
+                cells.Add(c);
+                for (int i = 0; i < 6; i++)
+                {
+                    var n = c.Neighbor(i);
+                    if (Connected(c, n)) stack.Push(n);   // el cerco corta la mancha (ver `Connected`)
+                }
+            }
+
+            _patches[id] = cells;
+            return id;
+        }
 
         /// Qué elemento lleva cada mancha del bioma. **Mayoría suya · un par de vecinas · un par de
         /// exóticas**, y las dos últimas están *garantizadas*: son las que hacen que en mitad de un
@@ -179,8 +344,6 @@ namespace Tatemis
         /// manchas es tan importante como las manchas: es lo que hace que apuntar a una signifique algo.
         void FillGaps()
         {
-            float neutralOfGap = neutralShare / Mathf.Max(0.001f, neutralShare + (1f - elementalShare - neutralShare));
-
             for (int bi = 0; bi < biomes.Count; bi++)
             {
                 var b = biomes[bi];
@@ -196,8 +359,18 @@ namespace Tatemis
                         Vector3 p = c.ToWorld(cellRadius);
                         Vector3 d = p - b.center; d.y = 0f;
                         if (d.sqrMagnitude > b.radius * b.radius) continue;
-                        _cells[c] = new Cell { element = null, biome = bi, ambient = c.Hash01(7) >= neutralOfGap };
+                        _cells[c] = new Cell { element = null, biome = bi };
                     }
+            }
+
+            // La marca AMBIENTAL se reparte al final y sobre TODAS las celdas, elementales incluidas:
+            // desde el 2026-07-31 es un modificador, no una clase de celda (ER §0.5).
+            var keys = new List<HexCoord>(_cells.Keys);
+            for (int i = 0; i < keys.Count; i++)
+            {
+                var cell = _cells[keys[i]];
+                cell.ambient = keys[i].Hash01(7) < ambientShare;
+                _cells[keys[i]] = cell;
             }
         }
 
@@ -221,6 +394,12 @@ namespace Tatemis
             return _cells.TryGetValue(CoordAt(world), out var cell) ? cell : default;   // fuera de bioma = neutra
         }
 
+        public Cell CellAt(HexCoord c)
+        {
+            if (!_baked) Bake();
+            return _cells.TryGetValue(c, out var cell) ? cell : default;
+        }
+
         /// La consulta que usa el sistema de reacciones (R1). `null` = suelo neutro → no reacciona nada.
         public Element? ElementAt(Vector3 world) => CellAt(world).element;
 
@@ -231,6 +410,186 @@ namespace Tatemis
             Vector3 c = CoordAt(world).ToWorld(cellRadius);
             c.y = world.y;
             return c;
+        }
+
+        // ───────────────── El cerco corta las manchas ✅ (playtest 2026-07-31) ─────────────────
+
+        /// Celdas de la zona de combate en curso. `null` = no hay combate y todo el mundo conecta.
+        HashSet<HexCoord> _zone;
+
+        /// 🔑 **El cerco es un muro también para la CONECTIVIDAD, no solo para los cuerpos.** Dos celdas
+        /// vecinas del mismo elemento **no forman la misma mancha si el cerco pasa entre ellas**.
+        ///
+        /// Arregla dos cosas que se vieron en el playtest y que eran la misma:
+        ///  ① al reventar una mancha cortada por el muro, **reaccionaba también la mitad de fuera** —
+        ///     el jugador pagaba una detonación y media se perdía en terreno al que no puede llegar;
+        ///  ② una mancha **partida en dos por el muro** seguía siendo una sola batería, así que cargar
+        ///     un lado llenaba el otro a través de un puente que **no existe para el jugador**.
+        /// La regla es la misma en los dos casos: *si no puedes ir andando de una celda a la otra sin
+        /// salir de la arena, no son la misma mancha.*
+        bool Connected(HexCoord a, HexCoord b) =>
+            _zone == null || _zone.Contains(a) == _zone.Contains(b);
+
+        /// La abre `CombatZone`. Recalcula todas las manchas con el cerco puesto.
+        public void SetCombatZone(IEnumerable<HexCoord> cells)
+        {
+            _zone = cells != null ? new HashSet<HexCoord>(cells) : null;
+            RebuildAllPatches(resetIds: false);
+            CellsChanged?.Invoke(System.Array.Empty<HexCoord>());   // tira las baterías huérfanas y repinta
+        }
+
+        public void ClearCombatZone()
+        {
+            if (_zone == null) return;
+            _zone = null;
+            RebuildAllPatches(resetIds: false);
+            CellsChanged?.Invoke(System.Array.Empty<HexCoord>());
+        }
+
+        // ───────────────── Manchas: la batería del sistema de saturación (ER §0.10) ─────────────────
+
+        /// A qué mancha pertenece este punto. `0` = ninguna (celda neutra → acumula **por celda**,
+        /// porque una neutra no forma parte de ninguna mancha; ver ER §0.10).
+        public int PatchAt(Vector3 world) => CellAt(world).patch;
+        public int PatchAt(HexCoord c) => _cells.TryGetValue(c, out var cell) ? cell.patch : 0;
+
+        /// Las celdas de una mancha. **Esto es lo que revienta**: la explosión no es un círculo, es la
+        /// mancha entera, y por eso hereda su forma de ameba en vez de un radio inventado.
+        public IReadOnlyList<HexCoord> PatchCells(int id) =>
+            _patches.TryGetValue(id, out var list) ? list : System.Array.Empty<HexCoord>();
+
+        /// Cuántas celdas tiene una mancha. Gobierna lo grande que es su explosión y —vía el diseño de
+        /// [ARENA §1b](../../../../docs/ARENA.md)— cuánto cuesta cargarla.
+        public int PatchSize(int id) => _patches.TryGetValue(id, out var list) ? list.Count : 0;
+
+        /// El **anillo** de una mancha: las celdas pegadas a su contorno que no son suyas. Es lo que se
+        /// mancha al detonar, y es lo que hace que **ninguna detonación sea nula** — aunque el
+        /// subproducto coincida con el elemento de la mancha, el anillo sí cambia y la mancha **crece**.
+        public List<HexCoord> RingAround(IReadOnlyList<HexCoord> cells)
+        {
+            var ring = new List<HexCoord>();
+            if (cells == null || cells.Count == 0) return ring;
+
+            var inside = new HashSet<HexCoord>(cells);
+            var seen = new HashSet<HexCoord>();
+            for (int i = 0; i < cells.Count; i++)
+                for (int d = 0; d < 6; d++)
+                {
+                    var n = cells[i].Neighbor(d);
+                    if (inside.Contains(n) || !seen.Add(n)) continue;
+                    if (!Connected(cells[i], n)) continue;    // el cerco corta también el manchado
+                    if (_cells.ContainsKey(n)) ring.Add(n);   // solo suelo que existe
+                }
+            return ring;
+        }
+
+        /// **Transforma terreno** (ER §0.10): la detonación deja el subproducto en la mancha y en su
+        /// anillo. `to == null` = neutro, que es lo que dejan las 9 combinaciones.
+        ///
+        /// 🔑 **La reversión se REFRESCA en cada llamada.** Aunque una celda ya estuviera transformada,
+        /// volver a detonar encima reinicia su reloj — así *el suelo que se disputa se queda cambiado y
+        /// el que se abandona se cura*, sin ninguna regla extra.
+        public void TransformCells(IReadOnlyList<HexCoord> cells, Element? to)
+        {
+            if (cells == null || cells.Count == 0) return;
+            if (!_baked) Bake();
+
+            var touched = new List<HexCoord>(cells.Count);
+
+            for (int i = 0; i < cells.Count; i++)
+            {
+                var c = cells[i];
+                if (!_cells.TryGetValue(c, out var cell)) continue;   // fuera del mundo horneado
+                if (!_origin.ContainsKey(c)) _origin[c] = cell;       // por si nació fuera del snapshot
+                cell.element = to;
+                _cells[c] = cell;
+                _revertAt[c] = Time.time + RevertSecondsFor(c);
+                touched.Add(c);
+            }
+
+            if (touched.Count == 0) return;
+            RebuildPatchesAround(touched);
+            CellsChanged?.Invoke(touched);
+        }
+
+        /// ¿Esta celda está transformada ahora mismo? Lo usa el overlay para marcarla: el jugador tiene
+        /// que poder distinguir la ceniza que hizo él del suelo que ya estaba (ER §6).
+        public bool IsTransformed(HexCoord c) => _revertAt.ContainsKey(c);
+
+        /// **El doble para las que nacieron neutras** ✅ *(playtest 2026-07-31)*. Fabricarte tablero son
+        /// **dos pasos** —convertir la neutra (2y) y después cargarla (3y o 5y)—, así que con el mismo
+        /// reloj que el terreno natural se te desharía a mitad del proceso y el plan B no sería viable.
+        float RevertSecondsFor(HexCoord c) =>
+            _origin.TryGetValue(c, out var baked) && !baked.element.HasValue
+                ? revertSeconds * neutralRevertMultiplier
+                : revertSeconds;
+
+        /// **Pelear encima refresca el reloj, aunque no detone nada** ✅ *(playtest 2026-07-31)*.
+        /// Antes solo lo refrescaba una detonación, y una mancha que estabas cargando activamente podía
+        /// revertirse **en mitad de la carga** — el jugador veía deshacerse justo lo que estaba
+        /// construyendo. Ahora basta con **mover el medidor**, para arriba o para abajo: el terreno
+        /// disputado se queda cambiado mientras haya disputa, que es lo que §0.10 quería decir.
+        public void TouchRevert(IReadOnlyList<HexCoord> cells)
+        {
+            if (cells == null) return;
+            for (int i = 0; i < cells.Count; i++)
+                if (_revertAt.ContainsKey(cells[i]))
+                    _revertAt[cells[i]] = Time.time + RevertSecondsFor(cells[i]);
+        }
+
+        public void TouchRevert(HexCoord c)
+        {
+            if (_revertAt.ContainsKey(c)) _revertAt[c] = Time.time + RevertSecondsFor(c);
+        }
+
+        /// Segundos que le quedan a una celda para volver a su estado horneado, o **-1** si no está
+        /// transformada. Lo lee el instrumental del laboratorio: sin este número, afinar `revertSeconds`
+        /// y su ×2 neutro es adivinar.
+        public float RevertRemaining(HexCoord c) =>
+            _revertAt.TryGetValue(c, out float at) ? Mathf.Max(0f, at - Time.time) : -1f;
+
+        /// Devuelve **todo** el terreno a su estado horneado, ya mismo. Es el botón de *reset* del
+        /// laboratorio: sin él, cada medida obligaría a esperar a que revirtiera media arena.
+        public void RevertAll()
+        {
+            if (_revertAt.Count == 0) return;
+            var all = new List<HexCoord>(_revertAt.Keys);
+            _revertAt.Clear();
+            for (int i = 0; i < all.Count; i++)
+                if (_origin.TryGetValue(all[i], out var baked)) _cells[all[i]] = baked;
+
+            RebuildPatchesAround(all);
+            CellsChanged?.Invoke(all);
+        }
+
+        /// Recalcula las manchas del vecindario tocado. Se limpia **la mancha entera** de cada celda
+        /// afectada y de sus vecinas antes de re-inundar: si no, dos manchas que acaban de fundirse en
+        /// una seguirían con ids distintos y serían **dos baterías donde el jugador ve una**.
+        void RebuildPatchesAround(IReadOnlyList<HexCoord> seeds)
+        {
+            var dirty = new HashSet<HexCoord>();
+            for (int i = 0; i < seeds.Count; i++)
+            {
+                AddWithItsPatch(seeds[i], dirty);
+                for (int d = 0; d < 6; d++) AddWithItsPatch(seeds[i].Neighbor(d), dirty);
+            }
+
+            foreach (var c in dirty)
+            {
+                if (!_cells.TryGetValue(c, out var cell)) continue;
+                if (cell.patch != 0) _patches.Remove(cell.patch);
+                cell.patch = 0;
+                _cells[c] = cell;
+            }
+            foreach (var c in dirty) FloodPatch(c);
+        }
+
+        void AddWithItsPatch(HexCoord c, HashSet<HexCoord> into)
+        {
+            if (!_cells.TryGetValue(c, out var cell)) return;
+            into.Add(c);
+            if (cell.patch != 0 && _patches.TryGetValue(cell.patch, out var list))
+                for (int i = 0; i < list.Count; i++) into.Add(list[i]);
         }
 
         /// Todas las celdas cuyo centro cae dentro del radio dado. Lo usa la zona de combate para
@@ -268,7 +627,10 @@ namespace Tatemis
 
         /// Celda **neutra**: gris oscuro. No reacciona nada (R5).
         public static readonly Color Neutral = new Color(0.36f, 0.36f, 0.36f);
-        /// Celda **ambiental**: gris claro. Sitio reservado al 2º sistema ambiental (GDD §8.1).
+        /// Gris claro **reservado** al 2º sistema ambiental (GDD §8.1). ⚠️ Ya **no se usa como color de
+        /// celda**: desde el 2026-07-31 lo ambiental es un modificador encima de cualquier celda, así
+        /// que cuando ese sistema se dicte necesitará una capa propia (textura, partículas, borde), no
+        /// un color de relleno que compita con el del elemento.
         public static readonly Color Ambient = new Color(0.80f, 0.80f, 0.80f);
 
         /// **Cuánto del bioma se cuela en sus celdas sin elemento.** Bajo a propósito: es un lavado de
@@ -282,10 +644,12 @@ namespace Tatemis
         /// de la Laguna arena mojada. Mecánicamente idénticos, visualmente no.
         public Color ColorOfCell(Cell c)
         {
+            // ✏️ 2026-07-31: **desaparece el gris claro**. Lo ambiental dejó de ser una clase de celda,
+            // así que ya no tiene color propio — el tablero se lee con DOS grados (pasa algo aquí, o
+            // no) en vez de tres, que era la ambigüedad de tener dos grises con significados distintos.
             if (c.element.HasValue) return ColorOf(c.element);
-            var basecol = c.ambient ? Ambient : Neutral;
-            if (c.biome < 0 || c.biome >= biomes.Count || biomes[c.biome] == null) return basecol;
-            return Color.Lerp(basecol, biomes[c.biome].color, BiomeWash);
+            if (c.biome < 0 || c.biome >= biomes.Count || biomes[c.biome] == null) return Neutral;
+            return Color.Lerp(Neutral, biomes[c.biome].color, BiomeWash);
         }
     }
 }

@@ -48,20 +48,26 @@ namespace Tatemis
 
         /// `spreadBudget` = cuántos saltos de propagación le quedan (solo lo usa el incendio). Cada hijo
         /// nace con uno menos, así que **se apaga solo** sin ninguna regla de tope aparte.
+        /// `suppressBurst` = **la onda ya cobró el fogonazo**. Cuando una detonación encadenada deja
+        /// zona residual, el estallido lo reparte la onda celda a celda (una vez por criatura) y este
+        /// efecto se queda **solo con la zona** — si no, el mismo golpe se pagaría dos veces.
         public static ReactionEffect Spawn(ReactionEntry entry, Vector3 groundPos, float radius,
                                            float duration, float delay, ICombatant instigator,
-                                           Vector3 direction, int spreadBudget = 3)
+                                           Vector3 direction, int spreadBudget = 3,
+                                           bool suppressBurst = false)
         {
             var go = new GameObject("Reaccion_" + entry.reactionName);
             go.transform.position = groundPos;
             var fx = go.AddComponent<ReactionEffect>();
             fx._spreadBudget = spreadBudget;
+            fx._suppressBurst = suppressBurst;
             fx.Init(entry, radius, duration, delay, instigator, direction);
             return fx;
         }
 
         int _spreadBudget;
         bool _hasSpread;
+        bool _suppressBurst;
 
         void Init(ReactionEntry entry, float radius, float duration, float delay, ICombatant instigator,
                   Vector3 direction)
@@ -96,7 +102,7 @@ namespace Tatemis
             BuildVisual();
             // La MECHA no estalla al nacer: acumula y deflagra al morir. Es la única que invierte el
             // delay, y esa inversión es su identidad.
-            if (_entry.style == ReactionStyle.Dominancia && !_entry.deflagrates) Burst();
+            if (_entry.style == ReactionStyle.Dominancia && !_entry.deflagrates && !_suppressBurst) Burst();
         }
 
         // ---------------- Consultas para otros sistemas ----------------
@@ -162,40 +168,44 @@ namespace Tatemis
         /// Una **reacción** pega con el elemento que manda y pasa por la tabla de tipos; una
         /// **combinación** pega NEUTRO, porque ahí no se impone ninguno de los dos (§0.2). Es la
         /// diferencia que hace que las dos se sientan distintas jugando.
-        float TypeMultiplier(ICombatant target)
-        {
-            var e = _entry.DamageElement;
-            if (!e.HasValue || CombatServices.TypeChart == null || target == null) return 1f;
-            return CombatServices.TypeChart.Multiplier(e.Value, target.Element);
-        }
+        float TypeMultiplier(ICombatant target) => TypeMultiplierOf(_entry, target);
 
-        Color Tint => _entry.friendlyFire
-            ? Color.Lerp(_entry.debugColor, new Color(1f, 0.15f, 0.1f, _entry.debugColor.a), 0.45f)
-            : _entry.debugColor;
+        Color Tint => TintOf(_entry);
 
-        void Burst()
+        void Burst() => ApplyBurst(_entry, Center, _radius, _instigatorRoot, null, Tint);
+
+        /// **El payload de un fogonazo, sin la zona.** Vive aquí y es estático para que la regla de daño
+        /// esté en UN solo sitio: lo usan tanto una reacción suelta como **la onda encadenada** de una
+        /// detonación (ER §0.10), que lo va aplicando celda a celda mientras avanza.
+        ///
+        /// 🔑 `alreadyHit` es lo que hace que **la onda golpee a cada criatura UNA sola vez**. Sin ese
+        /// conjunto compartido, quedarse en el centro de una mancha de 6 celdas serían 6 impactos y la
+        /// reacción dejaría de ser un acontecimiento para ser una bomba. *Se ve recorriendo, cobra una
+        /// vez* — la misma regla del 22/07: la detección se muestrea, las consecuencias se cronometran.
+        public static bool ApplyBurst(ReactionEntry entry, Vector3 center, float radius,
+                                      Transform instigatorRoot, HashSet<Transform> alreadyHit, Color tint)
         {
-            Vector3 origin = Center + Vector3.up * 0.4f;
-            HitboxDebug.Show(origin, _radius, 0.3f, Tint);
+            Vector3 origin = center + Vector3.up * 0.4f;
+            HitboxDebug.Show(origin, radius, 0.3f, tint);
             ImpactVFX.Spawn(origin, 1f, 1f);
 
             bool hitSomeone = false;
-            var seen = new HashSet<Transform>();
-            foreach (var col in Physics.OverlapSphere(origin, _radius))
+            var seen = alreadyHit ?? new HashSet<Transform>();
+            foreach (var col in Physics.OverlapSphere(origin, radius))
             {
                 if (!col.TryGetComponent(out ICombatant t)) continue;
                 var root = t.Transform.root;
                 if (!seen.Add(root)) continue;
                 // Sin bando = golpea a todos: la respuesta del terreno y TODAS las combinaciones (§0.7).
-                if (!_entry.NoBando && _instigatorRoot != null && root == _instigatorRoot) continue;
+                if (!entry.NoBando && instigatorRoot != null && root == instigatorRoot) continue;
 
                 Vector3 point = col.ClosestPoint(origin);
-                Vector3 radial = t.Transform.position - Center; radial.y = 0f;
+                Vector3 radial = t.Transform.position - center; radial.y = 0f;
                 radial = radial.sqrMagnitude > 0.001f ? radial.normalized : Vector3.forward;
 
-                float mult = TypeMultiplier(t);
-                float dealt = _entry.burstDamage * mult;
-                t.TakeHit(dealt, _entry.Stagger * mult);   // el aturdimiento va con el daño (GDD §8.2)
+                float mult = TypeMultiplierOf(entry, t);
+                float dealt = entry.burstDamage * mult;
+                t.TakeHit(dealt, entry.Stagger * mult);   // el aturdimiento va con el daño (GDD §8.2)
 
                 if (t.TakesDamage)
                 {
@@ -203,14 +213,66 @@ namespace Tatemis
                     hitSomeone = true;
                 }
 
-                if (t.IsCreature && _entry.burstStatus != StatusType.None)
-                    StatusController.Of(t.Transform)?.Apply(_entry.burstStatus, _entry.burstStatusSeconds);
+                if (t.IsCreature && entry.burstStatus != StatusType.None)
+                    StatusController.Of(t.Transform)?.Apply(entry.burstStatus, entry.burstStatusSeconds);
 
                 // El GÉISER eleva: es lo que abre el juego aéreo y deja que un melee alcance a un volador.
-                Vector3 push = radial * _entry.burstKnockback + Vector3.up * _entry.burstLift;
-                if (push.sqrMagnitude > 0.01f) Push(t, push, _entry.burstLift > 0f ? 0.3f : 0.18f);
+                Vector3 push = radial * entry.burstKnockback + Vector3.up * entry.burstLift;
+                if (push.sqrMagnitude > 0.01f) Push(t, push, entry.burstLift > 0f ? 0.3f : 0.18f);
             }
             if (hitSomeone) ImpactFeel.Shockwave(0.08f);
+            return hitSomeone;
+        }
+
+        static float TypeMultiplierOf(ReactionEntry entry, ICombatant target)
+        {
+            var e = entry.DamageElement;
+            if (!e.HasValue || CombatServices.TypeChart == null || target == null) return 1f;
+            return CombatServices.TypeChart.Multiplier(e.Value, target.Element);
+        }
+
+        /// El tinte de una entrada, sin necesitar una instancia. La respuesta del terreno se tiñe de
+        /// rojo ("matiz de provocada", §6).
+        public static Color TintOf(ReactionEntry entry) => entry.friendlyFire
+            ? Color.Lerp(entry.debugColor, new Color(1f, 0.15f, 0.1f, entry.debugColor.a), 0.45f)
+            : entry.debugColor;
+
+        /// **Una detonación borra los efectos vivos de su alcance** (ER §0.10): el suelo que los
+        /// sostenía dejó de ser ese elemento. `bornThisFrame` se respeta para no matar el que acaba de
+        /// nacer de la propia detonación.
+        public static void ClearLiveIn(Vector3 center, float radius)
+        {
+            for (int i = Live.Count - 1; i >= 0; i--)
+            {
+                var fx = Live[i];
+                if (fx == null || fx.BornFrame == Time.frameCount) continue;
+                Vector3 d = fx.Center - center; d.y = 0f;
+                if (d.sqrMagnitude <= radius * radius) Destroy(fx.gameObject);
+            }
+        }
+
+        /// **R3 por DRENAJE** *(ER §3, rev. 2026-07-31)*. Con la saturación, un impacto ya no *resuelve*
+        /// — deposita —, así que si R3 se hubiera quedado como estaba **no habría forma de quitar una
+        /// zona**, y ahora son más grandes y duran más. Golpear DENTRO de una zona viva con **otro**
+        /// elemento le drena duración; el que lo hace **gasta el golpe en limpiar en vez de en cargar**,
+        /// que es el coste que R3 siempre quiso. Devuelve true si drenó algo.
+        public static bool DrainAt(Vector3 point, Element incoming, float seconds)
+        {
+            bool drained = false;
+            for (int i = Live.Count - 1; i >= 0; i--)
+            {
+                var fx = Live[i];
+                if (fx == null || !fx._hatched || fx.BornFrame == Time.frameCount) continue;
+                if (!fx.Contains(point)) continue;                       // puntería, no proximidad
+                if (fx._entry.DamageElement == incoming) continue;       // el mismo elemento no se drena
+
+                fx._dieAt -= seconds;
+                drained = true;
+                HitboxDebug.Show(fx.Center + Vector3.up * 0.2f, fx._radius * 0.7f, 0.12f,
+                                 new Color(0.7f, 0.7f, 0.7f, 0.3f));
+                if (fx._dieAt <= Time.time) Destroy(fx.gameObject);
+            }
+            return drained;
         }
 
         /// Empuje por el camino que cada cuerpo entienda. El jugador NO usa `HitReactor` (aplicaría su
@@ -321,7 +383,11 @@ namespace Tatemis
             }
 
             if (_entry.tetherPull > 0f) Tether();
-            if (_entry.propagates && !_hasSpread && Age > _duration * 0.35f) Spread();
+            // ⚠️ `!_suppressBurst`: si esta zona es el residuo de una DETONACIÓN, la onda ya recorrió la
+            // mancha entera — propagar otra vez sería hacerlo dos veces, y además saltaría a manchas
+            // vecinas **sin pagar saturación**, que es justo el dominó que §0.10 prohíbe. La propagación
+            // del incendio sigue viva para el camino instantáneo (excepciones y escenas sin rejilla).
+            if (_entry.propagates && !_suppressBurst && !_hasSpread && Age > _duration * 0.35f) Spread();
         }
 
         /// INCENDIO: se extiende **poco a poco y solo por terreno de su elemento**, hasta apagarse.

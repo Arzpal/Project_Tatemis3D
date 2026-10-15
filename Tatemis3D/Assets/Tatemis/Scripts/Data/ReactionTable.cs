@@ -35,6 +35,21 @@ namespace Tatemis
         /// El tipo con el que pega: el del dominante si manda alguien, **neutro** si es combinación.
         public Element? DamageElement => style == ReactionStyle.Dominancia ? dominantElement : (Element?)null;
 
+        [Header("Subproducto (ER §0.10) — en qué queda el terreno al detonar")]
+        [Tooltip("El elemento que DEJA la detonación en la mancha y en su anillo. Sale del fenómeno " +
+                 "físico, igual que los verbos de §0.1: el vapor deja Aire, el incendio deja ceniza " +
+                 "(Mineral), la tormenta de arena carga el suelo de estática (Rayo)…\n\n" +
+                 "🔑 Los 6 elementos aparecen EXACTAMENTE UNA VEZ entre las 6 reacciones, así que la " +
+                 "tabla es una PERMUTACIÓN — y eso es lo que garantiza que ningún elemento pueda " +
+                 "extinguirse del tablero ni comérselo. No es simetría bonita, es balance.\n\n" +
+                 "Las COMBINACIONES lo ignoran: dejan el suelo NEUTRO, porque no ganó nadie")]
+        public Element subproduct;
+
+        /// El terreno que queda tras detonar. `null` = **neutro**, que es lo que dejan las 9
+        /// combinaciones: nadie se impuso, así que nadie reclama el suelo — se gastó.
+        public Element? TerrainAfter =>
+            style == ReactionStyle.Dominancia ? subproduct : (Element?)null;
+
         [Header("Fogonazo (reacciones): AoE instantáneo")]
         public float burstDamage;
         [Tooltip("0 = igual al daño. **El aturdimiento es proporcional al daño** por dictado (GDD §8.2), " +
